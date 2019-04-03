@@ -7,8 +7,8 @@
     <ProjectGuid>{531F81D2-E41D-4F0E-886E-B1418853A827}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TableSynth2</RootNamespace>
-    <AssemblyName>TableSynth2</AssemblyName>
+    <RootNamespace>BetterSynth</RootNamespace>
+    <AssemblyName>BetterSynth</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -64,6 +64,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -71,8 +72,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class.cs" />
+    <Compile Include="AdsrEnvelope.cs" />
+    <Compile Include="AudioProcessor.cs" />
+    <Compile Include="CommonFunctions.cs" />
+    <Compile Include="MidiProcessor.cs" />
+    <Compile Include="OnePoleLowpassFilter.cs" />
+    <Compile Include="ParameterFactory.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="PluginCommandStub.cs" />
+    <Compile Include="PluginPrograms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Routing.cs" />
+    <Compile Include="SampledMath.cs" />
+    <Compile Include="Voice.cs" />
+    <Compile Include="VoicesManager.cs" />
+    <Compile Include="WaveTablePlayer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WavesData\WavesData.csproj">
+      <Project>{39b2c612-63f7-43df-ba98-1fbbab0353e0}</Project>
+      <Name>WavesData</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
