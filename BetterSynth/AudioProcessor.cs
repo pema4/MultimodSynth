@@ -13,7 +13,6 @@ namespace BetterSynth
         public AudioProcessor(Plugin plugin) : base(0, 2, 0)
         {
             this.plugin = plugin;
-            
             routing = new Routing(plugin);
         }
 

@@ -131,6 +131,7 @@ namespace BetterSynth
                     }
                     break;
                 case State.Sustain:
+                    currValue = sustainLevel;
                     break;
                 case State.Release:
                     currValue = releaseBase + currValue * releaseCoef;

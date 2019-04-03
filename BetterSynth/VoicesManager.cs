@@ -2,20 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 using Jacobi.Vst.Framework;
-using System.Windows.Forms;
-/*
-* voice = new Voice(plugin);
-voice.Osc = new WaveTablePlayer(plugin);
-voice.VolumeEnvelope = new AdsrEnvelope()
-{
-AttackRate = 44100,
-DecayRate = 44100,
-ReleaseRate = 44100,
-SustainLevel = 0.5f,
-AttackTargetRatio = 0.3f,
-DecayReleaseTargetRatio = 0.0001f,
-};
-*/
+using WavesData;
+
 namespace BetterSynth
 {
     class VoicesManager
@@ -92,6 +80,8 @@ namespace BetterSynth
 
         private void setAttackTime(float value)
         {
+            if (voices == null)
+                return;
             float rate = plugin.AudioProcessor.SampleRate * value;
             foreach (var voice in voices)
                 voice.VolumeEnvelope.AttackRate = rate;
@@ -99,6 +89,8 @@ namespace BetterSynth
 
         private void setDecayTime(float value)
         {
+            if (voices == null)
+                return;
             float rate = plugin.AudioProcessor.SampleRate * value;
             foreach (var voice in voices)
                 voice.VolumeEnvelope.DecayRate = rate;
@@ -106,12 +98,16 @@ namespace BetterSynth
 
         private void setSustainLevel(float level)
         {
+            if (voices == null)
+                return;
             foreach (var voice in voices)
                 voice.VolumeEnvelope.SustainLevel = level;
         }
 
         private void setReleaseTime(float value)
         {
+            if (voices == null)
+                return;
             float rate = plugin.AudioProcessor.SampleRate * value;
             foreach (var voice in voices)
                 voice.VolumeEnvelope.ReleaseRate = rate;
@@ -119,14 +115,17 @@ namespace BetterSynth
 
         private void setAttackCurve(float value)
         {
+            if (voices == null)
+                return;
             float targetRatio = 0.001f * ((float)Math.Exp(12 * (0.001f + 0.999f * value)) - 1);
             foreach (var voice in voices)
                 voice.VolumeEnvelope.AttackTargetRatio = targetRatio;
-            MessageBox.Show($"set attack curve: {targetRatio}");
         }
 
         private void setDecayReleaseCurve(float value)
         {
+            if (voices == null)
+                return;
             float targetRatio = 0.001f * ((float)Math.Exp(12 * (0.001f + 0.999f * value)) - 1);
             foreach (var voice in voices)
                 voice.VolumeEnvelope.DecayReleaseTargetRatio = targetRatio;
@@ -134,8 +133,21 @@ namespace BetterSynth
 
         private void setWaveTablePosition(float pos)
         {
+            if (voices == null)
+                return;
             foreach (var voice in voices)
                 voice.Osc.WaveTablePos = pos;
+        }
+
+        private void setAllVoicesParameters()
+        {
+            setAttackTime(AttackTime.CurrentValue);
+            setDecayTime(DecayTime.CurrentValue);
+            setSustainLevel(SustainLevel.CurrentValue);
+            setReleaseTime(ReleaseTime.CurrentValue);
+            setAttackCurve(AttackCurve.CurrentValue);
+            setDecayReleaseCurve(DecayReleaseCurve.CurrentValue);
+            setWaveTablePosition(WaveTablePosition.CurrentValue);
         }
 
         #endregion vst parameters initialization
@@ -147,8 +159,13 @@ namespace BetterSynth
         public VoicesManager(Plugin plugin)
         {
             this.plugin = plugin;
-            VoicesCount = 8;
             InitializeParameters();
+            WaveTable wt = new WaveTable((x, y) => x + y, 0, 1);
+
+            plugin.Opened += (sender, e) =>
+            {
+                VoicesCount = 32;
+            };
         }
 
         public int VoicesCount
@@ -160,24 +177,27 @@ namespace BetterSynth
                 voices = new Voice[value];
                 for (int i = 0; i < voices.Length; ++i)
                     voices[i] = CreateVoice();
+                setAllVoicesParameters();
                 freeVoices = new SortedSet<int>(Enumerable.Range(0, value));
-                noteToVoiceMapping = new Dictionary<MidiNote, int>();
-                pressedNotes = new List<MidiNote>();
+                noteToVoiceMapping = new Dictionary<byte, int>();
+                pressedNotes = new List<byte>();
             }
         }
 
         private Voice CreateVoice()
         {
-            var voice = new Voice(plugin, x => RemoveNote(x.Note));
+            var voice = new Voice(plugin, x => RemoveNote(x.Note.NoteNo));
             return voice;
         }
 
         private SortedSet<int> freeVoices = new SortedSet<int>();
-        private Dictionary<MidiNote, int> noteToVoiceMapping = new Dictionary<MidiNote, int>();
-        private List<MidiNote> pressedNotes = new List<MidiNote>();
+        private Dictionary<byte, int> noteToVoiceMapping = new Dictionary<byte, int>();
+        private List<byte> pressedNotes = new List<byte>();
 
         internal void PlayNote(MidiNote note)
         {
+            RemoveNote(note.NoteNo);
+
             int voiceIndex;
 
             if (freeVoices.Count == 0)
@@ -191,27 +211,28 @@ namespace BetterSynth
                 freeVoices.Remove(voiceIndex);
             }
 
-            noteToVoiceMapping[note] = voiceIndex;
-            pressedNotes.Add(note);
+            noteToVoiceMapping[note.NoteNo] = voiceIndex;
+            pressedNotes.Add(note.NoteNo);
             voices[voiceIndex].PlayNote(note);
         }
 
-        private void RemoveNote(MidiNote note)
+        private void RemoveNote(byte noteNo)
         {
-            if (noteToVoiceMapping.ContainsKey(note))
+            if (noteToVoiceMapping.ContainsKey(noteNo))
             {
-                int voiceIndex = noteToVoiceMapping[note];
+                int voiceIndex = noteToVoiceMapping[noteNo];
                 freeVoices.Add(voiceIndex);
-                noteToVoiceMapping.Remove(note);
-                pressedNotes.Remove(note);
+                noteToVoiceMapping.Remove(noteNo);
+                pressedNotes.Remove(noteNo);
             }
         }
 
         internal void ReleaseNote(MidiNote note)
         {
-            if (noteToVoiceMapping.ContainsKey(note))
+            byte noteNo = note.NoteNo;
+            if (noteToVoiceMapping.ContainsKey(noteNo))
             {
-                int voiceIndex = noteToVoiceMapping[note];
+                int voiceIndex = noteToVoiceMapping[noteNo];
                 voices[voiceIndex].Release();
             }
         }
