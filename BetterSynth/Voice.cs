@@ -1,56 +1,134 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BetterSynth
 {
+    public enum ModulationType
+    {
+        None,
+        FrequencyModulationA,
+        FrequencyModulationB,
+        AmplitudeModulationA,
+        AmplitudeModulationB,
+    }
+
     class Voice
     {
         private Plugin plugin;
+        private Oscillator oscA;
+        private Oscillator oscB;
+        private Filter filter;
+        private AdsrEnvelope oscAEnvelope;
+        private AdsrEnvelope oscBEnvelope;
+        private AdsrEnvelope filterEnvelope;
         private float noteVolume;
+        private bool isActive;
+
+        public Voice(
+            Plugin plugin,
+            Oscillator oscA,
+            Oscillator oscB,
+            Filter filter,
+            AdsrEnvelope oscAEnvelope,
+            AdsrEnvelope oscBEnvelope,
+            AdsrEnvelope filterEnvelope)
+        {
+            this.plugin = plugin;
+            this.oscA = oscA;
+            this.oscB = oscB;
+            this.filter = filter;
+            this.oscAEnvelope = oscAEnvelope;
+            this.oscBEnvelope = oscBEnvelope;
+            this.filterEnvelope = filterEnvelope;
+        }
 
         public MidiNote Note { get; private set; }
 
-        public WaveTablePlayer Osc { get; set; }
-
-        public AdsrEnvelope VolumeEnvelope { get; set; }
-
-        public Voice(Plugin plugin, Action<Voice> onSoundStop)
-        {
-            this.plugin = plugin;
-            Osc = new WaveTablePlayer(plugin);
-            VolumeEnvelope = new AdsrEnvelope();
-            VolumeEnvelope.SoundStop += (sender, e) => Osc.Bypass = true;
-            VolumeEnvelope.SoundStop += (sender, e) => onSoundStop(this);
-        }
+        public ModulationType ModulationType { get; set; }
 
         public void PlayNote(MidiNote note)
         {
             Note = note;
             noteVolume = note.Velocity / 128f;
-            Osc.Bypass = false;
-            Osc.Frequency = (float)CommonFunctions.MidiNoteToFrequency(note.NoteNo);
-            VolumeEnvelope.TriggerAttack();
+            var noteFrequency = (float)Utilities.MidiNoteToFrequency(note.NoteNo);
+
+            oscA.ResetPhase();
+            oscB.ResetPhase();
+            filter.Reset();
+
+            oscA.NoteFrequency = noteFrequency;
+            oscB.NoteFrequency = noteFrequency;
+            filter.NoteFrequency = noteFrequency;
+
+            oscAEnvelope.TriggerAttack();
+            oscBEnvelope.TriggerAttack();
+            filterEnvelope.TriggerAttack();
+
+            isActive = true;
         }
 
-        public void Release()
+        public void TriggerRelease()
         {
-            VolumeEnvelope.TriggerRelease();
+            oscAEnvelope.TriggerRelease();
+            oscBEnvelope.TriggerRelease();
+            filterEnvelope.TriggerRelease();
         }
 
-        public void Process(out float output)
+        public float Process()
         {
-            if (Osc.Bypass)
+            if (!isActive)
+                return 0;
+
+            var envAOut = oscAEnvelope.Process();
+            var envBOut = oscBEnvelope.Process();
+
+            if (envAOut == 0 && envBOut == 0)
             {
-                output = 0;
+                isActive = false;
+                OnSoundStop();
+                return 0;
             }
-            else
+
+            float oscMix = 0;
+            switch (ModulationType)
             {
-                Osc.Process(out var oscOutput);
-                VolumeEnvelope.Process(out var volEnvOutput);
-                output = oscOutput * volEnvOutput * noteVolume;
+                case ModulationType.None:
+                    var oscAOut = oscA.Process();
+                    var oscBOut = oscB.Process();
+                    oscMix = oscAOut * envAOut + oscBOut * envBOut;
+                    break;
+
+                case ModulationType.AmplitudeModulationA:
+                    oscBOut = oscB.Process();
+                    oscAOut = oscA.Process();
+                    oscMix = oscAOut * envAOut * (1 + oscBOut * envBOut);
+                    break;
+
+                case ModulationType.AmplitudeModulationB:
+                    oscAOut = oscA.Process();
+                    oscBOut = oscB.Process(phaseModulation: oscAOut * envAOut);
+                    oscMix = oscBOut * envBOut * (1 + oscAOut * envAOut);
+                    break;
+
+                case ModulationType.FrequencyModulationA:
+                    oscBOut = oscB.Process();
+                    oscAOut = oscA.Process(phaseModulation: oscBOut * envAOut);
+                    oscMix = oscAOut * envAOut;
+                    break;
+
+                case ModulationType.FrequencyModulationB:
+                    oscAOut = oscA.Process();
+                    oscBOut = oscB.Process(phaseModulation: oscAOut * envAOut);
+                    oscMix = oscBOut * envBOut;
+                    break;
             }
+
+            var filterEnvOut = filterEnvelope.Process();
+            return filter.Process(oscMix, filterEnvOut);
         }
+
+        public event EventHandler SoundStop;
+
+        private void OnSoundStop() =>
+            SoundStop?.Invoke(this, new EventArgs());
     }
 }

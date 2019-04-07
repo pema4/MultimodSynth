@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WavesData;
 
 namespace BetterSynth
 {
-    static class CommonFunctions
+    static class Utilities
     {
         public static double ConvertDbToAmp(float db)
         {
@@ -25,5 +26,11 @@ namespace BetterSynth
                 return max;
             return value;
         }
+
+        public static WaveTable[] WaveTables =
+        {
+            new WaveTable((exp, x) => Math.Sign(Math.Sin(x)) * Math.Pow(Math.Abs(Math.Sin(x)), 1 / exp), 0.001, 1,
+                mode: InterpolationMode.Normal),
+        };
     }
 }

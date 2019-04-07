@@ -49,7 +49,7 @@ namespace BetterSynth
             if (valueChangedHandler != null)
                 manager.PropertyChanged += (sender, e) =>
                 {
-                    if (e.PropertyName == "CurrentValue")
+                    if (e.PropertyName == "CurrentValue" || e.PropertyName == "ActiveParameter")
                         valueChangedHandler(manager.CurrentValue);
                 };
 

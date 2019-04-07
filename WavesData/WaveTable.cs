@@ -5,7 +5,7 @@ namespace WavesData
     [Serializable]
     public class WaveTable
     {
-        private SampledFunction[] waves;
+        public SampledFunction[] Waves { get; set; }
         private double tableStartPoint;
         private double tableEndPoint;
         private double waveStartPoint;
@@ -39,7 +39,7 @@ namespace WavesData
             this.samplesAmount = samplesAmount;
             InterpolationMode = mode;
 
-            waves = new SampledFunction[wavesAmount];
+            Waves = new SampledFunction[wavesAmount];
             double xDelta;
             //if (mode == InterpolationMode.Cycled)
                 xDelta = (tableEndPoint - tableStartPoint) / wavesAmount;
@@ -50,58 +50,32 @@ namespace WavesData
             {
                 double xCopy = x;
                 double function(double y) => generatorFunction(xCopy, y);
-                waves[i] = new SampledFunction(function, waveStartPoint, waveEndPoint, samplesAmount, mode: mode);
+                Waves[i] = new SampledFunction(function, waveStartPoint, waveEndPoint, samplesAmount, mode: mode);
                 x += xDelta;
             }
         }
         
-        public SampledFunction this[int idx] => waves[idx];
+        public SampledFunction this[int idx] => Waves[idx];
 
-        public int Count => waves.Length;
+        public int Count => Waves.Length;
 
         public InterpolationMode InterpolationMode { get; set; }
         
-        public IWaveLookup this[float point]
+        public WaveTableLookup this[float point]
         {
             get
             {
                 float unnormalizedLength;
                 if (InterpolationMode == InterpolationMode.Normal)
-                    unnormalizedLength = point * (waves.Length - 1);
+                    unnormalizedLength = point * (Waves.Length - 1);
                 else
-                    unnormalizedLength = point * waves.Length;
+                    unnormalizedLength = point * Waves.Length;
                 int leftIndex = (int)unnormalizedLength;
-                int rightIndex = leftIndex == waves.Length - 1 ? 0 : leftIndex + 1;
+                int rightIndex = leftIndex == Waves.Length - 1 ? 0 : leftIndex + 1;
                 float rightCoeff = unnormalizedLength - leftIndex;
                 float leftCoeff = 1 - rightCoeff;
-                return new InterpolatedLookup(this, leftIndex, rightIndex, leftCoeff, rightCoeff);
+                return new WaveTableLookup(this, leftIndex, rightIndex, leftCoeff, rightCoeff);
             }
-        }
-        
-        private class InterpolatedLookup : IWaveLookup
-        {
-            private WaveTable waveTable;
-            private int aIndex;
-            private int bIndex;
-            private float aCoefficient;
-            private float bCoefficient;
-
-            public InterpolatedLookup(
-                WaveTable waveTable,
-                int aIndex,
-                int bIndex,
-                float aCoefficient,
-                float bCoefficient)
-            {
-                this.waveTable = waveTable;
-                this.aIndex = aIndex;
-                this.bIndex = bIndex;
-                this.aCoefficient = aCoefficient;
-                this.bCoefficient = bCoefficient;
-            }
-
-            public float this[float idx] =>
-                waveTable.waves[aIndex][idx] * aCoefficient + waveTable.waves[bIndex][idx] * bCoefficient;
         }
     }
 }

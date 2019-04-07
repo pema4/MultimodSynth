@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jacobi.Vst.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace BetterSynth
@@ -17,6 +18,7 @@ namespace BetterSynth
             
             VoicesManager = new VoicesManager(plugin);
         }
+        
 
         private void MidiProcessor_NoteOn(object sender, MidiNoteEventArgs e)
         {
