@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace BetterSynth
 {
-    class FiltersManager : INotifyPropertyChanged
+    class FiltersManager : ManagerOfManagers
     {
         private Plugin plugin;
         private string parameterPrefix;
@@ -110,22 +110,6 @@ namespace BetterSynth
 
             foreach (var filter in filters)
                 filter.Curve = curve;   
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void CreateRedirection(VstParameterManager manager, string managerName)
-        {
-            manager.PropertyChanged += (sender, e) =>
-            {
-                if (e.PropertyName == "CurrentValue")
-                    OnPropertyChanged(managerName);
-            };
         }
     }
 }

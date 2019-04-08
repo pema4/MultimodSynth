@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace BetterSynth
 {
-    class EnvelopesManager : INotifyPropertyChanged
+    class EnvelopesManager : ManagerOfManagers
     {
         private const float MaximumTime = 10f;
 
@@ -104,8 +104,7 @@ namespace BetterSynth
         private void SetAttackTime(float value)
         {
             attackTime = value * MaximumTime;
-
-            MessageBox.Show(attackTime.ToString());
+            
             foreach (var envelope in envelopes)
                 envelope.AttackTime = attackTime;
         }
@@ -157,22 +156,6 @@ namespace BetterSynth
 
             foreach (var envelope in envelopes)
                 envelope.Amplitude = value;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void CreateRedirection(VstParameterManager manager, string managerName)
-        {
-            manager.PropertyChanged += (sender, e) =>
-            {
-                if (e.PropertyName == "CurrentValue")
-                    OnPropertyChanged(managerName);
-            };
         }
     }
 }

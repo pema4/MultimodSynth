@@ -78,6 +78,7 @@
     <Compile Include="EnvelopesManager.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="FiltersManager.cs" />
+    <Compile Include="ManagerOfManagers.cs" />
     <Compile Include="MidiProcessor.cs" />
     <Compile Include="DSP\OnePoleLowpassFilter.cs" />
     <Compile Include="Oscillator.cs" />

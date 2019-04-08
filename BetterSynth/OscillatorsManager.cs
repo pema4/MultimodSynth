@@ -7,7 +7,7 @@ using WavesData;
 
 namespace BetterSynth
 {
-    internal class OscillatorsManager : INotifyPropertyChanged
+    internal class OscillatorsManager : ManagerOfManagers
     {
         const float MaximumTime = 10;
         
@@ -97,22 +97,6 @@ namespace BetterSynth
             
             foreach (var oscillator in oscillators)
                 oscillator.CurrentWave = currentWave;
-        }
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void CreateRedirection(VstParameterManager manager, string managerName)
-        {
-            manager.PropertyChanged += (sender, e) =>
-            {
-                if (e.PropertyName == "CurrentValue")
-                    OnPropertyChanged(managerName);
-            };
         }
     }
 }
