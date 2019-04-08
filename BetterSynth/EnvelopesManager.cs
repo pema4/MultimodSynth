@@ -43,6 +43,11 @@ namespace BetterSynth
             return envelope;
         }
 
+        public void RemoveEnvelope(AdsrEnvelope envelope)
+        {
+            envelopes.Remove(envelope);
+        }
+
         private void InitializeParameters()
         {
             var factory = new ParameterFactory(plugin, "envelopes");

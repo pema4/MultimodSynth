@@ -92,37 +92,47 @@ namespace BetterSynth
             switch (ModulationType)
             {
                 case ModulationType.None:
-                    var oscAOut = oscA.Process();
-                    var oscBOut = oscB.Process();
-                    oscMix = oscAOut * envAOut + oscBOut * envBOut;
+                    if (envAOut != 0)
+                        oscMix += oscA.Process() * envAOut;
+                    if (envBOut != 0)
+                        oscMix += oscB.Process() * envBOut;
                     break;
 
                 case ModulationType.AmplitudeModulationA:
-                    oscBOut = oscB.Process();
-                    oscAOut = oscA.Process();
-                    oscMix = oscAOut * envAOut * (1 + oscBOut * envBOut);
+                    if (envAOut != 0)
+                    {
+                        var mod = envBOut == 0 ? 0 : oscB.Process() * envBOut;
+                        oscMix = oscA.Process() * envAOut * (1 + mod);
+                    }
                     break;
 
                 case ModulationType.AmplitudeModulationB:
-                    oscAOut = oscA.Process();
-                    oscBOut = oscB.Process(phaseModulation: oscAOut * envAOut);
-                    oscMix = oscBOut * envBOut * (1 + oscAOut * envAOut);
+                    if (envBOut != 0)
+                    {
+                        var mod = envAOut == 0 ? 0 : oscA.Process() * envAOut;
+                        oscMix = oscB.Process() * envBOut * (1 + mod);
+                    }
                     break;
 
                 case ModulationType.FrequencyModulationA:
-                    oscBOut = oscB.Process();
-                    oscAOut = oscA.Process(phaseModulation: oscBOut * envAOut);
-                    oscMix = oscAOut * envAOut;
+                    if (envAOut != 0)
+                    {
+                        var mod = envBOut == 0 ? 0 : oscB.Process() * envBOut;
+                        oscMix = oscA.Process(phaseModulation: mod) * envAOut;
+                    }
                     break;
 
                 case ModulationType.FrequencyModulationB:
-                    oscAOut = oscA.Process();
-                    oscBOut = oscB.Process(phaseModulation: oscAOut * envAOut);
-                    oscMix = oscBOut * envBOut;
+                    if (envBOut != 0)
+                    {
+                        var mod = envAOut == 0 ? 0 : oscA.Process() * envAOut;
+                        oscMix = oscB.Process(phaseModulation: mod) * envBOut;
+                    }
                     break;
             }
 
             var filterEnvOut = filterEnvelope.Process();
+
             return filter.Process(oscMix, filterEnvOut);
         }
 

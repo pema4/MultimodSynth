@@ -5,12 +5,7 @@ namespace WavesData
     [Serializable]
     public class WaveTable
     {
-        public SampledFunction[] Waves { get; set; }
-        private double tableStartPoint;
-        private double tableEndPoint;
-        private double waveStartPoint;
-        private double waveEndPoint;
-        private int samplesAmount;
+        private WaveLookup[] waves;
 
         /// <summary>
         /// Initializes a new instance of the WaveTable class that is generated using given function of two variables.
@@ -29,52 +24,28 @@ namespace WavesData
             double waveStartPoint = 0,
             double waveEndPoint = 2 * Math.PI,
             int wavesAmount = 128,
-            int samplesAmount = 1 << 12,
-            InterpolationMode mode = InterpolationMode.Cycled)
+            int samplesAmount = 4096)
         {
-            this.tableStartPoint = tableStartPoint;
-            this.tableEndPoint = tableEndPoint;
-            this.waveStartPoint = waveStartPoint;
-            this.waveEndPoint = waveEndPoint;
-            this.samplesAmount = samplesAmount;
-            InterpolationMode = mode;
+            waves = new WaveLookup[wavesAmount];
 
-            Waves = new SampledFunction[wavesAmount];
-            double xDelta;
-            //if (mode == InterpolationMode.Cycled)
-                xDelta = (tableEndPoint - tableStartPoint) / wavesAmount;
-            //else
-              //  xDelta = (tableEndPoint - tableStartPoint) / (wavesAmount - 1);
-            double x = tableStartPoint;
             for (int i = 0; i < wavesAmount; ++i)
             {
-                double xCopy = x;
-                double function(double y) => generatorFunction(xCopy, y);
-                Waves[i] = new SampledFunction(function, waveStartPoint, waveEndPoint, samplesAmount, mode: mode);
-                x += xDelta;
+                double x = tableStartPoint + (tableEndPoint - tableStartPoint) * i / wavesAmount;
+                double function(double y) => generatorFunction(x, y);
+                waves[i] = new WaveLookup(function, waveStartPoint, waveEndPoint, samplesAmount);
             }
         }
-        
-        public SampledFunction this[int idx] => Waves[idx];
-
-        public int Count => Waves.Length;
-
-        public InterpolationMode InterpolationMode { get; set; }
         
         public WaveTableLookup this[float point]
         {
             get
             {
-                float unnormalizedLength;
-                if (InterpolationMode == InterpolationMode.Normal)
-                    unnormalizedLength = point * (Waves.Length - 1);
-                else
-                    unnormalizedLength = point * Waves.Length;
+                float unnormalizedLength = point * (waves.Length - 1);
                 int leftIndex = (int)unnormalizedLength;
-                int rightIndex = leftIndex == Waves.Length - 1 ? 0 : leftIndex + 1;
+                int rightIndex = (leftIndex != waves.Length - 1) ? leftIndex + 1 : leftIndex;
                 float rightCoeff = unnormalizedLength - leftIndex;
                 float leftCoeff = 1 - rightCoeff;
-                return new WaveTableLookup(this, leftIndex, rightIndex, leftCoeff, rightCoeff);
+                return new WaveTableLookup(waves[leftIndex], waves[rightIndex], leftCoeff, rightCoeff);
             }
         }
     }

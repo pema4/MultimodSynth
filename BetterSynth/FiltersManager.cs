@@ -37,6 +37,11 @@ namespace BetterSynth
             return filter;
         }
 
+        public void RemoveFilter(Filter filter)
+        {
+            filters.Remove(filter);
+        }
+
         private void InitializeParameters()
         {
             var factory = new ParameterFactory(plugin, "filters");

@@ -63,11 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InterpolationMethod.cs" />
-    <Compile Include="InterpolationMode.cs" />
-    <Compile Include="IWaveLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SampledFunction.cs" />
+    <Compile Include="WaveLookup.cs" />
     <Compile Include="WaveTable.cs" />
     <Compile Include="WaveTableLookup.cs" />
   </ItemGroup>

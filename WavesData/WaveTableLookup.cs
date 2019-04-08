@@ -1,28 +1,25 @@
 ﻿namespace WavesData
 {
-    public class WaveTableLookup : IWaveLookup
+    public class WaveTableLookup
     {
-        private WaveTable waveTable;
-        private int aIndex;
-        private int bIndex;
+        private WaveLookup aWave;
+        private WaveLookup bWave;
         private float aCoefficient;
         private float bCoefficient;
 
         public WaveTableLookup(
-            WaveTable waveTable,
-            int aIndex,
-            int bIndex,
+            WaveLookup aWave,
+            WaveLookup bWave,
             float aCoefficient,
             float bCoefficient)
         {
-            this.waveTable = waveTable;
-            this.aIndex = aIndex;
-            this.bIndex = bIndex;
+            this.aWave = aWave;
+            this.bWave = bWave;
             this.aCoefficient = aCoefficient;
             this.bCoefficient = bCoefficient;
         }
 
         public float this[float idx] =>
-            waveTable.Waves[aIndex][idx] * aCoefficient + waveTable.Waves[bIndex][idx] * bCoefficient;
+            aWave[idx] * aCoefficient + bWave[idx] * bCoefficient;
     }
 }

@@ -29,8 +29,7 @@ namespace BetterSynth
 
         public static WaveTable[] WaveTables =
         {
-            new WaveTable((exp, x) => Math.Sign(Math.Sin(x)) * Math.Pow(Math.Abs(Math.Sin(x)), 1 / exp), 0.001, 1,
-                mode: InterpolationMode.Normal),
+            new WaveTable((exp, x) => Math.Sign(Math.Sin(x)) * Math.Pow(Math.Abs(Math.Sin(x)), 1 / exp), 0.001, 1),
         };
     }
 }
