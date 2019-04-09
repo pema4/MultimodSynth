@@ -1,8 +1,6 @@
 ﻿using Jacobi.Vst.Framework;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Forms;
 using WavesData;
 
 namespace BetterSynth

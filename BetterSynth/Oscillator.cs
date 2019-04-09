@@ -1,7 +1,4 @@
-﻿using System;
-using WavesData;
-
-namespace BetterSynth
+﻿namespace BetterSynth
 {
     class Oscillator
     {

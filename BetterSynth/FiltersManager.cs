@@ -1,6 +1,5 @@
 ﻿using Jacobi.Vst.Framework;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace BetterSynth
 {

@@ -1,21 +1,7 @@
-﻿using System;
-using System.Globalization;
-using Jacobi.Vst.Framework;
-
-namespace BetterSynth
+﻿namespace BetterSynth
 {
     class Downsampler : ManagerOfManagers
     {
-        private static void PrintCoefficientsToConsole(double[] arr)
-        {
-            for (int i = 0; i < arr.Length; i += 4)
-            {
-                for (int j = i; j < i + 4 && j < arr.Length; ++j)
-                    Console.Write($"{arr[j].ToString("F30", CultureInfo.InvariantCulture).TrimEnd('0')}, ");
-                Console.WriteLine();
-            }
-        }
-
         public static double[] X2OversamplingCoefficients = new[]
         {
             0.0000030416222567197833,  8.361952157148288e-7,      -0.000005925094515842721,  -0.000003024729165169841,

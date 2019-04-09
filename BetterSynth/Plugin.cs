@@ -1,7 +1,6 @@
 ﻿using Jacobi.Vst.Core;
 using Jacobi.Vst.Framework;
 using Jacobi.Vst.Framework.Plugin;
-using System.Windows.Forms;
 
 namespace BetterSynth
 {
