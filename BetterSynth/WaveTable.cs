@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WavesData
+namespace BetterSynth
 {
     [Serializable]
     public class WaveTable
