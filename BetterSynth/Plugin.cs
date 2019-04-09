@@ -17,13 +17,7 @@ namespace BetterSynth
         {
         }
 
-        public AudioProcessor AudioProcessor
-        {
-            get
-            {
-                return GetInstance<AudioProcessor>();
-            }
-        }
+        public AudioProcessor AudioProcessor => GetInstance<AudioProcessor>();
 
         public MidiProcessor MidiProcessor => GetInstance<MidiProcessor>();
 

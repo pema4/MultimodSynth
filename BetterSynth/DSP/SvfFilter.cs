@@ -18,10 +18,38 @@ namespace BetterSynth
 
     class SvfFilter
     {
-        public SvfFilter(Plugin plugin, SvfFilterType type = SvfFilterType.None)
+        private Plugin plugin;
+        private SvfFilterType type;
+        private float cutoff;
+        private float q = 1;
+        private float sampleRate = 44100;
+        private float ic1eq = 0;
+        private float ic2eq = 0;
+        private float g;
+        private float k;
+        private float a1;
+        private float a2;
+        private float a3;
+        private float m0;
+        private float m1;
+        private float m2;
+        private float A;
+
+        public SvfFilter(Plugin plugin, SvfFilterType type = SvfFilterType.None, float sampleRate = 44100)
         {
             this.plugin = plugin;
             this.type = type;
+            this.sampleRate = sampleRate;
+        }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                sampleRate = value;
+                updateCoefficients();
+            }
         }
 
         public SvfFilterType Type
@@ -29,13 +57,10 @@ namespace BetterSynth
             get => type;
             set
             {
-                if (type != value)
-                {
-                    type = value;
-                    ic1eq = 0;
-                    ic2eq = 0;
-                    updateCoefficients();
-                }
+                type = value;
+                ic1eq = 0;
+                ic2eq = 0;
+                updateCoefficients();
             }
         }
         
@@ -57,40 +82,19 @@ namespace BetterSynth
             get => q;
             set
             {
-                if (q != value)
-                {
-                    q = value;
-                    updateCoefficients();
-                }
+                q = value;
+                updateCoefficients();
             }
         }
 
         public float Gain { get; set; }
-
-        private float SampleRate => 44100;
-
-        private SvfFilterType type;
-        private float ic1eq = 0;
-        private float ic2eq = 0;
-        private float g;
-        private float k;
-        private float a1;
-        private float a2;
-        private float a3;
-        private float m0;
-        private float m1;
-        private float m2;
-        private Plugin plugin;
-        private float cutoff;
-        private float q = 1;
-        private float A;
 
         private void updateCoefficients()
         {
             switch (Type)
             {
                 case SvfFilterType.Low:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -101,7 +105,7 @@ namespace BetterSynth
                     break;
 
                 case SvfFilterType.Band:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -112,7 +116,7 @@ namespace BetterSynth
                     break;
 
                 case SvfFilterType.High:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -123,7 +127,7 @@ namespace BetterSynth
                     break;
 
                 case SvfFilterType.Notch:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -134,7 +138,7 @@ namespace BetterSynth
                     break;
 
                 case SvfFilterType.Peak:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -145,7 +149,7 @@ namespace BetterSynth
                     break;
 
                 case SvfFilterType.All:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -156,7 +160,7 @@ namespace BetterSynth
                     break;
                 case SvfFilterType.Bell:
                     A = (float)Math.Pow(10, Gain / 40);
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
                     k = 1 / (Q * A);
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -167,7 +171,7 @@ namespace BetterSynth
                     break;
                 case SvfFilterType.LowShelf:
                     A = (float)Math.Pow(10, Gain / 40);
-                    g = (float)(Math.Tan(Math.PI * cutoff / SampleRate) / Math.Sqrt(A));
+                    g = (float)(Math.Tan(Math.PI * cutoff / sampleRate) / Math.Sqrt(A));
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
@@ -178,7 +182,7 @@ namespace BetterSynth
                     break;
                 case SvfFilterType.HighShelf:
                     A = (float)Math.Pow(10, Gain / 40);
-                    g = (float)(Math.Tan(Math.PI * cutoff / SampleRate) * Math.Sqrt(A));
+                    g = (float)(Math.Tan(Math.PI * cutoff / sampleRate) * Math.Sqrt(A));
                     k = 1 / Q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;

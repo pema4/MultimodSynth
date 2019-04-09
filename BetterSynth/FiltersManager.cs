@@ -22,7 +22,21 @@ namespace BetterSynth
             filters = new List<Filter>();
             InitializeParameters();
 
-            plugin.Opened += (sender, e) => sampleRate = plugin.AudioProcessor.SampleRate;
+            plugin.Opened += (sender, e) => SampleRate = plugin.AudioProcessor.SampleRate;
+        }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                if (sampleRate != value)
+                {
+                    sampleRate = value;
+                    foreach (var filter in filters)
+                        filter.SampleRate = sampleRate;
+                }
+            }
         }
 
         public Filter CreateNewFilter()
@@ -80,17 +94,25 @@ namespace BetterSynth
 
         private void SetFilterType(float value)
         {
-            if (value < 0.25f)
-                filterType = SvfFilterType.Low;
-            else if (value < 0.5f)
-                filterType = SvfFilterType.Band;
-            else if (value < 0.75f)
-                filterType = SvfFilterType.Notch;
-            else
-                filterType = SvfFilterType.High;
+            SvfFilterType newType;
 
-            foreach (var filter in filters)
-                filter.FilterType = filterType;
+            if (value < 0.25f)
+                newType = SvfFilterType.Low;
+            else if (value < 0.5f)
+                newType = SvfFilterType.Band;
+            else if (value < 0.75f)
+                newType = SvfFilterType.Notch;
+            else
+                newType = SvfFilterType.High;
+
+            if (filterType != newType)
+            {
+                filterType = newType;
+
+                foreach (var filter in filters)
+                    filter.FilterType = filterType;
+            }
+
         }
 
         private void SetCutoff(float value)

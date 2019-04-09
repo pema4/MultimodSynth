@@ -19,6 +19,7 @@ namespace BetterSynth
         private float releaseTime;
         private float attackCurve;
         private float decayReleaseCurve;
+        private float sampleRate;
 
         public EnvelopesManager(Plugin plugin, string parameterPrefix = "E")
         {
@@ -26,6 +27,20 @@ namespace BetterSynth
             this.parameterPrefix = parameterPrefix;
             envelopes = new List<AdsrEnvelope>();
             InitializeParameters();
+        }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                if (sampleRate != value)
+                {
+                    sampleRate = value;
+                    foreach (var envelope in envelopes)
+                        envelope.SampleRate = sampleRate;
+                }
+            }
         }
 
         public AdsrEnvelope CreateNewEnvelope()

@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="AdsrEnvelope.cs" />
     <Compile Include="AudioProcessor.cs" />
+    <Compile Include="DSP\Downsampler.cs" />
     <Compile Include="EnvelopesManager.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="FiltersManager.cs" />
@@ -93,7 +94,6 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Voice.cs" />
     <Compile Include="VoicesManager.cs" />
-    <Compile Include="WindowedSincFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WavesData\WavesData.csproj">

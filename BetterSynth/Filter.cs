@@ -25,6 +25,12 @@ namespace BetterSynth
             };
         }
         
+        public float SampleRate
+        {
+            get => filter.SampleRate;
+            set => filter.SampleRate = value;
+        }
+
         public SvfFilterType FilterType
         {
             get => filter.Type;

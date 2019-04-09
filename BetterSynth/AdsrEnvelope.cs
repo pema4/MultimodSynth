@@ -51,12 +51,23 @@ namespace BetterSynth
 
             plugin.Opened += (sender, e) =>
             {
-                sampleRate = plugin.AudioProcessor.SampleRate;
-
-                AttackTime = attackTime;
-                DecayTime = decayTime;
-                ReleaseTime = releaseTime;
+                SampleRate = plugin.AudioProcessor.SampleRate;
             };
+        }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                if (sampleRate != value)
+                {
+                    sampleRate = value;
+                    AttackTime = attackTime;
+                    DecayTime = decayTime;
+                    ReleaseTime = releaseTime;
+                }
+            }
         }
         
         public float AttackTime

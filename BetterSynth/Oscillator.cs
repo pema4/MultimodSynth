@@ -1,4 +1,5 @@
-﻿using WavesData;
+﻿using System;
+using WavesData;
 
 namespace BetterSynth
 {
@@ -9,7 +10,6 @@ namespace BetterSynth
         private float overallFrequency;
         private float phaseIncrement;
         public float sampleRate;
-        private float timePeriod;
         private float pitchMultiplier;
         private float phaseOffset;
 
@@ -21,9 +21,18 @@ namespace BetterSynth
 
             plugin.Opened += (sender, e) =>
             {
-                sampleRate = plugin.AudioProcessor.SampleRate;
-                timePeriod = 1 / sampleRate;
+                SampleRate = plugin.AudioProcessor.SampleRate;
             };
+        }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                sampleRate = value;
+                phaseIncrement = overallFrequency / sampleRate;
+            }
         }
 
         public WaveTableLookup CurrentWave { get; set; }
@@ -52,8 +61,20 @@ namespace BetterSynth
 
         public float Process(float phaseModulation = 0)
         {
-            float res = CurrentWave[phaseOffset + phaseModulation];
-            phaseOffset = (phaseOffset + phaseIncrement + phaseModulation) % 1;
+            float res = CurrentWave[phaseOffset];
+            phaseOffset = (phaseOffset + phaseIncrement + phaseModulation);
+            if (phaseOffset >= 2)
+                phaseOffset -= 2;
+            else if (phaseOffset >= 1)
+                phaseOffset -= 1;
+            else if (phaseOffset < -1)
+                phaseOffset += 2;
+            else if (phaseOffset < 0)
+                phaseOffset += 1;
+
+            if (phaseOffset == 1)
+                throw new ArgumentException();
+
             return res;
         }
 

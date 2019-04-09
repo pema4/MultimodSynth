@@ -117,7 +117,7 @@ namespace BetterSynth
                 case ModulationType.FrequencyModulationA:
                     if (envAOut != 0)
                     {
-                        var mod = envBOut == 0 ? 0 : oscB.Process() * envBOut;
+                        var mod = envBOut == 0 ? 0 : 0.01f * oscB.Process() * envBOut;
                         oscMix = oscA.Process(phaseModulation: mod) * envAOut;
                     }
                     break;
@@ -125,7 +125,7 @@ namespace BetterSynth
                 case ModulationType.FrequencyModulationB:
                     if (envBOut != 0)
                     {
-                        var mod = envAOut == 0 ? 0 : oscA.Process() * envAOut;
+                        var mod = envAOut == 0 ? 0 : 0.01f * oscA.Process() * envAOut;
                         oscMix = oscB.Process(phaseModulation: mod) * envBOut;
                     }
                     break;
