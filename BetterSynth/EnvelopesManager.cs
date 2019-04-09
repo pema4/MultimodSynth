@@ -29,20 +29,6 @@ namespace BetterSynth
             InitializeParameters();
         }
 
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    foreach (var envelope in envelopes)
-                        envelope.SampleRate = sampleRate;
-                }
-            }
-        }
-
         public AdsrEnvelope CreateNewEnvelope()
         {
             var envelope = new AdsrEnvelope(plugin);

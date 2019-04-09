@@ -21,6 +21,8 @@ namespace BetterSynth
         private AdsrEnvelope envB;
         private AdsrEnvelope envFilter;
         private float noteVolume;
+        private float sampleRate;
+        private float fmAmountMultiplier;
 
         public Voice(
             Plugin plugin,
@@ -45,6 +47,25 @@ namespace BetterSynth
         public MidiNote Note { get; private set; }
 
         public ModulationType ModulationType { get; set; }
+
+        public float SampleRate
+        {
+            get => sampleRate;
+            set
+            {
+                if (sampleRate != value)
+                {
+                    sampleRate = value;
+                    fmAmountMultiplier = 5000 / SampleRate;
+                    oscA.SampleRate = sampleRate;
+                    oscB.SampleRate = sampleRate;
+                    filter.SampleRate = sampleRate;
+                    envA.SampleRate = sampleRate;
+                    envB.SampleRate = sampleRate;
+                    envFilter.SampleRate = sampleRate;
+                }
+            }
+        }
 
         public void PlayNote(MidiNote note)
         {
@@ -123,7 +144,7 @@ namespace BetterSynth
                     if (envAOut != 0)
                     {
                         envBOut = envB.Process();
-                        var mod = envBOut == 0 ? 0 : 0.01f * oscB.Process() * envBOut;
+                        var mod = envBOut == 0 ? 0 : fmAmountMultiplier * oscB.Process() * envBOut;
                         oscMix = oscA.Process(phaseModulation: mod) * envAOut;
                     }
                     else
@@ -135,7 +156,7 @@ namespace BetterSynth
                     if (envBOut != 0)
                     {
                         envAOut = envA.Process();
-                        var mod = envAOut == 0 ? 0 : 0.01f * oscA.Process() * envAOut;
+                        var mod = envAOut == 0 ? 0 : fmAmountMultiplier * oscA.Process() * envAOut;
                         oscMix = oscB.Process(phaseModulation: mod) * envBOut;
                     }
                     else

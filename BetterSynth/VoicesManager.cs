@@ -39,12 +39,9 @@ namespace BetterSynth
                 if (sampleRate != value)
                 {
                     sampleRate = value;
-                    OscAManager.SampleRate = value;
-                    OscBManager.SampleRate = value;
-                    FiltersManager.SampleRate = value;
-                    OscAVolumeEnvelopeManager.SampleRate = value;
-                    OscBVolumeEnvelopeManager.SampleRate = value;
-                    FilterCutoffEnvelopeManager.SampleRate = value;
+
+                    foreach (var voice in voices)
+                        voice.SampleRate = sampleRate;
                 }
             }
         }

@@ -21,22 +21,6 @@ namespace BetterSynth
             this.parameterPrefix = parameterPrefix;
             filters = new List<Filter>();
             InitializeParameters();
-
-            plugin.Opened += (sender, e) => SampleRate = plugin.AudioProcessor.SampleRate;
-        }
-
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    foreach (var filter in filters)
-                        filter.SampleRate = sampleRate;
-                }
-            }
         }
 
         public Filter CreateNewFilter()

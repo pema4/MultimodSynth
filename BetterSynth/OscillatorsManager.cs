@@ -29,20 +29,6 @@ namespace BetterSynth
             plugin.Opened += (sender, e) => sampleRate = plugin.AudioProcessor.SampleRate;
         }
 
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    foreach (var oscillator in oscillators)
-                        oscillator.SampleRate = sampleRate;
-                }
-            }
-        }
-
         public Oscillator CreateNewOscillator()
         {
             var res = new Oscillator(plugin);
