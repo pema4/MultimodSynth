@@ -18,7 +18,6 @@ namespace BetterSynth
         private float pitchMultiplier;
         private float waveTablePosition;
         private WaveTable waveTable = Utilities.WaveTables[0];
-        private WaveTableLookup currentWave = Utilities.WaveTables[0][0f];
 
         public OscillatorsManager(Plugin plugin, string parameterPrefix)
         {
@@ -48,8 +47,8 @@ namespace BetterSynth
         {
             var res = new Oscillator(plugin);
 
-            res.CurrentWave = currentWave;
             res.PitchMultiplier = pitchMultiplier;
+            res.WaveTable = waveTable;
 
             oscillators.Add(res);
             return res;
@@ -101,16 +100,14 @@ namespace BetterSynth
             int idx = (int)(value * (Utilities.WaveTables.Length - 1));
             waveTable = Utilities.WaveTables[idx];
 
-            SetWaveTablePosition(waveTablePosition);
+            foreach (var oscillator in oscillators)
+                oscillator.WaveTable = waveTable;
         }
 
         private void SetWaveTablePosition(float value)
         {
             waveTablePosition = value;
-            currentWave = waveTable[value];
-            
-            foreach (var oscillator in oscillators)
-                oscillator.CurrentWave = currentWave;
+            waveTable.Position = waveTablePosition;
         }
     }
 }

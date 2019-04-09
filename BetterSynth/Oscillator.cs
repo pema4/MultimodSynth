@@ -35,7 +35,7 @@ namespace BetterSynth
             }
         }
 
-        public WaveTableLookup CurrentWave { get; set; }
+        public WaveTable WaveTable { get; set; }
 
         public float NoteFrequency
         {
@@ -61,8 +61,9 @@ namespace BetterSynth
 
         public float Process(float phaseModulation = 0)
         {
-            float res = CurrentWave[phaseOffset];
-            phaseOffset = (phaseOffset + phaseIncrement + phaseModulation);
+            float output = WaveTable.Process(phaseOffset);
+
+            phaseOffset = phaseOffset + phaseIncrement + phaseModulation;
             if (phaseOffset >= 2)
                 phaseOffset -= 2;
             else if (phaseOffset >= 1)
@@ -72,10 +73,7 @@ namespace BetterSynth
             else if (phaseOffset < 0)
                 phaseOffset += 1;
 
-            if (phaseOffset == 1)
-                throw new ArgumentException();
-
-            return res;
+            return output;
         }
 
         public void ResetPhase() => phaseOffset = 0;

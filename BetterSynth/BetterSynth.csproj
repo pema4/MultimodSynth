@@ -94,12 +94,7 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Voice.cs" />
     <Compile Include="VoicesManager.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WavesData\WavesData.csproj">
-      <Project>{39b2c612-63f7-43df-ba98-1fbbab0353e0}</Project>
-      <Name>WavesData</Name>
-    </ProjectReference>
+    <Compile Include="WaveTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

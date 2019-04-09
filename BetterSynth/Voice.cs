@@ -17,29 +17,30 @@ namespace BetterSynth
         private Oscillator oscA;
         private Oscillator oscB;
         private Filter filter;
-        private AdsrEnvelope oscAEnvelope;
-        private AdsrEnvelope oscBEnvelope;
-        private AdsrEnvelope filterEnvelope;
+        private AdsrEnvelope envA;
+        private AdsrEnvelope envB;
+        private AdsrEnvelope envFilter;
         private float noteVolume;
-        private bool isActive;
 
         public Voice(
             Plugin plugin,
             Oscillator oscA,
             Oscillator oscB,
             Filter filter,
-            AdsrEnvelope oscAEnvelope,
-            AdsrEnvelope oscBEnvelope,
-            AdsrEnvelope filterEnvelope)
+            AdsrEnvelope envA,
+            AdsrEnvelope envB,
+            AdsrEnvelope envFilter)
         {
             this.plugin = plugin;
             this.oscA = oscA;
             this.oscB = oscB;
             this.filter = filter;
-            this.oscAEnvelope = oscAEnvelope;
-            this.oscBEnvelope = oscBEnvelope;
-            this.filterEnvelope = filterEnvelope;
+            this.envA = envA;
+            this.envB = envB;
+            this.envFilter = envFilter;
         }
+
+        public bool IsActive { get; private set; }
 
         public MidiNote Note { get; private set; }
 
@@ -59,39 +60,34 @@ namespace BetterSynth
             oscB.NoteFrequency = noteFrequency;
             filter.NoteFrequency = noteFrequency;
 
-            oscAEnvelope.TriggerAttack();
-            oscBEnvelope.TriggerAttack();
-            filterEnvelope.TriggerAttack();
+            envA.TriggerAttack();
+            envB.TriggerAttack();
+            envFilter.TriggerAttack();
 
-            isActive = true;
+            IsActive = true;
         }
 
         public void TriggerRelease()
         {
-            oscAEnvelope.TriggerRelease();
-            oscBEnvelope.TriggerRelease();
-            filterEnvelope.TriggerRelease();
+            envA.TriggerRelease();
+            envB.TriggerRelease();
+            envFilter.TriggerRelease();
         }
 
         public float Process()
         {
-            if (!isActive)
+            if (!IsActive)
                 return 0;
 
-            var envAOut = oscAEnvelope.Process();
-            var envBOut = oscBEnvelope.Process();
-
-            if (envAOut == 0 && envBOut == 0)
-            {
-                isActive = false;
-                OnSoundStop();
-                return 0;
-            }
-
+            float envAOut, envBOut;
             float oscMix = 0;
             switch (ModulationType)
             {
                 case ModulationType.None:
+                    envAOut = envA.Process();
+                    envBOut = envB.Process();
+                    if (envAOut == 0 && envBOut == 0)
+                        goto default;
                     if (envAOut != 0)
                         oscMix += oscA.Process() * envAOut;
                     if (envBOut != 0)
@@ -99,40 +95,60 @@ namespace BetterSynth
                     break;
 
                 case ModulationType.AmplitudeModulationA:
+                    envAOut = envA.Process();
                     if (envAOut != 0)
                     {
+                        envBOut = envB.Process();
                         var mod = envBOut == 0 ? 0 : oscB.Process() * envBOut;
                         oscMix = oscA.Process() * envAOut * (1 + mod);
                     }
+                    else
+                        goto default;
                     break;
 
                 case ModulationType.AmplitudeModulationB:
+                    envBOut = envB.Process();
                     if (envBOut != 0)
                     {
+                        envAOut = envA.Process();
                         var mod = envAOut == 0 ? 0 : oscA.Process() * envAOut;
                         oscMix = oscB.Process() * envBOut * (1 + mod);
                     }
+                    else
+                        goto default;
                     break;
 
                 case ModulationType.FrequencyModulationA:
+                    envAOut = envA.Process();
                     if (envAOut != 0)
                     {
+                        envBOut = envB.Process();
                         var mod = envBOut == 0 ? 0 : 0.01f * oscB.Process() * envBOut;
                         oscMix = oscA.Process(phaseModulation: mod) * envAOut;
                     }
+                    else
+                        goto default;
                     break;
 
                 case ModulationType.FrequencyModulationB:
+                    envBOut = envB.Process();
                     if (envBOut != 0)
                     {
+                        envAOut = envA.Process();
                         var mod = envAOut == 0 ? 0 : 0.01f * oscA.Process() * envAOut;
                         oscMix = oscB.Process(phaseModulation: mod) * envBOut;
                     }
+                    else
+                        goto default;
                     break;
+
+                default:
+                    IsActive = false;
+                    OnSoundStop();
+                    return 0;
             }
 
-            var filterEnvOut = filterEnvelope.Process();
-
+            var filterEnvOut = envFilter.Process();
             return filter.Process(oscMix, filterEnvOut);
         }
 

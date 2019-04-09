@@ -120,7 +120,7 @@ namespace BetterSynth
                 voice.ModulationType = modulationType;
         }
 
-        internal void PlayNote(MidiNote note)
+        public void PlayNote(MidiNote note)
         {
             //RemoveNote(note.NoteNo);
 
@@ -153,7 +153,7 @@ namespace BetterSynth
             }
         }
 
-        internal void ReleaseNote(MidiNote note)
+        public void ReleaseNote(MidiNote note)
         {
             byte noteNo = note.NoteNo;
             if (noteToVoiceMapping.ContainsKey(noteNo))
@@ -163,9 +163,14 @@ namespace BetterSynth
             }
         }
 
-        internal float Process()
+        public float Process()
         {
-            return voices.Select(voice => voice.Process()).Sum();
+            float sum = 0;
+            foreach (var voice in voices)
+                if (voice.IsActive)
+                    sum += voice.Process();
+
+            return sum;
         }
     }
 }
