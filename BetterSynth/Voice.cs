@@ -170,7 +170,7 @@ namespace BetterSynth
             }
 
             var filterEnvOut = envFilter.Process();
-            return filter.Process(oscMix, filterEnvOut);
+            return noteVolume * filter.Process(oscMix, filterEnvOut);
         }
 
         public event EventHandler SoundStop;

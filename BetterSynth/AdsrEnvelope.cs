@@ -18,10 +18,12 @@ namespace BetterSynth
 
         private Plugin plugin;
 
+        private float amplitude;
         private float attackBase;
         private float attackCoef;
         private float attackRate;
         private float attackTargetRatio;
+        private State currentState;
         private float currValue;
         private float decayBase;
         private float decayCoef;
@@ -69,7 +71,7 @@ namespace BetterSynth
                 }
             }
         }
-        
+
         public float AttackTime
         {
             get => attackTime;
@@ -135,9 +137,8 @@ namespace BetterSynth
             }
         }
 
-        public float Amplitude { get; set; }
+        public float Amplitude { get => amplitude; set => amplitude = value; }
 
-        public State CurrentState { get; private set; }
 
         private void SetAttackRate(float rate)
         {
@@ -180,13 +181,13 @@ namespace BetterSynth
 
             decayCoef = CalcCoef(decayRate, targetRatio);
             releaseCoef = CalcCoef(releaseRate, targetRatio);
-            decayBase = (SustainLevel - decayReleaseTargetRatio) * (1 - decayCoef);
+            decayBase = (sustainLevel - decayReleaseTargetRatio) * (1 - decayCoef);
             releaseBase = -decayReleaseTargetRatio * (1 - releaseCoef);
         }
 
         public float Process()
         {
-            switch (CurrentState)
+            switch (currentState)
             {
                 case State.Idle:
                     break;
@@ -196,9 +197,9 @@ namespace BetterSynth
                     {
                         currValue = 1f;
                         if (decayCoef != 0)
-                            CurrentState = State.Decay;
+                            currentState = State.Decay;
                         else
-                            CurrentState = State.Sustain;
+                            currentState = State.Sustain;
                     }
                     break;
                 case State.Decay:
@@ -206,7 +207,7 @@ namespace BetterSynth
                     if (currValue <= sustainLevel)
                     {
                         currValue = sustainLevel;
-                        CurrentState = State.Sustain;
+                        currentState = State.Sustain;
                     }
                     break;
                 case State.Sustain:
@@ -217,13 +218,13 @@ namespace BetterSynth
                     if (currValue <= 0)
                     {
                         currValue = 0;
-                        CurrentState = State.Idle;
+                        currentState = State.Idle;
                         OnSoundStop();
                     }
                     break;
             }
 
-            return Amplitude * currValue;
+            return amplitude * currValue;
         }
 
         private void OnSoundStop()
@@ -233,7 +234,7 @@ namespace BetterSynth
 
         public event EventHandler SoundStop;
 
-        private float CalcCoef(float rate, float targetRatio) => 
+        private float CalcCoef(float rate, float targetRatio) =>
             (float)((rate <= 0f) ? 0f : Math.Exp(-Math.Log((1.0 + targetRatio) / targetRatio) / rate));
 
         public void TriggerAttack()
@@ -241,20 +242,20 @@ namespace BetterSynth
             if (attackCoef != 0)
             {
                 currValue = 0;
-                CurrentState = State.Attack;
+                currentState = State.Attack;
             }
             else if (decayCoef != 0)
             {
                 currValue = 1;
-                CurrentState = State.Decay;
+                currentState = State.Decay;
             }
             else
-                CurrentState = State.Sustain;
+                currentState = State.Sustain;
         }
 
         public void TriggerRelease()
         {
-            CurrentState = State.Release;
+            currentState = State.Release;
         }
     }
 }

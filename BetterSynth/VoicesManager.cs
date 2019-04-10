@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using Jacobi.Vst.Framework;
+using System;
 
 namespace BetterSynth
 {
@@ -10,10 +11,10 @@ namespace BetterSynth
 
         private Plugin plugin;
         private string parameterPrefix;
-        private List<Voice> voices;
-        private SortedSet<int> freeVoices = new SortedSet<int>();
-        private Dictionary<byte, int> noteToVoiceMapping = new Dictionary<byte, int>();
-        private List<byte> pressedNotes = new List<byte>();
+        private List<Voice> voicesPool;
+        private List<Voice> usedVoices;
+        private Dictionary<byte, List<Voice>> noteToVoicesMapping;
+        private SortedSet<int> freeVoicesIndices;
         private float sampleRate;
         private ModulationType modulationType;
 
@@ -38,7 +39,7 @@ namespace BetterSynth
                 {
                     sampleRate = value;
 
-                    foreach (var voice in voices)
+                    foreach (var voice in voicesPool)
                         voice.SampleRate = sampleRate;
                 }
             }
@@ -56,16 +57,16 @@ namespace BetterSynth
             OscBVolumeEnvelopeManager = new EnvelopesManager(plugin, "B");
             FilterCutoffEnvelopeManager = new EnvelopesManager(plugin, "F");
 
-            freeVoices = new SortedSet<int>(Enumerable.Range(0, MaxVoicesCount));
-            noteToVoiceMapping = new Dictionary<byte, int>();
-            pressedNotes = new List<byte>();
+            freeVoicesIndices = new SortedSet<int>(Enumerable.Range(0, MaxVoicesCount));
+            noteToVoicesMapping = new Dictionary<byte, List<Voice>>();
+            usedVoices = new List<Voice>();
 
-            voices = new List<Voice>();
+            voicesPool = new List<Voice>();
 
             for (int i = 0; i < MaxVoicesCount; ++i)
-                voices.Add(CreateVoice());
+                voicesPool.Add(CreateVoice());
 
-            InitializaParameters();
+            InitializeParameters();
         }
 
         private Voice CreateVoice()
@@ -81,12 +82,12 @@ namespace BetterSynth
                 oscAEnvelope, oscBEnvelope, filterEnvelope);
 
             voice.ModulationType = modulationType;
-            voice.SoundStop += (sender, e) => RemoveNote(voice.Note.NoteNo);
+            voice.SoundStop += (sender, e) => StopVoice(voice);
 
             return voice;
         }
 
-        private void InitializaParameters()
+        private void InitializeParameters()
         {
             var factory = new ParameterFactory(plugin, "voice");
 
@@ -111,59 +112,63 @@ namespace BetterSynth
             else
                 modulationType = ModulationType.FrequencyModulationB;
 
-            foreach (var voice in voices)
+            foreach (var voice in voicesPool)
                 voice.ModulationType = modulationType;
         }
 
         public void PlayNote(MidiNote note)
         {
-            //RemoveNote(note.NoteNo);
+            Voice voice;
 
-            int voiceIndex;
-
-            if (freeVoices.Count == 0)
+            if (freeVoicesIndices.Count == 0)
             {
-                voiceIndex = noteToVoiceMapping[pressedNotes[0]];
-                RemoveNote(pressedNotes[0]);
+                voice = usedVoices[0];
+                StopVoice(voice);
             }
             else
             {
-                voiceIndex = freeVoices.Min;
-                freeVoices.Remove(voiceIndex);
+                voice = voicesPool[freeVoicesIndices.Min];
             }
 
-            noteToVoiceMapping[note.NoteNo] = voiceIndex;
-            pressedNotes.Add(note.NoteNo);
-            voices[voiceIndex].PlayNote(note);
+            byte noteNo = note.NoteNo;
+            
+            if (!noteToVoicesMapping.ContainsKey(noteNo))
+                noteToVoicesMapping[noteNo] = new List<Voice>();
+
+            noteToVoicesMapping[noteNo].Add(voice);
+            usedVoices.Add(voice);
+            freeVoicesIndices.Remove(voicesPool.IndexOf(voice));
+            voice.PlayNote(note);
         }
 
-        private void RemoveNote(byte noteNo)
+        private void StopVoice(Voice voice)
         {
-            if (noteToVoiceMapping.ContainsKey(noteNo))
-            {
-                int voiceIndex = noteToVoiceMapping[noteNo];
-                freeVoices.Add(voiceIndex);
-                noteToVoiceMapping.Remove(noteNo);
-                pressedNotes.Remove(noteNo);
-            }
+            usedVoices.Remove(voice);
+
+            byte noteNo = voice.Note.NoteNo;
+            noteToVoicesMapping[noteNo].Remove(voice);
+
+            int voiceIndex = voicesPool.IndexOf(voice);
+            freeVoicesIndices.Add(voiceIndex);
         }
 
         public void ReleaseNote(MidiNote note)
         {
             byte noteNo = note.NoteNo;
-            if (noteToVoiceMapping.ContainsKey(noteNo))
+
+            if (noteToVoicesMapping.ContainsKey(noteNo))
             {
-                int voiceIndex = noteToVoiceMapping[noteNo];
-                voices[voiceIndex].TriggerRelease();
+                foreach (var voice in noteToVoicesMapping[noteNo])
+                    voice.TriggerRelease();
             }
         }
 
         public float Process()
         {
             float sum = 0;
-            foreach (var voice in voices)
-                if (voice.IsActive)
-                    sum += voice.Process();
+
+            foreach (var voice in usedVoices.ToList())
+                sum += voice.Process();
 
             return sum;
         }

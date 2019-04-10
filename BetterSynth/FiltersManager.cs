@@ -9,7 +9,6 @@ namespace BetterSynth
         private string parameterPrefix;
         private List<Filter> filters;
         private SvfFilterType filterType;
-        private float sampleRate;
         private float cutoff;
         private float trackingCoeff;
         private float curve;
