@@ -4,13 +4,15 @@ namespace BetterSynth
 {
     class Filter
     {
+        private const float BaseCutoff = 65.41f;
+        
         private Plugin plugin;
         private SvfFilter filter;
         private float curve;
         private float noteFrequency;
-        private float cutoff;
+        private float cutoffMultiplier;
         private float trackingCoeff;
-        private float overallCutoff;
+        private float cutoff;
 
         public Filter(Plugin plugin)
         {
@@ -37,15 +39,15 @@ namespace BetterSynth
             set => filter.Type = value;
         }
 
-        public float Cutoff
+        public float CutoffMultiplier
         {
-            get => cutoff;
+            get => cutoffMultiplier;
             set
             {
-                if (cutoff != value)
+                if (cutoffMultiplier != value)
                 {
-                    cutoff = value;
-                    overallCutoff = Cutoff + NoteFrequency * TrackingCoeff;
+                    cutoffMultiplier = value;
+                    CalculateCutoff();
                 }
             }
         }
@@ -58,7 +60,7 @@ namespace BetterSynth
                 if (noteFrequency != value)
                 {
                     noteFrequency = value;
-                    overallCutoff = Cutoff + NoteFrequency * TrackingCoeff;
+                    CalculateCutoff();
                 }
             }
         }
@@ -71,9 +73,15 @@ namespace BetterSynth
                 if (trackingCoeff != value)
                 {
                     trackingCoeff = value;
-                    overallCutoff = Cutoff + NoteFrequency * TrackingCoeff;
+                    CalculateCutoff();
                 }
             }
+        }
+
+        private void CalculateCutoff()
+        {
+            var trackedCutoff = BaseCutoff + (noteFrequency - BaseCutoff) * trackingCoeff;
+            cutoff = cutoffMultiplier * trackedCutoff;
         }
 
         public float Curve
@@ -94,7 +102,11 @@ namespace BetterSynth
 
         public float Process(float input, float cutoffModulation = 0)
         {
-            filter.Cutoff = Math.Min(overallCutoff * (1 + cutoffModulation * 10), 20000);
+            var modulatedCutoff = cutoff * (1 + cutoffModulation * 305);
+            if (modulatedCutoff > 20000)
+                modulatedCutoff = 20000;
+            filter.Cutoff = modulatedCutoff;
+
             return filter.Process(input);
         }
 

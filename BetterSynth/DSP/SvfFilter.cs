@@ -48,7 +48,7 @@ namespace BetterSynth
             set
             {
                 sampleRate = value;
-                updateCoefficients();
+                UpdateCoefficients();
             }
         }
 
@@ -60,7 +60,7 @@ namespace BetterSynth
                 type = value;
                 ic1eq = 0;
                 ic2eq = 0;
-                updateCoefficients();
+                UpdateCoefficients();
             }
         }
         
@@ -72,7 +72,7 @@ namespace BetterSynth
                 if (cutoff != value)
                 {
                     cutoff = value;
-                    updateCoefficients();
+                    UpdateCoefficients();
                 }
             }
         }
@@ -83,13 +83,13 @@ namespace BetterSynth
             set
             {
                 q = value;
-                updateCoefficients();
+                UpdateCoefficients();
             }
         }
 
         public float Gain { get; set; }
 
-        private void updateCoefficients()
+        private void UpdateCoefficients()
         {
             switch (Type)
             {
@@ -158,6 +158,7 @@ namespace BetterSynth
                     m1 = -2 * k;
                     m2 = 0;
                     break;
+
                 case SvfFilterType.Bell:
                     A = (float)Math.Pow(10, Gain / 40);
                     g = (float)Math.Tan(Math.PI * cutoff / sampleRate);
@@ -169,6 +170,7 @@ namespace BetterSynth
                     m1 = k * (A * A - 1);
                     m2 = 0;
                     break;
+
                 case SvfFilterType.LowShelf:
                     A = (float)Math.Pow(10, Gain / 40);
                     g = (float)(Math.Tan(Math.PI * cutoff / sampleRate) / Math.Sqrt(A));
@@ -180,6 +182,7 @@ namespace BetterSynth
                     m1 = k * (A - 1);
                     m2 = A * A - 1;
                     break;
+
                 case SvfFilterType.HighShelf:
                     A = (float)Math.Pow(10, Gain / 40);
                     g = (float)(Math.Tan(Math.PI * cutoff / sampleRate) * Math.Sqrt(A));

@@ -73,7 +73,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdsrEnvelope.cs" />
+    <Compile Include="DSP\AdsrEnvelope.cs" />
     <Compile Include="AudioProcessor.cs" />
     <Compile Include="DSP\Downsampler.cs" />
     <Compile Include="EnvelopesManager.cs" />

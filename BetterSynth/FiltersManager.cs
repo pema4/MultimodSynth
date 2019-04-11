@@ -1,4 +1,5 @@
 ﻿using Jacobi.Vst.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace BetterSynth
@@ -9,7 +10,7 @@ namespace BetterSynth
         private string parameterPrefix;
         private List<Filter> filters;
         private SvfFilterType filterType;
-        private float cutoff;
+        private float cutoffMultiplier;
         private float trackingCoeff;
         private float curve;
 
@@ -24,7 +25,7 @@ namespace BetterSynth
         public Filter CreateNewFilter()
         {
             var filter = new Filter(plugin);
-            filter.Cutoff = cutoff;
+            filter.CutoffMultiplier = cutoffMultiplier;
             filter.Curve = curve;
             filter.TrackingCoeff = trackingCoeff;
             filter.FilterType = filterType;
@@ -99,10 +100,10 @@ namespace BetterSynth
 
         private void SetCutoff(float value)
         {
-            cutoff = value * 20000;
+            cutoffMultiplier = (float)Math.Pow(2, 13 * value);
 
             foreach (var filter in filters)
-                filter.Cutoff = cutoff;
+                filter.CutoffMultiplier = cutoffMultiplier;
         }
 
         private void SetTrackingCoeff(float value)
