@@ -99,8 +99,7 @@ namespace BetterSynth
         {
             if (!IsActive)
                 return 0;
-
-            float envAOut, envBOut;
+            
             float oscMix = 0;
             switch (ModulationType)
             {

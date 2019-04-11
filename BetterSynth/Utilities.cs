@@ -26,26 +26,61 @@ namespace BetterSynth
         public static WaveTable[] WaveTables =
         {
             new WaveTable((exp, x) => Math.Sign(Math.Sin(x)) * Math.Pow(Math.Abs(Math.Sin(x)), 1 / exp), 0.001, 1),
-            new WaveTable(TruncatedSawGenerator(20, 20000), 1, 11, wavesAmount: 10),
+            new WaveTable(TruncatedSawGenerator(20, 15000), 1, 11, wavesAmount: 10),
+            new WaveTable(TruncatedSquareGenerator(20, 15000), 1, 11, wavesAmount: 10),
+            new WaveTable(PwmGenerator(20, 15000), 2 * Math.PI / 11, 2 * Math.PI, wavesAmount: 10),
         };
-
-        private static Func<double, double> SawGenerator(double initFrequency, double maxFrequency)
+        
+        private static Func<double, double, double> TruncatedSawGenerator(double initFreq, double maxFreq)
         {
-            return freq =>
+            Func<double, double> SawGenerator(int harmonicsCount)
             {
-                double res = 0;
-                for (int i = 1; i < maxFrequency / initFrequency; ++i)
-                    res += Math.Sin(i * freq) / i;
-                return res;
+                return freq =>
+                {
+                    double res = 0;
+                    for (int i = 1; i < harmonicsCount; ++i)
+                        res += Math.Sin(i * freq) / i;
+                    return res;
+                };
+            }
+
+            return (octaves, x) =>
+            {
+                int harmonicsCount = (int)(Math.Min(maxFreq, initFreq * Math.Pow(2, octaves)) / initFreq);
+                var sawGenerator = SawGenerator(harmonicsCount);
+                return sawGenerator(x);
             };
         }
-        
-        private static Func<double, double, double> TruncatedSawGenerator(double initFrequency, double maxFrequency)
+
+        private static Func<double, double, double> TruncatedSquareGenerator(double initFreq, double maxFreq)
         {
-            return (octaves, freq) =>
+            Func<double, double> SquareGenerator(int harmonicsCount)
             {
-                var sawGenerator = SawGenerator(initFrequency, Math.Min(maxFrequency, initFrequency * Math.Pow(2, octaves)));
-                return sawGenerator(freq);
+                return freq =>
+                {
+                    double res = 0;
+                    for (int i = 1; i < harmonicsCount; i += 2)
+                        res += Math.Sin(i * freq) / i;
+                    return res;
+                };
+            }
+
+            return (octaves, x) =>
+            {
+                int harmonicsCount = (int)(Math.Min(maxFreq, initFreq * Math.Pow(2, octaves)) / initFreq);
+                var sawGenerator = SquareGenerator(harmonicsCount);
+                return sawGenerator(x);
+            };
+        }
+
+        private static Func<double, double, double> PwmGenerator(double initFreq, double maxFreq)
+        {
+            return (pwm, x) =>
+            {
+                double res = 0;
+                for (int i = 1; i < (int)(maxFreq / initFreq); ++i)
+                    res += (Math.Sin(i * x) - Math.Sin(i *(x + pwm))) / i;
+                return res / 2;
             };
         }
     }

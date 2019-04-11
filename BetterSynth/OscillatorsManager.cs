@@ -80,8 +80,12 @@ namespace BetterSynth
 
         private void SetWaveTable(float value)
         {
-            int idx = (int)(value * (Utilities.WaveTables.Length - 1));
+            int idx = (int)(value * Utilities.WaveTables.Length);
+            if (idx == Utilities.WaveTables.Length)
+                idx -= 1;
+
             waveTable = Utilities.WaveTables[idx];
+            waveTable.Position = waveTablePosition;
 
             foreach (var oscillator in oscillators)
                 oscillator.WaveTable = waveTable;
