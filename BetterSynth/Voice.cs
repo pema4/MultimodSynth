@@ -17,9 +17,9 @@ namespace BetterSynth
         private Oscillator oscA;
         private Oscillator oscB;
         private Filter filter;
-        private AdsrEnvelope envA;
-        private AdsrEnvelope envB;
-        private AdsrEnvelope envFilter;
+        private Envelope envA;
+        private Envelope envB;
+        private Envelope envFilter;
         private float noteVolume;
         private float sampleRate;
         private float fmAmountMultiplier;
@@ -29,9 +29,9 @@ namespace BetterSynth
             Oscillator oscA,
             Oscillator oscB,
             Filter filter,
-            AdsrEnvelope envA,
-            AdsrEnvelope envB,
-            AdsrEnvelope envFilter)
+            Envelope envA,
+            Envelope envB,
+            Envelope envFilter)
         {
             this.plugin = plugin;
             this.oscA = oscA;
@@ -104,15 +104,15 @@ namespace BetterSynth
             switch (ModulationType)
             {
                 case ModulationType.None:
-                    if (envA.State != AdsrEnvelopeState.Idle)
+                    if (envA.IsActive)
                     {
                         oscMix += envA.Process() * oscA.Process();
-                        if (envB.State != AdsrEnvelopeState.Idle)
+                        if (envB.IsActive)
                             oscMix += envB.Process() * oscB.Process();
                     }
                     else
                     {
-                        if (envB.State != AdsrEnvelopeState.Idle)
+                        if (envB.IsActive)
                             oscMix = envB.Process() * oscB.Process();
                         else
                             goto default;
@@ -120,10 +120,10 @@ namespace BetterSynth
                     break;
 
                 case ModulationType.AmplitudeModulationA:
-                    if (envA.State != 0)
+                    if (envA.IsActive)
                     {
                         float mod = 0;
-                        if (envB.State != AdsrEnvelopeState.Idle)
+                        if (envB.IsActive)
                             mod = oscB.Process() * envB.Process();
                         oscMix = oscA.Process() * envA.Process() * (1 + mod);
                     }
@@ -132,10 +132,10 @@ namespace BetterSynth
                     break;
 
                 case ModulationType.AmplitudeModulationB:
-                    if (envB.State != 0)
+                    if (envB.IsActive)
                     {
                         float mod = 0;
-                        if (envA.State != AdsrEnvelopeState.Idle)
+                        if (envA.IsActive)
                             mod = oscA.Process() * envA.Process();
                         oscMix = oscB.Process() * envB.Process() * (1 + mod);
                     }
@@ -144,10 +144,10 @@ namespace BetterSynth
                     break;
 
                 case ModulationType.FrequencyModulationA:
-                    if (envA.State != AdsrEnvelopeState.Idle)
+                    if (envA.IsActive)
                     {
                         float mod = 0;
-                        if (envB.State != AdsrEnvelopeState.Idle)
+                        if (envB.IsActive)
                             mod = fmAmountMultiplier * oscB.Process() * envB.Process();
                         oscMix = oscA.Process(phaseModulation: mod) * envA.Process();
                     }
@@ -156,10 +156,10 @@ namespace BetterSynth
                     break;
 
                 case ModulationType.FrequencyModulationB:
-                    if (envB.State != AdsrEnvelopeState.Idle)
+                    if (envB.IsActive)
                     {
                         float mod = 0;
-                        if (envA.State != AdsrEnvelopeState.Idle)
+                        if (envA.IsActive)
                             mod = fmAmountMultiplier * oscA.Process() * envA.Process();
                         oscMix = oscB.Process(phaseModulation: mod) * envB.Process();
                     }

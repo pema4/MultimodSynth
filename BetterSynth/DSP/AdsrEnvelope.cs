@@ -16,154 +16,61 @@ namespace BetterSynth
     /// </summary>
     class AdsrEnvelope
     {
-        private Plugin plugin;
-
-        private float amplitude;
-        private float attackBase;
-        private float attackCoef;
-        private float attackRate;
-        private float attackTargetRatio;
+        private double attackBase;
+        private double attackCoef;
+        private double attackRate;
+        private double attackTargetRatio;
         private AdsrEnvelopeState state;
-        private float currValue;
-        private float decayBase;
-        private float decayCoef;
-        private float decayRate;
-        private float decayReleaseTargetRatio;
-        private float releaseBase;
-        private float releaseCoef;
-        private float releaseRate;
-        private float sampleRate;
+        private double currValue;
+        private double decayBase;
+        private double decayCoef;
+        private double decayRate;
+        private double decayReleaseTargetRatio;
+        private double releaseBase;
+        private double releaseCoef;
+        private double releaseRate;
+        private double sustainLevel;
 
-        private float attackTime;
-        private float decayTime;
-        private float sustainLevel;
-        private float releaseTime;
-        private float attackCurve;
-        private float decayReleaseCurve;
-
-        public AdsrEnvelope(Plugin plugin)
+        public AdsrEnvelope()
         {
-            this.plugin = plugin;
             SetAttackRate(0);
             SetDecayRate(0);
             SetReleaseRate(0);
-            SustainLevel = 1;
+            SetSustainLevel(1);
             SetAttackTargetRatio(0.3f);
             SetDecayReleaseTargetRatio(0.0001f);
-
-            plugin.Opened += (sender, e) =>
-            {
-                SampleRate = plugin.AudioProcessor.SampleRate;
-            };
-        }
-
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    AttackTime = attackTime;
-                    DecayTime = decayTime;
-                    ReleaseTime = releaseTime;
-                }
-            }
         }
 
         public AdsrEnvelopeState State => state;
 
-        public float AttackTime
-        {
-            get => attackTime;
-            set
-            {
-                if (attackTime != value)
-                {
-                    attackTime = value;
-                    SetAttackRate(attackTime * sampleRate);
-                }
-            }
-        }
-
-        public float DecayTime
-        {
-            get => decayTime;
-            set
-            {
-                decayTime = value;
-                SetDecayRate(decayTime * sampleRate);
-            }
-        }
-
-        public float SustainLevel
-        {
-            get => sustainLevel;
-            set
-            {
-                sustainLevel = value;
-                decayBase = (sustainLevel - decayReleaseTargetRatio) * (1 - decayCoef);
-            }
-        }
-
-        public float ReleaseTime
-        {
-            get => releaseTime;
-            set
-            {
-                releaseTime = value;
-                SetReleaseRate(releaseTime * sampleRate);
-            }
-        }
-
-        public float AttackCurve
-        {
-            get => attackCurve;
-            set
-            {
-                attackCurve = value;
-                attackTargetRatio = 0.001f * ((float)Math.Exp(12 * (0.005f + 0.995f * value)) - 1);
-                SetAttackTargetRatio(attackTargetRatio);
-            }
-        }
-
-        public float DecayReleaseCurve
-        {
-            get => decayReleaseCurve;
-            set
-            {
-                decayReleaseCurve = value;
-                decayReleaseTargetRatio = 0.001f * ((float)Math.Exp(12 * (0.0001f + 0.9999f * value)) - 1);
-                SetDecayReleaseTargetRatio(decayReleaseTargetRatio);
-            }
-        }
-
-        public float Amplitude { get => amplitude; set => amplitude = value; }
-
-
-        private void SetAttackRate(float rate)
+        public void SetAttackRate(double rate)
         {
             attackRate = rate;
             attackCoef = CalcCoef(rate, attackTargetRatio);
             attackBase = (1 + attackTargetRatio) * (1 - attackCoef);
         }
 
-        private void SetDecayRate(float rate)
+        public void SetDecayRate(double rate)
         {
             decayRate = rate;
             decayCoef = CalcCoef(decayRate, decayReleaseTargetRatio);
             decayBase = (sustainLevel - decayReleaseTargetRatio) * (1 - decayCoef);
         }
 
-        private void SetReleaseRate(float rate)
+        public void SetSustainLevel(double level)
+        {
+            sustainLevel = level;
+            decayBase = (sustainLevel - decayReleaseTargetRatio) * (1 - decayCoef);
+        }
+
+        public void SetReleaseRate(double rate)
         {
             releaseRate = rate;
             releaseCoef = CalcCoef(rate, decayReleaseTargetRatio);
             releaseBase = -decayReleaseTargetRatio * (1 - releaseCoef);
         }
 
-        private void SetAttackTargetRatio(float targetRatio)
+        public void SetAttackTargetRatio(double targetRatio)
         {
             if (targetRatio < 0.000000001f)
                 attackTargetRatio = 0.000000001f;
@@ -174,7 +81,7 @@ namespace BetterSynth
             attackBase = (1 + attackTargetRatio) * (1 - attackCoef);
         }
 
-        private void SetDecayReleaseTargetRatio(float targetRatio)
+        public void SetDecayReleaseTargetRatio(double targetRatio)
         {
             if (targetRatio < 0.000000001f)
                 decayReleaseTargetRatio = 0.000000001f;
@@ -187,12 +94,13 @@ namespace BetterSynth
             releaseBase = -decayReleaseTargetRatio * (1 - releaseCoef);
         }
 
-        public float Process()
+        public double Process()
         {
             switch (state)
             {
                 case AdsrEnvelopeState.Idle:
                     break;
+
                 case AdsrEnvelopeState.Attack:
                     currValue = attackBase + currValue * attackCoef;
                     if (currValue >= 1f)
@@ -204,6 +112,7 @@ namespace BetterSynth
                             state = AdsrEnvelopeState.Sustain;
                     }
                     break;
+
                 case AdsrEnvelopeState.Decay:
                     currValue = decayBase + currValue * decayCoef;
                     if (currValue <= sustainLevel)
@@ -212,9 +121,11 @@ namespace BetterSynth
                         state = AdsrEnvelopeState.Sustain;
                     }
                     break;
+
                 case AdsrEnvelopeState.Sustain:
                     currValue = sustainLevel;
                     break;
+
                 case AdsrEnvelopeState.Release:
                     currValue = releaseBase + currValue * releaseCoef;
                     if (currValue <= 0)
@@ -226,7 +137,7 @@ namespace BetterSynth
                     break;
             }
 
-            return amplitude * currValue;
+            return currValue;
         }
 
         private void OnSoundStop()
@@ -236,8 +147,8 @@ namespace BetterSynth
 
         public event EventHandler SoundStop;
 
-        private float CalcCoef(float rate, float targetRatio) =>
-            (float)((rate <= 0f) ? 0f : Math.Exp(-Math.Log((1.0 + targetRatio) / targetRatio) / rate));
+        private double CalcCoef(double rate, double targetRatio) =>
+            (rate <= 0f) ? 0f : Math.Exp(-Math.Log((1.0 + targetRatio) / targetRatio) / rate);
 
         public void TriggerAttack()
         {

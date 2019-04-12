@@ -76,6 +76,7 @@
     <Compile Include="DSP\AdsrEnvelope.cs" />
     <Compile Include="AudioProcessor.cs" />
     <Compile Include="DSP\Downsampler.cs" />
+    <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopesManager.cs" />
     <Compile Include="Filter.cs" />
     <Compile Include="FiltersManager.cs" />

@@ -9,7 +9,7 @@ namespace BetterSynth
 
         private Plugin plugin;
         private string parameterPrefix;
-        private List<AdsrEnvelope> envelopes;
+        private List<Envelope> envelopes;
         private float sustainLevel;
         private float envelopeAmplitude;
         private float decayTime;
@@ -22,13 +22,13 @@ namespace BetterSynth
         {
             this.plugin = plugin;
             this.parameterPrefix = parameterPrefix;
-            envelopes = new List<AdsrEnvelope>();
+            envelopes = new List<Envelope>();
             InitializeParameters();
         }
 
-        public AdsrEnvelope CreateNewEnvelope()
+        public Envelope CreateNewEnvelope()
         {
-            var envelope = new AdsrEnvelope(plugin);
+            var envelope = new Envelope(plugin);
             envelope.Amplitude = envelopeAmplitude;
             envelope.AttackTime = attackTime;
             envelope.DecayTime = decayTime;
@@ -41,7 +41,7 @@ namespace BetterSynth
             return envelope;
         }
 
-        public void RemoveEnvelope(AdsrEnvelope envelope)
+        public void RemoveEnvelope(Envelope envelope)
         {
             envelopes.Remove(envelope);
         }

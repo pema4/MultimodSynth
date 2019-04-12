@@ -166,8 +166,9 @@ namespace BetterSynth
         {
             float sum = 0;
 
-            foreach (var voice in usedVoices.ToList())
-                sum += voice.Process();
+            foreach (var voice in voicesPool)
+                if (voice.IsActive)
+                    sum += voice.Process();
 
             return sum;
         }

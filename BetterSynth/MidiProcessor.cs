@@ -73,7 +73,5 @@ namespace BetterSynth
     {
         public byte NoteNo { get; set; }
         public byte Velocity { get; set; }
-
-        public static MidiNote Empty => new MidiNote();
     }
 }
