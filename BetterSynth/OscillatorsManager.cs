@@ -63,7 +63,6 @@ namespace BetterSynth
                 minValue: -36,
                 maxValue: 36,
                 defaultValue: 0,
-                smallStepFloat: 1,
                 valueChangedHandler: SetPitchSemi);
             CreateRedirection(PitchSemiManager, nameof(PitchSemiManager));
 
@@ -73,7 +72,6 @@ namespace BetterSynth
                 minValue: -100,
                 maxValue: 100,
                 defaultValue: 0,
-                smallStepFloat: 0,
                 valueChangedHandler: SetPitchFine);
             CreateRedirection(PitchFineManager, nameof(PitchFineManager));
 

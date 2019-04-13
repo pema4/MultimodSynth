@@ -168,6 +168,7 @@ namespace BetterSynth
             OscBManager.Process();
             OscAVolumeEnvelopeManager.Process();
             OscBVolumeEnvelopeManager.Process();
+            FilterCutoffEnvelopeManager.Process();
 
             float sum = 0;
 

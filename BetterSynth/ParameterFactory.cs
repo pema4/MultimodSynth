@@ -27,7 +27,10 @@ namespace BetterSynth
             int minValue = 0,
             int maxValue = 1,
             float defaultValue = 0,
-            float smallStepFloat = 0,
+            float stepFloat = 0,
+            int stepInteger = 0,
+            float largeStepFloat = 0,
+            int largeStepInteger = 0,
             bool canBeAutomated = true,
             Action<float> valueChangedHandler = null)
         {
@@ -41,7 +44,10 @@ namespace BetterSynth
                 MaxInteger = maxValue,
                 DefaultValue = defaultValue,
                 CanBeAutomated = canBeAutomated,
-                SmallStepFloat = smallStepFloat,
+                StepFloat = stepFloat,
+                StepInteger = stepInteger,
+                LargeStepFloat = largeStepFloat,
+                LargeStepInteger = largeStepInteger
             };
 
             VstParameterNormalizationInfo.AttachTo(parameterInfo);

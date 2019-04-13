@@ -1,4 +1,6 @@
-﻿namespace BetterSynth
+﻿using System;
+
+namespace BetterSynth
 {
     /// <summary>
     /// http://www.musicdsp.org/en/latest/Filters/257-1-pole-lpf-for-smooth-parameter-changes.html

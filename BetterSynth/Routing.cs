@@ -11,6 +11,8 @@ namespace BetterSynth
 
         public Downsampler Downsampler { get; private set; }
 
+        public SaturationManager SaturationManager { get; private set; }
+
         public float SampleRate
         {
             get => sampleRate;
@@ -31,6 +33,7 @@ namespace BetterSynth
             this.plugin = plugin;
             VoicesManager = new VoicesManager(plugin, "V");
             Downsampler = new Downsampler(plugin);
+            SaturationManager = new SaturationManager(plugin);
 
             InitializeParameters();
 
@@ -85,9 +88,11 @@ namespace BetterSynth
         {
             for (int i = 0; i < Downsampler.Order; ++i)
             {
-                samplesForOversampling[i] = VoicesManager.Process();
+                var voicesOutput = VoicesManager.Process();
+                var saturationOutput = SaturationManager.Process(voicesOutput);
+                samplesForOversampling[i] = saturationOutput;
             }
-
+            
             var output = (float)Downsampler.Process(samplesForOversampling);
 
             left = output;
