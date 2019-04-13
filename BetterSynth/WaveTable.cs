@@ -52,6 +52,20 @@ namespace BetterSynth
             CalculateCoefficients();
         }
 
+        protected WaveTable(float[] samples, int wavesAmount, int waveSamplesAmount)
+        {
+            this.samples = samples;
+            this.wavesAmount = wavesAmount;
+            this.waveSamplesAmount = waveSamplesAmount;
+
+            CalculateCoefficients();
+        }
+
+        public WaveTable Clone()
+        {
+            return new WaveTable(samples, wavesAmount, waveSamplesAmount);
+        }
+
         public float Position
         {
             get => position;

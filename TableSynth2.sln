@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterSynth", "BetterSynth\BetterSynth.csproj", "{531F81D2-E41D-4F0E-886E-B1418853A827}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "почему рот в говне", "почему рот в говне\почему рот в говне.csproj", "{110CAB37-CC83-4C0F-9FA5-384BD88B2740}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,18 +25,6 @@ Global
 		{531F81D2-E41D-4F0E-886E-B1418853A827}.Release|x64.Build.0 = Release|x64
 		{531F81D2-E41D-4F0E-886E-B1418853A827}.Release|x86.ActiveCfg = Release|x86
 		{531F81D2-E41D-4F0E-886E-B1418853A827}.Release|x86.Build.0 = Release|x86
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|x64.Build.0 = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Debug|x86.Build.0 = Debug|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|Any CPU.Build.0 = Release|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|x64.ActiveCfg = Release|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|x64.Build.0 = Release|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|x86.ActiveCfg = Release|Any CPU
-		{110CAB37-CC83-4C0F-9FA5-384BD88B2740}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

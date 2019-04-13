@@ -164,12 +164,16 @@ namespace BetterSynth
 
         public float Process()
         {
+            OscAManager.Process();
+            OscBManager.Process();
+            OscAVolumeEnvelopeManager.Process();
+            OscBVolumeEnvelopeManager.Process();
+
             float sum = 0;
 
-            foreach (var voice in voicesPool)
-                if (voice.IsActive)
-                    sum += voice.Process();
-
+            foreach (var voice in usedVoices.ToArray())
+                sum += voice.Process();
+            
             return sum;
         }
     }

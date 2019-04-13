@@ -100,7 +100,7 @@ namespace BetterSynth
 
         private void SetCutoff(float value)
         {
-            cutoffMultiplier = (float)Math.Pow(2, 13 * value);
+            cutoffMultiplier = (float)Math.Pow(2, 13 * value) / 4;
 
             foreach (var filter in filters)
                 filter.CutoffMultiplier = cutoffMultiplier;

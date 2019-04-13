@@ -12,9 +12,9 @@ namespace BetterSynth
         private float sustainLevel;
         private float releaseTime;
         private float attackCurve;
-        private float attackTargetRatio;
+        private double attackTargetRatio;
         private float decayReleaseCurve;
-        private float decayReleaseTargetRatio;
+        private double decayReleaseTargetRatio;
         private float amplitude;
 
         public Envelope(Plugin plugin)
@@ -86,7 +86,7 @@ namespace BetterSynth
             set
             {
                 attackCurve = value;
-                attackTargetRatio = 0.001f * ((float)Math.Exp(12 * (0.05f + 0.95f * attackCurve)) - 1);
+                attackTargetRatio = 0.001 * (Math.Exp(12 * (0.05f + 0.95f * attackCurve)) - 1);
                 envelope.SetAttackTargetRatio(attackTargetRatio);
             }
         }
@@ -97,7 +97,8 @@ namespace BetterSynth
             set
             {
                 decayReleaseCurve = value;
-                decayReleaseTargetRatio = CalculateTargetRatio(attackCurve);
+                decayReleaseTargetRatio = 
+                    0.001 * (Math.Exp(12 * (0.0005 + 0.9995 * decayReleaseCurve)) - 1);
                 envelope.SetDecayReleaseTargetRatio(decayReleaseTargetRatio);
             }
         }
@@ -108,13 +109,13 @@ namespace BetterSynth
             set => amplitude = value;
         }
 
-        private float CalculateTargetRatio(float curve) =>
-            0.001f * ((float)Math.Exp(12 * (0.0005f + 0.9995f * curve)) - 1);
-
         public void TriggerAttack() => envelope.TriggerAttack();
 
         public void TriggerRelease() => envelope.TriggerRelease();
 
-        public float Process() => (float)envelope.Process() * amplitude;
+        public float Process()
+        {
+            return (float)envelope.Process() * amplitude;
+        }
     }
 }

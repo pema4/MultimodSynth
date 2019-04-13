@@ -27,6 +27,8 @@ namespace BetterSynth
             int minValue = 0,
             int maxValue = 1,
             float defaultValue = 0,
+            float smallStepFloat = 0,
+            bool canBeAutomated = true,
             Action<float> valueChangedHandler = null)
         {
             var parameterInfo = new VstParameterInfo()
@@ -38,6 +40,8 @@ namespace BetterSynth
                 MinInteger = minValue,
                 MaxInteger = maxValue,
                 DefaultValue = defaultValue,
+                CanBeAutomated = canBeAutomated,
+                SmallStepFloat = smallStepFloat,
             };
 
             VstParameterNormalizationInfo.AttachTo(parameterInfo);

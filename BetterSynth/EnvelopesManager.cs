@@ -1,4 +1,5 @@
 ﻿using Jacobi.Vst.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace BetterSynth
@@ -12,6 +13,9 @@ namespace BetterSynth
         private List<Envelope> envelopes;
         private float sustainLevel;
         private float envelopeAmplitude;
+        private float envelopeAmplitudeTarget;
+        private bool isEnvelopeAmplitudeChanging;
+        private OnePoleLowpassFilter envelopeAmplitudeFilter = new OnePoleLowpassFilter();
         private float decayTime;
         private float attackTime;
         private float releaseTime;
@@ -29,7 +33,7 @@ namespace BetterSynth
         public Envelope CreateNewEnvelope()
         {
             var envelope = new Envelope(plugin);
-            envelope.Amplitude = envelopeAmplitude;
+            envelope.Amplitude = envelopeAmplitudeTarget;
             envelope.AttackTime = attackTime;
             envelope.DecayTime = decayTime;
             envelope.SustainLevel = sustainLevel;
@@ -112,7 +116,6 @@ namespace BetterSynth
                 envelope.AttackTime = attackTime;
         }
 
-
         private void SetDecayTime(float value)
         {
             decayTime = value * MaximumTime;
@@ -155,10 +158,27 @@ namespace BetterSynth
 
         private void SetEnvelopeAmplitude(float value)
         {
-            envelopeAmplitude = value;
+            envelopeAmplitudeTarget = value;
+            isEnvelopeAmplitudeChanging = true;
+        }
 
-            foreach (var envelope in envelopes)
-                envelope.Amplitude = value;
+        private void UpdateEnvelopeAmplitude()
+        {
+            var newValue = envelopeAmplitudeFilter.Process(envelopeAmplitudeTarget);
+            if (newValue != envelopeAmplitude)
+            {
+                envelopeAmplitude = newValue;
+                foreach (var envelope in envelopes)
+                    envelope.Amplitude = envelopeAmplitude;
+            }
+            else
+                isEnvelopeAmplitudeChanging = false;
+        }
+
+        public void Process()
+        {
+            if (isEnvelopeAmplitudeChanging)
+                UpdateEnvelopeAmplitude();
         }
     }
 }
