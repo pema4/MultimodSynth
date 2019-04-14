@@ -163,8 +163,7 @@
             0.000008335743784466808,   0.000002944251445679728,   -8.350977788871221e-7,     -0.000003024682318617163,
             -0.000003857741139769582,  -0.0000036908168209737206, -0.0000029200756801788613,
         };
-
-        private Plugin plugin;
+        
         private double[] coefficients;
         private double[] buffer;
         private int currBufferIndex = 0;

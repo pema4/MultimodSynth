@@ -10,7 +10,7 @@ namespace BetterSynth
     /// </summary>
     class DCBlocker : AudioComponent
     {
-        private double DefaultExp = 0.00079777080867193622;
+        private double DefaultExp = 7.9597372547769154E-05;
         private const float BaseSampleRate = 441000f;
         private float xm1, ym1;
         private float r;
@@ -26,11 +26,9 @@ namespace BetterSynth
 
         protected override void OnSampleRateChanged(float newSampleRate)
         {
-            var ratio = newSampleRate / BaseSampleRate;
+            var ratio = BaseSampleRate / newSampleRate;
             r = (float)Math.Exp(-2 * Math.PI * DefaultExp * ratio);
             normalizationCoeff = (1 + r) / 2;
-            xm1 = 0;
-            ym1 = 0;
         }
     }
 }

@@ -153,7 +153,7 @@ namespace BetterSynth
         {
             flavour = value;
             softClipper.Treshold = 1 - value;
-            bitCrusher.Bits = 4 * (float)Math.Pow(1 << 13, 1 - value);
+            bitCrusher.Bits = (float)Math.Pow(1 << 16, 1 - value);
             sampleRateReductor.HoldTime = (float)Math.Pow(44100, 1 - value);
         }
 
@@ -193,36 +193,37 @@ namespace BetterSynth
             if (isAmpChanging)
                 UpdateAmp();
 
-            //input =  amp * lowPass.Process(input);
-            input = amp * input;
-            float distortedSample;
+            input =  amp * lowPass.Process(input);
+            float output = 0;
             switch (DistType)
             {
                 case DistortionType.AbsClipping:
-                    distortedSample = absClipper.Process(input + dcOffset);
+                    var distortedSample = absClipper.Process(input + dcOffset);
+                    output = dcBlocker.Process(distortedSample);
                     break;
 
                 case DistortionType.BitCrush:
-                    distortedSample = bitCrusher.Process(input + dcOffset);
+                    output = bitCrusher.Process(input + dcOffset);
                     break;
 
                 case DistortionType.CubicClipping:
                     distortedSample = cubicClipper.Process(input + dcOffset);
+                    output = dcBlocker.Process(distortedSample);
                     break;
 
                 case DistortionType.SoftClipping:
                     distortedSample = softClipper.Process(input + dcOffset);
+                    output = dcBlocker.Process(distortedSample);
                     break;
 
                 case DistortionType.SampleRateReduction:
-                    distortedSample = sampleRateReductor.Process(input + dcOffset);
+                    output = sampleRateReductor.Process(input + dcOffset);
                     break;
 
                 default:
                     return input;
             }
-
-            var output = dcBlocker.Process(distortedSample);
+            
             return dryCoeff * input + wetCoeff * output;
         }
 

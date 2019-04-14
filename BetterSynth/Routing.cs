@@ -53,7 +53,7 @@ namespace BetterSynth
             if (newOrder != Downsampler.Order)
             {
                 Downsampler.Order = newOrder;
-                VoicesManager.SampleRate = newOrder * SampleRate;
+                UpdateSampleRates();
             }
         }
 
@@ -86,7 +86,12 @@ namespace BetterSynth
 
         protected override void OnSampleRateChanged(float newSampleRate)
         {
-            var scaledSampleRate = newSampleRate * Downsampler.Order;
+            UpdateSampleRates();
+        }
+
+        private void UpdateSampleRates()
+        {
+            var scaledSampleRate = SampleRate * Downsampler.Order;
             VoicesManager.SampleRate = scaledSampleRate;
             Distortion.SampleRate = scaledSampleRate;
         }
