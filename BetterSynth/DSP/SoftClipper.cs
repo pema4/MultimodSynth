@@ -31,7 +31,7 @@
                 return normalizationCoeff * (-treshold + temp / (1 + temp * temp / denominator));
             }
             else if (input < treshold)
-                return input;
+                return normalizationCoeff * input;
             else if (input < 1)
             {
                 var temp = input - treshold;

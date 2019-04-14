@@ -143,7 +143,7 @@ namespace BetterSynth
                 DistType = DistortionType.SoftClipping;
             else if (value < 4)
                 DistType = DistortionType.CubicClipping;
-            else if (value < 4)
+            else if (value < 5)
                 DistType = DistortionType.BitCrush;
             else
                 DistType = DistortionType.SampleRateReduction;
@@ -193,7 +193,8 @@ namespace BetterSynth
             if (isAmpChanging)
                 UpdateAmp();
 
-            input =  amp * lowPass.Process(input);
+            //input =  amp * lowPass.Process(input);
+            input = amp * input;
             float distortedSample;
             switch (DistType)
             {
@@ -227,6 +228,7 @@ namespace BetterSynth
 
         protected override void OnSampleRateChanged(float newSampleRate)
         {
+            dcBlocker.SampleRate = newSampleRate;
             lowPass.SampleRate = newSampleRate;
             sampleRateReductor.SampleRate = newSampleRate;
         }
