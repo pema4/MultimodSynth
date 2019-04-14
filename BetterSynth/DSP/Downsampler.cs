@@ -1,6 +1,6 @@
 ﻿namespace BetterSynth
 {
-    class Downsampler : ManagerOfManagers
+    class Downsampler : AudioComponent
     {
         public static double[] X2OversamplingCoefficients = new[]
         {
@@ -170,9 +170,8 @@
         private int currBufferIndex = 0;
         private int order;
 
-        public Downsampler(Plugin plugin)
+        public Downsampler()
         {
-            this.plugin = plugin;
         }
 
         public int Order

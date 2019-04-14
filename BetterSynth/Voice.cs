@@ -11,9 +11,8 @@ namespace BetterSynth
         AmplitudeModulationB,
     }
 
-    class Voice
+    class Voice : AudioComponent
     {
-        private Plugin plugin;
         private Oscillator oscA;
         private Oscillator oscB;
         private Filter filter;
@@ -21,7 +20,6 @@ namespace BetterSynth
         private Envelope envB;
         private Envelope envFilter;
         private float noteVolume;
-        private float sampleRate;
         private float fmAmountMultiplier;
 
         public Voice(
@@ -33,7 +31,6 @@ namespace BetterSynth
             Envelope envB,
             Envelope envFilter)
         {
-            this.plugin = plugin;
             this.oscA = oscA;
             this.oscB = oscB;
             this.filter = filter;
@@ -47,25 +44,6 @@ namespace BetterSynth
         public MidiNote Note { get; private set; }
 
         public ModulationType ModulationType { get; set; }
-
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    fmAmountMultiplier = 5000 / SampleRate;
-                    oscA.SampleRate = sampleRate;
-                    oscB.SampleRate = sampleRate;
-                    filter.SampleRate = sampleRate;
-                    envA.SampleRate = sampleRate;
-                    envB.SampleRate = sampleRate;
-                    envFilter.SampleRate = sampleRate;
-                }
-            }
-        }
 
         public void PlayNote(MidiNote note)
         {
@@ -174,12 +152,23 @@ namespace BetterSynth
             }
 
             var filterEnvOut = envFilter.Process();
-            return filter.Process(oscMix, filterEnvOut);
+            return noteVolume * filter.Process(oscMix, filterEnvOut);
         }
 
         public event EventHandler SoundStop;
 
         private void OnSoundStop() =>
             SoundStop?.Invoke(this, new EventArgs());
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            fmAmountMultiplier = 5000 / SampleRate;
+            oscA.SampleRate = newSampleRate;
+            oscB.SampleRate = newSampleRate;
+            filter.SampleRate = newSampleRate;
+            envA.SampleRate = newSampleRate;
+            envB.SampleRate = newSampleRate;
+            envFilter.SampleRate = newSampleRate;
+        }
     }
 }

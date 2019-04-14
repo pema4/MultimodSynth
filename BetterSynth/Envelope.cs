@@ -2,11 +2,9 @@
 
 namespace BetterSynth
 {
-    class Envelope : ManagerOfManagers
+    class Envelope : AudioComponent
     {
-        private Plugin plugin;
         private AdsrEnvelope envelope;
-        private float sampleRate;
         private float attackTime;
         private float decayTime;
         private float sustainLevel;
@@ -17,28 +15,12 @@ namespace BetterSynth
         private double decayReleaseTargetRatio;
         private float amplitude;
 
-        public Envelope(Plugin plugin)
+        public Envelope()
         {
-            this.plugin = plugin;
             envelope = new AdsrEnvelope();
         }
 
         public bool IsActive => envelope.State != AdsrEnvelopeState.Idle;
-
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    AttackTime = attackTime;
-                    DecayTime = decayTime;
-                    ReleaseTime = releaseTime;
-                }
-            }
-        }
 
         public float AttackTime
         {
@@ -46,7 +28,7 @@ namespace BetterSynth
             set
             {
                 attackTime = value;
-                envelope.SetAttackRate(attackTime * sampleRate);
+                envelope.SetAttackRate(attackTime * SampleRate);
             }
         }
 
@@ -56,7 +38,7 @@ namespace BetterSynth
             set
             {
                 decayTime = value;
-                envelope.SetDecayRate(decayTime * sampleRate);
+                envelope.SetDecayRate(decayTime * SampleRate);
             }
         }
 
@@ -76,7 +58,7 @@ namespace BetterSynth
             set
             {
                 releaseTime = value;
-                envelope.SetReleaseRate(releaseTime * sampleRate);
+                envelope.SetReleaseRate(releaseTime * SampleRate);
             }
         }
 
@@ -116,6 +98,13 @@ namespace BetterSynth
         public float Process()
         {
             return (float)envelope.Process() * amplitude;
+        }
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            AttackTime = attackTime;
+            DecayTime = decayTime;
+            ReleaseTime = releaseTime;
         }
     }
 }

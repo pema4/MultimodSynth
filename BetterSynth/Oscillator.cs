@@ -1,35 +1,21 @@
 ﻿namespace BetterSynth
 {
-    class Oscillator
+    class Oscillator : AudioComponent
     {
-        private Plugin plugin;
         private float noteFrequency;
         private float overallFrequency;
         private float phaseIncrement;
-        public float sampleRate;
         private float pitchMultiplier;
-        private float phaseOffset;
+        private float phasor;
 
-        public Oscillator(Plugin plugin)
+        public Oscillator()
         {
-            this.plugin = plugin;
-
-            PitchMultiplier = 1;
-
-            plugin.Opened += (sender, e) =>
-            {
-                SampleRate = plugin.AudioProcessor.SampleRate;
-            };
+            // PitchMultiplier = 1;
         }
 
-        public float SampleRate
+        protected override void OnSampleRateChanged(float newSampleRate)
         {
-            get => sampleRate;
-            set
-            {
-                sampleRate = value;
-                phaseIncrement = overallFrequency / sampleRate;
-            }
+            phaseIncrement = overallFrequency / newSampleRate;
         }
 
         public WaveTable WaveTable { get; set; }
@@ -40,8 +26,7 @@
             set
             {
                 noteFrequency = value;
-                overallFrequency = noteFrequency * pitchMultiplier;
-                phaseIncrement = overallFrequency / sampleRate;
+                UpdateCoefficients();
             }
         }
 
@@ -51,28 +36,33 @@
             set
             {
                 pitchMultiplier = value;
-                overallFrequency = noteFrequency * pitchMultiplier;
-                phaseIncrement = overallFrequency / sampleRate;
+                UpdateCoefficients();
             }
+        }
+
+        private void UpdateCoefficients()
+        {
+            overallFrequency = noteFrequency * pitchMultiplier;
+            phaseIncrement = overallFrequency / SampleRate;
         }
 
         public float Process(float phaseModulation = 0)
         {
-            float output = WaveTable.Process(phaseOffset);
+            float output = WaveTable.Process(phasor);
 
-            phaseOffset = phaseOffset + phaseIncrement + phaseModulation;
-            if (phaseOffset >= 2)
-                phaseOffset -= 2;
-            else if (phaseOffset >= 1)
-                phaseOffset -= 1;
-            else if (phaseOffset < -1)
-                phaseOffset += 2;
-            else if (phaseOffset < 0)
-                phaseOffset += 1;
+            phasor = phasor + phaseIncrement + phaseModulation;
+            if (phasor >= 2)
+                phasor -= 2;
+            else if (phasor >= 1)
+                phasor -= 1;
+            else if (phasor < -1)
+                phasor += 2;
+            else if (phasor < 0)
+                phasor += 1;
 
             return output;
         }
 
-        public void ResetPhase() => phaseOffset = 0;
+        public void ResetPhase() => phasor = 0;
     }
 }

@@ -6,18 +6,17 @@ namespace BetterSynth
 {
     class ParameterFactory
     {
-        private VstParameterInfoCollection parameterInfosCollection;
-        private VstParameterCategory category;
+        private PluginPrograms programs;
+        private VstParameterCategory parameterCategory;
+        private string namePrefix;
 
-        public ParameterFactory(Plugin plugin, string categoryName)
+        public ParameterFactory(Plugin plugin, string category = "", string namePrefix = "")
         {
-            var programs = plugin.Programs;
-            parameterInfosCollection = programs.ParameterInfos;
-            category = new VstParameterCategory() { Name = categoryName };
-            if (programs.ParameterCategories.All(x => x.Name != categoryName))
-            {
-                programs.ParameterCategories.Add(category);
-            }
+            programs = plugin.Programs;
+            this.namePrefix = namePrefix;
+            parameterCategory = new VstParameterCategory() { Name = category };
+            if (programs.ParameterCategories.All(x => x.Name != category))
+                programs.ParameterCategories.Add(parameterCategory);
         }
 
         public VstParameterManager CreateParameterManager(
@@ -27,42 +26,29 @@ namespace BetterSynth
             int minValue = 0,
             int maxValue = 1,
             float defaultValue = 0,
-            float stepFloat = 0,
-            int stepInteger = 0,
-            float largeStepFloat = 0,
-            int largeStepInteger = 0,
             bool canBeAutomated = true,
             Action<float> valueChangedHandler = null)
         {
             var parameterInfo = new VstParameterInfo()
             {
-                Category = category,
-                Name = name,
+                Category = parameterCategory,
+                Name = namePrefix + name,
                 Label = label,
                 ShortLabel = shortLabel,
                 MinInteger = minValue,
                 MaxInteger = maxValue,
                 DefaultValue = defaultValue,
                 CanBeAutomated = canBeAutomated,
-                StepFloat = stepFloat,
-                StepInteger = stepInteger,
-                LargeStepFloat = largeStepFloat,
-                LargeStepInteger = largeStepInteger
             };
-
             VstParameterNormalizationInfo.AttachTo(parameterInfo);
-
-            parameterInfosCollection.Add(parameterInfo);
-
+            programs.ParameterInfos.Add(parameterInfo);
             var manager = new VstParameterManager(parameterInfo);
-
             if (valueChangedHandler != null)
                 manager.PropertyChanged += (sender, e) =>
                 {
                     if (e.PropertyName == "CurrentValue" || e.PropertyName == "ActiveParameter")
                         valueChangedHandler(manager.CurrentValue);
                 };
-
             return manager;
         }
     }

@@ -4,12 +4,10 @@ using System.Collections.Generic;
 
 namespace BetterSynth
 {
-    class EnvelopesManager : ManagerOfManagers
+    class EnvelopesManager : AudioComponentWithParameters
     {
-        private const float MaximumTime = 10f;
-
-        private Plugin plugin;
-        private string parameterPrefix;
+        private const int MaximumTime = 10;
+        
         private List<Envelope> envelopes;
         private float sustainLevel;
         private float envelopeAmplitude;
@@ -21,77 +19,6 @@ namespace BetterSynth
         private float releaseTime;
         private float attackCurve;
         private float decayReleaseCurve;
-
-        public EnvelopesManager(Plugin plugin, string parameterPrefix = "E")
-        {
-            this.plugin = plugin;
-            this.parameterPrefix = parameterPrefix;
-            envelopes = new List<Envelope>();
-            InitializeParameters();
-        }
-
-        public Envelope CreateNewEnvelope()
-        {
-            var envelope = new Envelope(plugin);
-            envelope.Amplitude = envelopeAmplitudeTarget;
-            envelope.AttackTime = attackTime;
-            envelope.DecayTime = decayTime;
-            envelope.SustainLevel = sustainLevel;
-            envelope.ReleaseTime = releaseTime;
-            envelope.AttackCurve = attackCurve;
-            envelope.DecayReleaseCurve = decayReleaseCurve;
-
-            envelopes.Add(envelope);
-            return envelope;
-        }
-
-        public void RemoveEnvelope(Envelope envelope)
-        {
-            envelopes.Remove(envelope);
-        }
-
-        private void InitializeParameters()
-        {
-            var factory = new ParameterFactory(plugin, "envelopes");
-
-            AttackTimeManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_AT",
-                defaultValue: 0.001f,
-                valueChangedHandler: SetAttackTime);
-            CreateRedirection(AttackTimeManager, nameof(AttackTimeManager));
-
-            DecayTimeManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_DT",
-                valueChangedHandler: SetDecayTime);
-            CreateRedirection(DecayTimeManager, nameof(DecayTimeManager));
-
-            SustainLevelManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_SL",
-                defaultValue: 1,
-                valueChangedHandler: SetSustainLevel);
-            CreateRedirection(SustainLevelManager, nameof(SustainLevelManager));
-
-            ReleaseTimeManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_RT",
-                valueChangedHandler: SetReleaseTime);
-            CreateRedirection(ReleaseTimeManager, nameof(ReleaseTimeManager));
-
-            AttackCurveManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_AC",
-                valueChangedHandler: SetAttackCurve);
-            CreateRedirection(AttackCurveManager, nameof(AttackCurveManager));
-
-            DecayReleaseCurveManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_DRC",
-                valueChangedHandler: SetDecayReleaseCurve);
-            CreateRedirection(DecayReleaseCurveManager, nameof(DecayReleaseCurveManager));
-
-            EnvelopeAmplitudeManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_AMP",
-                defaultValue: 1f,
-                valueChangedHandler: SetEnvelopeAmplitude);
-            CreateRedirection(EnvelopeAmplitudeManager, nameof(EnvelopeAmplitudeManager));
-        }
 
         public VstParameterManager AttackTimeManager { get; private set; }
 
@@ -107,10 +34,64 @@ namespace BetterSynth
 
         public VstParameterManager EnvelopeAmplitudeManager { get; private set; }
 
+        public EnvelopesManager(
+            Plugin plugin,
+            string parameterPrefix = "E",
+            string parameterCategory = "env")
+            : base(plugin, parameterPrefix, parameterCategory)
+        {
+            envelopes = new List<Envelope>();
+            InitializeParameters();
+        }
+
+        protected override void InitializeParameters(ParameterFactory factory)
+        {
+            AttackTimeManager = factory.CreateParameterManager(
+                name: "AT",
+                maxValue: MaximumTime,
+                defaultValue: 0.01f,
+                valueChangedHandler: SetAttackTime);
+            CreateRedirection(AttackTimeManager, nameof(AttackTimeManager));
+
+            DecayTimeManager = factory.CreateParameterManager(
+                name: "DT",
+                maxValue: MaximumTime,
+                valueChangedHandler: SetDecayTime);
+            CreateRedirection(DecayTimeManager, nameof(DecayTimeManager));
+
+            SustainLevelManager = factory.CreateParameterManager(
+                name: "SL",
+                defaultValue: 1,
+                valueChangedHandler: SetSustainLevel);
+            CreateRedirection(SustainLevelManager, nameof(SustainLevelManager));
+
+            ReleaseTimeManager = factory.CreateParameterManager(
+                name: "RT",
+                maxValue: MaximumTime,
+                defaultValue: 0.01f,
+                valueChangedHandler: SetReleaseTime);
+            CreateRedirection(ReleaseTimeManager, nameof(ReleaseTimeManager));
+
+            AttackCurveManager = factory.CreateParameterManager(
+                name: "AC",
+                valueChangedHandler: SetAttackCurve);
+            CreateRedirection(AttackCurveManager, nameof(AttackCurveManager));
+
+            DecayReleaseCurveManager = factory.CreateParameterManager(
+                name: "DRC",
+                valueChangedHandler: SetDecayReleaseCurve);
+            CreateRedirection(DecayReleaseCurveManager, nameof(DecayReleaseCurveManager));
+
+            EnvelopeAmplitudeManager = factory.CreateParameterManager(
+                name: "AMP",
+                defaultValue: 1f,
+                valueChangedHandler: SetEnvelopeAmplitude);
+            CreateRedirection(EnvelopeAmplitudeManager, nameof(EnvelopeAmplitudeManager));
+        }
         
         private void SetAttackTime(float value)
         {
-            attackTime = value * MaximumTime;
+            attackTime = value;
             
             foreach (var envelope in envelopes)
                 envelope.AttackTime = attackTime;
@@ -118,7 +99,7 @@ namespace BetterSynth
 
         private void SetDecayTime(float value)
         {
-            decayTime = value * MaximumTime;
+            decayTime = value;
 
             foreach (var envelope in envelopes)
                 envelope.DecayTime = decayTime;
@@ -134,7 +115,7 @@ namespace BetterSynth
 
         private void SetReleaseTime(float value)
         {
-            releaseTime = value * MaximumTime;
+            releaseTime = value;
 
             foreach (var envelope in envelopes)
                 envelope.ReleaseTime = releaseTime;
@@ -162,6 +143,27 @@ namespace BetterSynth
             isEnvelopeAmplitudeChanging = true;
         }
 
+        public Envelope CreateNewEnvelope()
+        {
+            var envelope = new Envelope()
+            {
+                Amplitude = envelopeAmplitudeTarget,
+                AttackTime = attackTime,
+                DecayTime = decayTime,
+                SustainLevel = sustainLevel,
+                ReleaseTime = releaseTime,
+                AttackCurve = attackCurve,
+                DecayReleaseCurve = decayReleaseCurve
+            };
+            envelopes.Add(envelope);
+            return envelope;
+        }
+
+        public void RemoveEnvelope(Envelope envelope)
+        {
+            envelopes.Remove(envelope);
+        }
+
         private void UpdateEnvelopeAmplitude()
         {
             var newValue = envelopeAmplitudeFilter.Process(envelopeAmplitudeTarget);
@@ -179,6 +181,12 @@ namespace BetterSynth
         {
             if (isEnvelopeAmplitudeChanging)
                 UpdateEnvelopeAmplitude();
+        }
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            foreach (var envelope in envelopes)
+                envelope.SampleRate = newSampleRate;
         }
     }
 }

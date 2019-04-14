@@ -2,50 +2,35 @@
 
 namespace BetterSynth
 {
-    internal class Routing : ManagerOfManagers
+    internal class Routing : AudioComponentWithParameters
     {
-        private Plugin plugin;
-        private float sampleRate;
-
         public VoicesManager VoicesManager { get; private set; }
 
         public Downsampler Downsampler { get; private set; }
 
-        public SaturationManager SaturationManager { get; private set; }
-
-        public float SampleRate
-        {
-            get => sampleRate;
-            set
-            {
-                if (sampleRate != value)
-                {
-                    sampleRate = value;
-                    VoicesManager.SampleRate = sampleRate * Downsampler.Order;
-                }
-            }
-        }
+        public DistortionManager Distortion { get; private set; }
 
         public VstParameterManager OversamplingOrderManager { get; private set; }
 
-        public Routing(Plugin plugin)
+        public Routing(
+            Plugin plugin,
+            string parameterPrefix = "M",
+            string parameterCategory = "master") 
+            : base(plugin, parameterPrefix, parameterCategory)
         {
-            this.plugin = plugin;
             VoicesManager = new VoicesManager(plugin, "V");
-            Downsampler = new Downsampler(plugin);
-            SaturationManager = new SaturationManager(plugin);
-
-            InitializeParameters();
+            Downsampler = new Downsampler();
+            Distortion = new DistortionManager(plugin);
 
             plugin.MidiProcessor.NoteOn += MidiProcessor_NoteOn;
             plugin.MidiProcessor.NoteOff += MidiProcessor_NoteOff;
             plugin.Opened += (sender, e) => SampleRate = plugin.AudioProcessor.SampleRate;
+
+            InitializeParameters();
         }
 
-        private void InitializeParameters()
+        protected override void InitializeParameters(ParameterFactory factory)
         {
-            var factory = new ParameterFactory(plugin, "oversampler");
-
             OversamplingOrderManager = factory.CreateParameterManager(
                 name: "OVERSMP",
                 valueChangedHandler: SetOversamplingOrder);
@@ -89,7 +74,7 @@ namespace BetterSynth
             for (int i = 0; i < Downsampler.Order; ++i)
             {
                 var voicesOutput = VoicesManager.Process();
-                var saturationOutput = SaturationManager.Process(voicesOutput);
+                var saturationOutput = Distortion.Process(voicesOutput);
                 samplesForOversampling[i] = saturationOutput;
             }
             
@@ -97,6 +82,13 @@ namespace BetterSynth
 
             left = output;
             right = output;
+        }
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            var scaledSampleRate = newSampleRate * Downsampler.Order;
+            VoicesManager.SampleRate = scaledSampleRate;
+            Distortion.SampleRate = scaledSampleRate;
         }
     }
 }

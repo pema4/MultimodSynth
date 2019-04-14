@@ -1,90 +1,26 @@
 ﻿using Jacobi.Vst.Framework;
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace BetterSynth
 {
-    internal class OscillatorsManager : ManagerOfManagers
+    internal class OscillatorsManager : AudioComponentWithParameters
     {
         const float MaximumTime = 10;
         
-        private Plugin plugin;
-        private string parameterPrefix;
-        private List<Oscillator> oscillators;
-        private float sampleRate;
-        private float pitchSemi;
-        private float pitchFine;
-        private float pitchMultiplierTarget;
-        private OnePoleLowpassFilter pitchMultiplierFilter = new OnePoleLowpassFilter();
-        private float waveTablePositionTarget;
-        private float waveTablePosition;
-        private OnePoleLowpassFilter waveTablePositionFilter = new OnePoleLowpassFilter();
-        private WaveTable waveTable;
-        private int waveTableIndex;
-        private float pitchMultiplier;
         private bool isPitchMultiplierChanging;
         private bool isWaveTablePositionChanging;
-
-        public OscillatorsManager(Plugin plugin, string parameterPrefix)
-        {
-            this.plugin = plugin;
-            this.parameterPrefix = parameterPrefix;
-            oscillators = new List<Oscillator>();
-            waveTable = Utilities.WaveTables[waveTableIndex].Clone();
-            InitializeParameters();
-
-            plugin.Opened += (sender, e) => sampleRate = plugin.AudioProcessor.SampleRate;
-        }
-
-        public Oscillator CreateNewOscillator()
-        {
-            var res = new Oscillator(plugin);
-
-            res.PitchMultiplier = pitchMultiplierTarget;
-            res.WaveTable = waveTable;
-
-            oscillators.Add(res);
-            return res;
-        }
-
-        public void RemoveOscillator(Oscillator oscillator)
-        {
-            if (oscillators.Contains(oscillator))
-                oscillators.Remove(oscillator);
-        }
-
-        private void InitializeParameters()
-        {
-            var factory = new ParameterFactory(plugin, "oscs");
-
-            PitchSemiManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_SEMI",
-                label: "Oct",
-                minValue: -36,
-                maxValue: 36,
-                defaultValue: 0,
-                valueChangedHandler: SetPitchSemi);
-            CreateRedirection(PitchSemiManager, nameof(PitchSemiManager));
-
-            PitchFineManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_FINE",
-                label: "semitones",
-                minValue: -100,
-                maxValue: 100,
-                defaultValue: 0,
-                valueChangedHandler: SetPitchFine);
-            CreateRedirection(PitchFineManager, nameof(PitchFineManager));
-
-            WaveTableManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_WT",
-                valueChangedHandler: SetWaveTable);
-            CreateRedirection(WaveTableManager, nameof(WaveTableManager));
-
-            WaveTablePositionManager = factory.CreateParameterManager(
-                name: parameterPrefix + "_WP",
-                valueChangedHandler: SetWaveTablePosition);
-            CreateRedirection(WaveTablePositionManager, nameof(WaveTablePositionManager));
-        }
+        private List<Oscillator> oscillators;
+        private float pitchFine;
+        private float pitchSemi;
+        private float pitchMultiplier;
+        private OnePoleLowpassFilter pitchMultiplierFilter = new OnePoleLowpassFilter();
+        private float pitchMultiplierTarget;
+        private WaveTable waveTable = Utilities.WaveTables[0];
+        private float waveTablePosition;
+        private OnePoleLowpassFilter waveTablePositionFilter = new OnePoleLowpassFilter();
+        private float waveTablePositionTarget;
 
         public VstParameterManager PitchSemiManager { get; private set; }
 
@@ -93,6 +29,47 @@ namespace BetterSynth
         public VstParameterManager WaveTableManager { get; private set; }
 
         public VstParameterManager WaveTablePositionManager { get; private set; }
+
+        public OscillatorsManager(
+            Plugin plugin,
+            string parameterPrefix,
+            string parameterCategory = "oscillators") :
+                base(plugin, parameterPrefix, parameterCategory)
+        {
+            oscillators = new List<Oscillator>();
+            InitializeParameters();
+        }
+
+        protected override void InitializeParameters(ParameterFactory factory)
+        {
+            PitchSemiManager = factory.CreateParameterManager(
+                name: "SEMI",
+                label: "Oct",
+                minValue: -36,
+                maxValue: 36,
+                defaultValue: 0,
+                valueChangedHandler: SetPitchSemi);
+            CreateRedirection(PitchSemiManager, nameof(PitchSemiManager));
+
+            PitchFineManager = factory.CreateParameterManager(
+                name: "FINE",
+                label: "semitones",
+                minValue: -100,
+                maxValue: 100,
+                defaultValue: 0,
+                valueChangedHandler: SetPitchFine);
+            CreateRedirection(PitchFineManager, nameof(PitchFineManager));
+
+            WaveTableManager = factory.CreateParameterManager(
+                name: "WT",
+                valueChangedHandler: SetWaveTable);
+            CreateRedirection(WaveTableManager, nameof(WaveTableManager));
+
+            WaveTablePositionManager = factory.CreateParameterManager(
+                name: "WP",
+                valueChangedHandler: SetWaveTablePosition);
+            CreateRedirection(WaveTablePositionManager, nameof(WaveTablePositionManager));
+        }
 
         private void SetPitchSemi(float value)
         {
@@ -110,19 +87,21 @@ namespace BetterSynth
 
         private void SetWaveTable(float value)
         {
-            int index = (int)(value * Utilities.WaveTables.Length);
-            if (index == Utilities.WaveTables.Length)
+            var waveTables = Utilities.WaveTables;
+
+            int index = (int)(value * waveTables.Length);
+            if (index == waveTables.Length)
                 index -= 1;
+            var newWaveTable = waveTables[index];
 
-            if (index != waveTableIndex)
+            if (waveTable != newWaveTable)
             {
-                waveTableIndex = index;
-
-                waveTable = Utilities.WaveTables[index].Clone();
-                waveTable.Position = waveTablePositionTarget;
-
+                waveTable = newWaveTable;
                 foreach (var oscillator in oscillators)
-                    oscillator.WaveTable = waveTable;
+                {
+                    oscillator.WaveTable = waveTable.Clone();
+                    oscillator.WaveTable.Position = waveTablePosition;
+                }
             }
         }
 
@@ -132,13 +111,30 @@ namespace BetterSynth
             isWaveTablePositionChanging = true;
         }
 
+        public Oscillator CreateNewOscillator()
+        {
+            var res = new Oscillator()
+            {
+                PitchMultiplier = pitchMultiplier,
+                WaveTable = waveTable.Clone(),
+            };
+            oscillators.Add(res);
+            return res;
+        }
+
+        public void RemoveOscillator(Oscillator oscillator)
+        {
+            oscillators.Remove(oscillator);
+        }
+
         private void UpdateWaveTablePosition()
         {
             var newValue = waveTablePositionFilter.Process(waveTablePositionTarget);
             if (newValue != waveTablePosition)
             {
                 waveTablePosition = newValue;
-                waveTable.Position = waveTablePosition;
+                foreach (var oscillator in oscillators)
+                    oscillator.WaveTable.Position = waveTablePosition;
             }
             else
                 isWaveTablePositionChanging = false;
