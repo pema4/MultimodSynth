@@ -7,12 +7,10 @@ namespace BetterSynth
     class FiltersManager : AudioComponentWithParameters
     {
         private float cutoffMultiplier;
-        private float cutoffMultiplierTarget;
-        private OnePoleLowpassFilter cutoffMultiplierFilter = new OnePoleLowpassFilter();
+        private ParameterFilter cutoffMultiplierFilter;
         private float curve;
         private List<Filter> filters;
         private SvfFilterType filterType;
-        private bool isCutoffMultiplierChanging;
         private float trackingCoeff;
 
         public VstParameterManager FilterTypeManager { get; private set; }
@@ -44,8 +42,9 @@ namespace BetterSynth
             CutoffManager = factory.CreateParameterManager(
                 name: "CUT",
                 defaultValue: 1,
-                valueChangedHandler: SetCutoff);
+                valueChangedHandler: SetCutoffMultiplierTarget);
             CreateRedirection(CutoffManager, nameof(CutoffManager));
+            cutoffMultiplierFilter = new ParameterFilter(UpdateCutoffMultiplier, 1);
 
             TrackingCoeffManager = factory.CreateParameterManager(
                 name: "TRK",
@@ -82,10 +81,16 @@ namespace BetterSynth
             }
         }
 
-        private void SetCutoff(float value)
+        private void SetCutoffMultiplierTarget(float value)
         {
-            cutoffMultiplierTarget = (float)Math.Pow(2, 13 * value) / 4;
-            isCutoffMultiplierChanging = true;
+            cutoffMultiplierFilter.SetTarget((float)Math.Pow(2, 13 * value) / 4);
+        }
+
+        private void UpdateCutoffMultiplier(float value)
+        {
+            cutoffMultiplier = value;
+            foreach (var filter in filters)
+                filter.CutoffMultiplier = cutoffMultiplier;
         }
 
         private void SetTrackingCoeff(float value)
@@ -121,23 +126,9 @@ namespace BetterSynth
             filters.Remove(filter);
         }
 
-        private void UpdateCutoffMultiplier()
-        {
-            var newValue = cutoffMultiplierFilter.Process(cutoffMultiplierTarget);
-            if (cutoffMultiplier != newValue)
-            {
-                cutoffMultiplier = newValue;
-                foreach (var filter in filters)
-                    filter.CutoffMultiplier = cutoffMultiplier;
-            }
-            else
-                isCutoffMultiplierChanging = false;
-        }
-
         public void Process()
         {
-            if (isCutoffMultiplierChanging)
-                UpdateCutoffMultiplier();
+            cutoffMultiplierFilter.Process();
         }
     }
 }

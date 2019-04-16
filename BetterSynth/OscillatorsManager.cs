@@ -9,18 +9,14 @@ namespace BetterSynth
     {
         const float MaximumTime = 10;
         
-        private bool isPitchMultiplierChanging;
-        private bool isWaveTablePositionChanging;
         private List<Oscillator> oscillators;
         private float pitchFine;
         private float pitchSemi;
         private float pitchMultiplier;
-        private OnePoleLowpassFilter pitchMultiplierFilter = new OnePoleLowpassFilter();
-        private float pitchMultiplierTarget;
+        private ParameterFilter pitchMultiplierFilter;
         private WaveTable waveTable = Utilities.WaveTables[0];
         private float waveTablePosition;
-        private OnePoleLowpassFilter waveTablePositionFilter = new OnePoleLowpassFilter();
-        private float waveTablePositionTarget;
+        private ParameterFilter waveTablePositionFilter;
 
         public VstParameterManager PitchSemiManager { get; private set; }
 
@@ -59,6 +55,7 @@ namespace BetterSynth
                 defaultValue: 0,
                 valueChangedHandler: SetPitchFine);
             CreateRedirection(PitchFineManager, nameof(PitchFineManager));
+            pitchMultiplierFilter = new ParameterFilter(UpdatePitchMultiplier, 0);
 
             WaveTableManager = factory.CreateParameterManager(
                 name: "WT",
@@ -69,20 +66,28 @@ namespace BetterSynth
                 name: "WP",
                 valueChangedHandler: SetWaveTablePosition);
             CreateRedirection(WaveTablePositionManager, nameof(WaveTablePositionManager));
+            waveTablePositionFilter = new ParameterFilter(UpdateWaveTablePosition, 0);
         }
 
         private void SetPitchSemi(float value)
         {
             pitchSemi = (float)Math.Pow(2, value / 12);
-            pitchMultiplierTarget = pitchSemi * pitchFine;
-            isPitchMultiplierChanging = true;
+            var target = pitchSemi * pitchFine;
+            pitchMultiplierFilter.SetTarget(target);
         }
 
         private void SetPitchFine(float value)
         {
             pitchFine = (float)Math.Pow(2, value / 1200);
-            pitchMultiplierTarget = pitchSemi * pitchFine;
-            isPitchMultiplierChanging = true;
+            var target = pitchSemi * pitchFine;
+            pitchMultiplierFilter.SetTarget(target);
+        }
+
+        private void UpdatePitchMultiplier(float value)
+        {
+            pitchMultiplier = value;
+            foreach (var oscillator in oscillators)
+                oscillator.PitchMultiplier = pitchMultiplier;
         }
 
         private void SetWaveTable(float value)
@@ -107,8 +112,14 @@ namespace BetterSynth
 
         private void SetWaveTablePosition(float value)
         {
-            waveTablePositionTarget = value;
-            isWaveTablePositionChanging = true;
+            waveTablePositionFilter.SetTarget(value);
+        }
+
+        private void UpdateWaveTablePosition(float value)
+        {
+            waveTablePosition = value;
+            foreach (var oscillator in oscillators)
+                oscillator.WaveTable.Position = waveTablePosition;
         }
 
         public Oscillator CreateNewOscillator()
@@ -116,8 +127,9 @@ namespace BetterSynth
             var res = new Oscillator()
             {
                 PitchMultiplier = pitchMultiplier,
-                WaveTable = waveTable.Clone(),
+                WaveTable = waveTable.Clone()
             };
+            res.WaveTable.Position = waveTablePosition;
             oscillators.Add(res);
             return res;
         }
@@ -127,39 +139,10 @@ namespace BetterSynth
             oscillators.Remove(oscillator);
         }
 
-        private void UpdateWaveTablePosition()
-        {
-            var newValue = waveTablePositionFilter.Process(waveTablePositionTarget);
-            if (newValue != waveTablePosition)
-            {
-                waveTablePosition = newValue;
-                foreach (var oscillator in oscillators)
-                    oscillator.WaveTable.Position = waveTablePosition;
-            }
-            else
-                isWaveTablePositionChanging = false;
-        }
-
-        private void UpdatePitchMultiplier()
-        {
-            var newValue = pitchMultiplierFilter.Process(pitchMultiplierTarget);
-            if (newValue != pitchMultiplier)
-            {
-                pitchMultiplier = newValue;
-                foreach (var oscillator in oscillators)
-                    oscillator.PitchMultiplier = pitchMultiplier;
-            }
-            else
-                isPitchMultiplierChanging = false;
-        }
-
         public void Process()
         {
-            if (isPitchMultiplierChanging)
-                UpdatePitchMultiplier();
-
-            if (isWaveTablePositionChanging)
-                UpdateWaveTablePosition();
+            pitchMultiplierFilter.Process();
+            waveTablePositionFilter.Process();
         }
     }
 }

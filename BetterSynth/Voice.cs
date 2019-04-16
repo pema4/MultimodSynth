@@ -147,7 +147,7 @@ namespace BetterSynth
 
                 default:
                     IsActive = false;
-                    OnSoundStop();
+                    //OnSoundStop();
                     return 0;
             }
 

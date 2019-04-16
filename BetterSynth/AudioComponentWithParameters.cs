@@ -6,9 +6,10 @@ namespace BetterSynth
 {
     abstract class AudioComponentWithParameters : AudioComponent, INotifyPropertyChanged
     {
+        private string parameterPrefix;
+        private string parameterCategory;
+
         public Plugin Plugin { get; }
-        public string ParameterPrefix { get; }
-        public string ParameterCategory { get; }
 
         public AudioComponentWithParameters(
             Plugin plugin,
@@ -16,15 +17,15 @@ namespace BetterSynth
             string parameterCategory)
         {
             Plugin = plugin;
-            ParameterPrefix = parameterPrefix;
-            ParameterCategory = parameterCategory;
+            this.parameterPrefix = parameterPrefix;
+            this.parameterCategory = parameterCategory;
         }
 
         protected abstract void InitializeParameters(ParameterFactory factory);
 
         protected void InitializeParameters()
         {
-            var factory = new ParameterFactory(Plugin, ParameterCategory, ParameterPrefix);
+            var factory = new ParameterFactory(Plugin, parameterCategory, parameterPrefix);
             InitializeParameters(factory);
         }
 

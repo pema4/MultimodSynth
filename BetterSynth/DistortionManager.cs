@@ -8,11 +8,10 @@ namespace BetterSynth
 {
     /// <summary>
     /// http://www.musicdsp.org/en/latest/Effects/42-soft-saturation.html
-    /// 
     /// </summary>
     class DistortionManager : AudioComponentWithParameters
     {
-        public enum DistortionType
+        public enum DistortionMode
         {
             None,
             AbsClipping,
@@ -25,13 +24,14 @@ namespace BetterSynth
         private float flavour;
         private float wetCoeff;
         private float dryCoeff = 1;
-        private OnePoleLowpassFilter ampFilter = new OnePoleLowpassFilter();
+        private ParameterFilter ampFilter;
+        private ParameterFilter mixFilter;
+        private ParameterFilter asymmetryFilter;
         private float dcOffset;
-        private DistortionType distType;
-        private float ampTarget;
-        private bool isAmpChanging;
+        private DistortionMode mode;
         private float amp = 1;
         private DCBlocker dcBlocker;
+        private DCBlocker slowerDcBlocker;
         private SvfFilter lowPass;
         private SoftClipper softClipper;
         private AbsClipper absClipper;
@@ -39,20 +39,20 @@ namespace BetterSynth
         private BitCrusher bitCrusher;
         private SampleRateReductor sampleRateReductor;
         
-        public DistortionType DistType
+        public DistortionMode Mode
         {
-            get => distType;
+            get => mode;
             set
             {
-                if (value != distType)
+                if (value != mode)
                 {
-                    distType = value;
-                    OnPropertyChanged(nameof(DistType));
+                    mode = value;
+                    OnPropertyChanged(nameof(Mode));
                 }
             }
         }
 
-        public VstParameterManager DistTypeManager { get; private set; }
+        public VstParameterManager ModeManager { get; private set; }
 
         public VstParameterManager FlavourManager { get; private set; }
 
@@ -71,6 +71,7 @@ namespace BetterSynth
             : base(plugin, parameterPrefix, parameterCategory)
         {
             dcBlocker = new DCBlocker();
+            slowerDcBlocker = new DCBlocker();
             lowPass = new SvfFilter(plugin)
             {
                 Cutoff = 20000,
@@ -89,16 +90,16 @@ namespace BetterSynth
 
         protected override void InitializeParameters(ParameterFactory factory)
         {
-            DistTypeManager = factory.CreateParameterManager(
+            ModeManager = factory.CreateParameterManager(
                 name: "TYPE",
                 minValue: 0,
                 maxValue: 6,
                 defaultValue: 0,
-                valueChangedHandler: SetDistType);
-            CreateRedirection(DistTypeManager, nameof(DistTypeManager));
+                valueChangedHandler: SetMode);
+            CreateRedirection(ModeManager, nameof(ModeManager));
 
             FlavourManager = factory.CreateParameterManager(
-                name: "AMT",
+                name: "FLAV",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetFlavour);
             CreateRedirection(FlavourManager, nameof(FlavourManager));
@@ -107,16 +108,18 @@ namespace BetterSynth
                 name: "ASYM",
                 minValue: -1,
                 maxValue: 1,
-                valueChangedHandler: SetAsymmetry);
+                valueChangedHandler: SetAsymmetryTarget);
             CreateRedirection(AsymmetryManager, nameof(AsymmetryManager));
+            asymmetryFilter = new ParameterFilter(UpdateAsymmetry, 0);
 
             AmpManager = factory.CreateParameterManager(
                 name: "AMP",
                 minValue: 0,
                 maxValue: 4,
                 defaultValue: 1,
-                valueChangedHandler: SetAmp);
+                valueChangedHandler: x => ampFilter.SetTarget(x));
             CreateRedirection(AmpManager, nameof(AmpManager));
+            ampFilter = new ParameterFilter(UpdateAmp, 1);
 
             LowPassCutoffManager = factory.CreateParameterManager(
                 name: "LP",
@@ -129,24 +132,25 @@ namespace BetterSynth
             MixManager = factory.CreateParameterManager(
                 name: "MIX",
                 defaultValue: 0,
-                valueChangedHandler: SetMix);
+                valueChangedHandler: x => mixFilter.SetTarget(x));
             CreateRedirection(MixManager, nameof(MixManager));
+            mixFilter = new ParameterFilter(UpdateMix, 0);
         }
 
-        private void SetDistType(float value)
+        private void SetMode(float value)
         {
             if (value < 1)
-                DistType = DistortionType.None;
+                Mode = DistortionMode.None;
             else if (value < 2)
-                DistType = DistortionType.AbsClipping;
+                Mode = DistortionMode.AbsClipping;
             else if (value < 3)
-                DistType = DistortionType.SoftClipping;
+                Mode = DistortionMode.SoftClipping;
             else if (value < 4)
-                DistType = DistortionType.CubicClipping;
+                Mode = DistortionMode.CubicClipping;
             else if (value < 5)
-                DistType = DistortionType.BitCrush;
+                Mode = DistortionMode.BitCrush;
             else
-                DistType = DistortionType.SampleRateReduction;
+                Mode = DistortionMode.SampleRateReduction;
         }
 
         private void SetFlavour(float value)
@@ -157,15 +161,14 @@ namespace BetterSynth
             sampleRateReductor.HoldTime = (float)Math.Pow(44100, 1 - value);
         }
 
-        private void SetAsymmetry(float value)
+        private void SetAsymmetryTarget(float value)
         {
-            dcOffset = value;
+            asymmetryFilter.SetTarget(value);
         }
 
-        private void SetAmp(float value)
+        private void UpdateAsymmetry(float value)
         {
-            ampTarget = value;
-            isAmpChanging = true;
+            dcOffset = value;
         }
 
         private void SetLowPassCutoff(float value)
@@ -173,50 +176,46 @@ namespace BetterSynth
             lowPass.Cutoff = value;
         }
 
-        private void SetMix(float value)
+        private void UpdateMix(float value)
         {
             wetCoeff = value;
             dryCoeff = 1 - value;
         }
 
-        private void UpdateAmp()
+        private void UpdateAmp(float value)
         {
-            var newValue = ampFilter.Process(ampTarget);
-            if (amp != newValue)
-                amp = newValue;
-            else
-                isAmpChanging = false;
+            amp = value;
         }
 
         public float Process(float input)
         {
-            if (isAmpChanging)
-                UpdateAmp();
+            ampFilter.Process();
+            mixFilter.Process();
 
             input =  amp * lowPass.Process(input);
             float output = 0;
-            switch (DistType)
+            switch (Mode)
             {
-                case DistortionType.AbsClipping:
+                case DistortionMode.AbsClipping:
                     var distortedSample = absClipper.Process(input + dcOffset);
                     output = dcBlocker.Process(distortedSample);
                     break;
 
-                case DistortionType.BitCrush:
+                case DistortionMode.BitCrush:
                     output = bitCrusher.Process(input + dcOffset);
                     break;
 
-                case DistortionType.CubicClipping:
+                case DistortionMode.CubicClipping:
                     distortedSample = cubicClipper.Process(input + dcOffset);
                     output = dcBlocker.Process(distortedSample);
                     break;
 
-                case DistortionType.SoftClipping:
+                case DistortionMode.SoftClipping:
                     distortedSample = softClipper.Process(input + dcOffset);
                     output = dcBlocker.Process(distortedSample);
                     break;
 
-                case DistortionType.SampleRateReduction:
+                case DistortionMode.SampleRateReduction:
                     output = sampleRateReductor.Process(input + dcOffset);
                     break;
 

@@ -10,7 +10,6 @@
 
         public Oscillator()
         {
-            // PitchMultiplier = 1;
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)

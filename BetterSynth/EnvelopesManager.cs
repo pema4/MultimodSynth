@@ -11,9 +11,7 @@ namespace BetterSynth
         private List<Envelope> envelopes;
         private float sustainLevel;
         private float envelopeAmplitude;
-        private float envelopeAmplitudeTarget;
-        private bool isEnvelopeAmplitudeChanging;
-        private OnePoleLowpassFilter envelopeAmplitudeFilter = new OnePoleLowpassFilter();
+        private ParameterFilter envelopeAmplitudeFilter;
         private float decayTime;
         private float attackTime;
         private float releaseTime;
@@ -85,8 +83,9 @@ namespace BetterSynth
             EnvelopeAmplitudeManager = factory.CreateParameterManager(
                 name: "AMP",
                 defaultValue: 1f,
-                valueChangedHandler: SetEnvelopeAmplitude);
+                valueChangedHandler: x => envelopeAmplitudeFilter.SetTarget(x));
             CreateRedirection(EnvelopeAmplitudeManager, nameof(EnvelopeAmplitudeManager));
+            envelopeAmplitudeFilter = new ParameterFilter(UpdateEnvelopeAmplitude, 1);
         }
         
         private void SetAttackTime(float value)
@@ -137,17 +136,18 @@ namespace BetterSynth
                 envelope.DecayReleaseCurve = value;
         }
 
-        private void SetEnvelopeAmplitude(float value)
+        private void UpdateEnvelopeAmplitude(float value)
         {
-            envelopeAmplitudeTarget = value;
-            isEnvelopeAmplitudeChanging = true;
+            envelopeAmplitude = value;
+            foreach (var envelope in envelopes)
+                envelope.Amplitude = envelopeAmplitude;
         }
 
         public Envelope CreateNewEnvelope()
         {
             var envelope = new Envelope()
             {
-                Amplitude = envelopeAmplitudeTarget,
+                Amplitude = envelopeAmplitude,
                 AttackTime = attackTime,
                 DecayTime = decayTime,
                 SustainLevel = sustainLevel,
@@ -163,24 +163,10 @@ namespace BetterSynth
         {
             envelopes.Remove(envelope);
         }
-
-        private void UpdateEnvelopeAmplitude()
-        {
-            var newValue = envelopeAmplitudeFilter.Process(envelopeAmplitudeTarget);
-            if (newValue != envelopeAmplitude)
-            {
-                envelopeAmplitude = newValue;
-                foreach (var envelope in envelopes)
-                    envelope.Amplitude = envelopeAmplitude;
-            }
-            else
-                isEnvelopeAmplitudeChanging = false;
-        }
-
+        
         public void Process()
         {
-            if (isEnvelopeAmplitudeChanging)
-                UpdateEnvelopeAmplitude();
+            envelopeAmplitudeFilter.Process();
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)

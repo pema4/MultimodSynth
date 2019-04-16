@@ -10,17 +10,20 @@ namespace BetterSynth
 
         public DistortionManager Distortion { get; private set; }
 
+        public DelayManager DelayManager { get; private set; }
+
         public VstParameterManager OversamplingOrderManager { get; private set; }
 
         public Routing(
             Plugin plugin,
-            string parameterPrefix = "M",
+            string parameterPrefix = "M_",
             string parameterCategory = "master") 
             : base(plugin, parameterPrefix, parameterCategory)
         {
-            VoicesManager = new VoicesManager(plugin, "V");
+            VoicesManager = new VoicesManager(plugin, "M_");
             Downsampler = new Downsampler();
             Distortion = new DistortionManager(plugin);
+            DelayManager = new DelayManager(plugin);
 
             plugin.MidiProcessor.NoteOn += MidiProcessor_NoteOn;
             plugin.MidiProcessor.NoteOff += MidiProcessor_NoteOff;
@@ -32,7 +35,7 @@ namespace BetterSynth
         protected override void InitializeParameters(ParameterFactory factory)
         {
             OversamplingOrderManager = factory.CreateParameterManager(
-                name: "OVERSMP",
+                name: "OVSMP",
                 valueChangedHandler: SetOversamplingOrder);
             CreateRedirection(OversamplingOrderManager, nameof(OversamplingOrderManager));
         }
@@ -79,14 +82,13 @@ namespace BetterSynth
             }
             
             var output = (float)Downsampler.Process(samplesForOversampling);
-
-            left = output;
-            right = output;
+            DelayManager.Process(output, output, out left, out right);
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             UpdateSampleRates();
+            DelayManager.SampleRate = newSampleRate;
         }
 
         private void UpdateSampleRates()

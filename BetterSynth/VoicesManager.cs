@@ -155,8 +155,15 @@ namespace BetterSynth
 
             float sum = 0;
 
-            foreach (var voice in activeVoices.ToArray())
+            for (int i = 0; i < activeVoices.Count;)
+            {
+                var voice = activeVoices[i];
                 sum += voice.Process();
+                if (!voice.IsActive)
+                    StopVoice(voice);
+                else
+                    i += 1;
+            }
             
             return sum;
         }
