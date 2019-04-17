@@ -31,7 +31,6 @@ namespace BetterSynth
         private DistortionMode mode;
         private float amp = 1;
         private DCBlocker dcBlocker;
-        private DCBlocker slowerDcBlocker;
         private SvfFilter lowPass;
         private SoftClipper softClipper;
         private AbsClipper absClipper;
@@ -70,15 +69,8 @@ namespace BetterSynth
             string parameterCategory = "effects")
             : base(plugin, parameterPrefix, parameterCategory)
         {
-            dcBlocker = new DCBlocker();
-            slowerDcBlocker = new DCBlocker();
-            lowPass = new SvfFilter(plugin)
-            {
-                Cutoff = 20000,
-                Gain = 0,
-                Q = 1,
-                Type = SvfFilterType.Low,
-            };
+            dcBlocker = new DCBlocker(10);
+            lowPass = new SvfFilter(type: SvfFilterType.Low);
             absClipper = new AbsClipper();
             softClipper = new SoftClipper();
             cubicClipper = new CubicClipper();
@@ -123,9 +115,7 @@ namespace BetterSynth
 
             LowPassCutoffManager = factory.CreateParameterManager(
                 name: "LP",
-                minValue: 20,
-                maxValue: 20000,
-                defaultValue: 15000,
+                defaultValue: 1,
                 valueChangedHandler: SetLowPassCutoff);
             CreateRedirection(LowPassCutoffManager, nameof(LowPassCutoffManager));
 
@@ -161,19 +151,17 @@ namespace BetterSynth
             sampleRateReductor.HoldTime = (float)Math.Pow(44100, 1 - value);
         }
 
-        private void SetAsymmetryTarget(float value)
-        {
-            asymmetryFilter.SetTarget(value);
-        }
+        private void SetAsymmetryTarget(float value) => asymmetryFilter.SetTarget(value);
 
-        private void UpdateAsymmetry(float value)
-        {
-            dcOffset = value;
-        }
+        private void UpdateAsymmetry(float value) => dcOffset = value;
 
         private void SetLowPassCutoff(float value)
         {
-            lowPass.Cutoff = value;
+            // 14.287712379549449 == Math.Log(2, 20000)
+            // 0.30249265803205166 == Math.Log(2, 20) / 14.287712379549449
+            // 0.6975073419679482 = 1 - 0.30249265803205166
+            var cutoff = (float)Math.Pow(2, 14.287712379549449 * (0.30249265803205166 + 0.69750734196794828 * value));
+            lowPass.SetCutoff(cutoff);
         }
 
         private void UpdateMix(float value)
@@ -182,23 +170,20 @@ namespace BetterSynth
             dryCoeff = 1 - value;
         }
 
-        private void UpdateAmp(float value)
-        {
-            amp = value;
-        }
+        private void UpdateAmp(float value) => amp = value;
 
         public float Process(float input)
         {
             ampFilter.Process();
             mixFilter.Process();
+            asymmetryFilter.Process();
 
             input =  amp * lowPass.Process(input);
             float output = 0;
             switch (Mode)
             {
                 case DistortionMode.AbsClipping:
-                    var distortedSample = absClipper.Process(input + dcOffset);
-                    output = dcBlocker.Process(distortedSample);
+                    output = absClipper.Process(input + dcOffset);
                     break;
 
                 case DistortionMode.BitCrush:
@@ -206,13 +191,11 @@ namespace BetterSynth
                     break;
 
                 case DistortionMode.CubicClipping:
-                    distortedSample = cubicClipper.Process(input + dcOffset);
-                    output = dcBlocker.Process(distortedSample);
+                    output = cubicClipper.Process(input + dcOffset);
                     break;
 
                 case DistortionMode.SoftClipping:
-                    distortedSample = softClipper.Process(input + dcOffset);
-                    output = dcBlocker.Process(distortedSample);
+                    output = softClipper.Process(input + dcOffset);
                     break;
 
                 case DistortionMode.SampleRateReduction:
@@ -222,7 +205,8 @@ namespace BetterSynth
                 default:
                     return input;
             }
-            
+
+            output = dcBlocker.Process(output);
             return dryCoeff * input + wetCoeff * output;
         }
 

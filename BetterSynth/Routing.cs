@@ -2,8 +2,12 @@
 
 namespace BetterSynth
 {
-    internal class Routing : AudioComponentWithParameters
+    class Routing : AudioComponentWithParameters
     {
+        private double[] samplesForOversampling = new double[8];
+        private float masterVolume;
+        private ParameterFilter masterVolumeFilter;
+
         public VoicesManager VoicesManager { get; private set; }
 
         public Downsampler Downsampler { get; private set; }
@@ -14,6 +18,8 @@ namespace BetterSynth
 
         public VstParameterManager OversamplingOrderManager { get; private set; }
 
+        public VstParameterManager MasterVolumeManager { get; private set; }
+
         public Routing(
             Plugin plugin,
             string parameterPrefix = "M_",
@@ -22,8 +28,8 @@ namespace BetterSynth
         {
             VoicesManager = new VoicesManager(plugin, "M_");
             Downsampler = new Downsampler();
-            Distortion = new DistortionManager(plugin);
-            DelayManager = new DelayManager(plugin);
+            Distortion = new DistortionManager(plugin, "DS_");
+            DelayManager = new DelayManager(plugin, "DL_");
 
             plugin.MidiProcessor.NoteOn += MidiProcessor_NoteOn;
             plugin.MidiProcessor.NoteOff += MidiProcessor_NoteOff;
@@ -38,6 +44,12 @@ namespace BetterSynth
                 name: "OVSMP",
                 valueChangedHandler: SetOversamplingOrder);
             CreateRedirection(OversamplingOrderManager, nameof(OversamplingOrderManager));
+
+            MasterVolumeManager = factory.CreateParameterManager(
+                name: "VOL",
+                defaultValue: 0.5f,
+                valueChangedHandler: x => masterVolumeFilter.SetTarget(x));
+            masterVolumeFilter = new ParameterFilter(UpdateMasterVolume, 1);
         }
 
         private void SetOversamplingOrder(float value)
@@ -60,6 +72,8 @@ namespace BetterSynth
             }
         }
 
+        private void UpdateMasterVolume(float value) => masterVolume = value;
+
         private void MidiProcessor_NoteOn(object sender, MidiNoteEventArgs e)
         {
             VoicesManager.PlayNote(e.Note);
@@ -70,10 +84,10 @@ namespace BetterSynth
             VoicesManager.ReleaseNote(e.Note);
         }
 
-        private double[] samplesForOversampling = new double[8];
-
         public void Process(out float left, out float right)
         {
+            masterVolumeFilter.Process();
+
             for (int i = 0; i < Downsampler.Order; ++i)
             {
                 var voicesOutput = VoicesManager.Process();
@@ -83,6 +97,8 @@ namespace BetterSynth
             
             var output = (float)Downsampler.Process(samplesForOversampling);
             DelayManager.Process(output, output, out left, out right);
+            left *= masterVolume;
+            right *= masterVolume;
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)

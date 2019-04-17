@@ -22,73 +22,48 @@ namespace BetterSynth
 
         public bool IsActive => envelope.State != AdsrEnvelopeState.Idle;
 
-        public float AttackTime
+        public void SetAttackTime(float value)
         {
-            get => attackTime;
-            set
-            {
-                attackTime = value;
-                envelope.SetAttackRate(attackTime * SampleRate);
-            }
+            attackTime = value;
+            envelope.SetAttackRate(attackTime * SampleRate);
         }
 
-        public float DecayTime
+        public void SetDecayTime(float value)
         {
-            get => decayTime;
-            set
-            {
-                decayTime = value;
-                envelope.SetDecayRate(decayTime * SampleRate);
-            }
+            decayTime = value;
+            envelope.SetDecayRate(decayTime * SampleRate);
         }
 
-        public float SustainLevel
+        public void SetSustainLevel(float value)
         {
-            get => sustainLevel;
-            set
-            {
-                sustainLevel = value;
-                envelope.SetSustainLevel(sustainLevel);
-            }
+            sustainLevel = value;
+            envelope.SetSustainLevel(sustainLevel);
         }
 
-        public float ReleaseTime
+        public void SetReleaseTime(float value)
         {
-            get => releaseTime;
-            set
-            {
-                releaseTime = value;
-                envelope.SetReleaseRate(releaseTime * SampleRate);
-            }
+            releaseTime = value;
+            envelope.SetReleaseRate(releaseTime * SampleRate);
         }
 
-        public float AttackCurve
+        public void SetAttackCurve(float value)
         {
-            get => attackCurve;
-            set
-            {
-                attackCurve = value;
-                attackTargetRatio = 0.001 * (Math.Exp(12 * (0.05f + 0.95f * attackCurve)) - 1);
-                envelope.SetAttackTargetRatio(attackTargetRatio);
-            }
+            attackCurve = value;
+            attackTargetRatio = 0.001 * (Math.Exp(12 * (0.05f + 0.95f * attackCurve)) - 1);
+            envelope.SetAttackTargetRatio(attackTargetRatio);
         }
 
-        public float DecayReleaseCurve
+        public void SetDecayReleaseCurve(float value)
         {
-            get => decayReleaseCurve;
-            set
-            {
-                decayReleaseCurve = value;
-                decayReleaseTargetRatio = 
-                    0.001 * (Math.Exp(12 * (0.0005 + 0.9995 * decayReleaseCurve)) - 1);
-                envelope.SetDecayReleaseTargetRatio(decayReleaseTargetRatio);
-            }
+            decayReleaseCurve = value;
+            decayReleaseTargetRatio = 
+                0.001 * (Math.Exp(12 * (0.0005 + 0.9995 * decayReleaseCurve)) - 1);
+            envelope.SetDecayReleaseTargetRatio(decayReleaseTargetRatio);
         }
 
-        public float Amplitude
+        public void SetAmplitude(float value)
         {
-            get => amplitude;
-            set => amplitude = value;
+            amplitude = value;
         }
 
         public void TriggerAttack() => envelope.TriggerAttack();
@@ -102,9 +77,9 @@ namespace BetterSynth
 
         protected override void OnSampleRateChanged(float newSampleRate)
         {
-            AttackTime = attackTime;
-            DecayTime = decayTime;
-            ReleaseTime = releaseTime;
+            SetAttackTime(attackTime);
+            SetDecayTime(decayTime);
+            SetReleaseTime(releaseTime);
         }
     }
 }

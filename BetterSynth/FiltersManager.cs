@@ -77,7 +77,7 @@ namespace BetterSynth
                 filterType = newType;
 
                 foreach (var filter in filters)
-                    filter.FilterType = filterType;
+                    filter.SetFilterType(filterType);
             }
         }
 
@@ -90,7 +90,7 @@ namespace BetterSynth
         {
             cutoffMultiplier = value;
             foreach (var filter in filters)
-                filter.CutoffMultiplier = cutoffMultiplier;
+                filter.SetCutoffMultiplier(cutoffMultiplier);
         }
 
         private void SetTrackingCoeff(float value)
@@ -98,7 +98,7 @@ namespace BetterSynth
             trackingCoeff = value;
 
             foreach (var filter in filters)
-                filter.TrackingCoeff = value;
+                filter.SetTrackingCoeff(value);
         }
 
         private void SetCurve(float value)
@@ -106,16 +106,16 @@ namespace BetterSynth
             curve = value;
 
             foreach (var filter in filters)
-                filter.Curve = curve;
+                filter.SetCurve(curve);
         }
 
         public Filter CreateNewFilter()
         {
-            var filter = new Filter(Plugin);
-            filter.CutoffMultiplier = cutoffMultiplier;
-            filter.Curve = curve;
-            filter.TrackingCoeff = trackingCoeff;
-            filter.FilterType = filterType;
+            var filter = new Filter();
+            filter.SetCutoffMultiplier(cutoffMultiplier);
+            filter.SetCurve(curve);
+            filter.SetTrackingCoeff(trackingCoeff);
+            filter.SetFilterType(filterType);
 
             filters.Add(filter);
             return filter;

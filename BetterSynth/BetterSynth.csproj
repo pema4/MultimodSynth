@@ -88,6 +88,7 @@
     <Compile Include="Effects\Delays\PingPongDelay.cs" />
     <Compile Include="Effects\Delays\StereoOffsetDelay.cs" />
     <Compile Include="Effects\Delays\VariousTimeDelay.cs" />
+    <Compile Include="Effects\IDistortion.cs" />
     <Compile Include="Filters\DCBlocker.cs" />
     <Compile Include="ParameterFilter.cs" />
     <Compile Include="Generators\AdsrEnvelope.cs" />

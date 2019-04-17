@@ -93,7 +93,7 @@ namespace BetterSynth
             attackTime = value;
             
             foreach (var envelope in envelopes)
-                envelope.AttackTime = attackTime;
+                envelope.SetAttackTime(attackTime);
         }
 
         private void SetDecayTime(float value)
@@ -101,7 +101,7 @@ namespace BetterSynth
             decayTime = value;
 
             foreach (var envelope in envelopes)
-                envelope.DecayTime = decayTime;
+                envelope.SetDecayTime(decayTime);
         }
 
         private void SetSustainLevel(float value)
@@ -109,7 +109,7 @@ namespace BetterSynth
             sustainLevel = value;
 
             foreach (var envelope in envelopes)
-                envelope.SustainLevel = value;
+                envelope.SetSustainLevel(value);
         }
 
         private void SetReleaseTime(float value)
@@ -117,7 +117,7 @@ namespace BetterSynth
             releaseTime = value;
 
             foreach (var envelope in envelopes)
-                envelope.ReleaseTime = releaseTime;
+                envelope.SetReleaseTime(releaseTime);
         }
 
         private void SetAttackCurve(float value)
@@ -125,7 +125,7 @@ namespace BetterSynth
             attackCurve = value;
 
             foreach (var envelope in envelopes)
-                envelope.AttackCurve = value;
+                envelope.SetAttackCurve(value);
         }
 
         private void SetDecayReleaseCurve(float value)
@@ -133,28 +133,28 @@ namespace BetterSynth
             decayReleaseCurve = value;
 
             foreach (var envelope in envelopes)
-                envelope.DecayReleaseCurve = value;
+                envelope.SetDecayReleaseCurve(value);
         }
 
         private void UpdateEnvelopeAmplitude(float value)
         {
             envelopeAmplitude = value;
             foreach (var envelope in envelopes)
-                envelope.Amplitude = envelopeAmplitude;
+                envelope.SetAmplitude(envelopeAmplitude);
         }
 
         public Envelope CreateNewEnvelope()
         {
             var envelope = new Envelope()
             {
-                Amplitude = envelopeAmplitude,
-                AttackTime = attackTime,
-                DecayTime = decayTime,
-                SustainLevel = sustainLevel,
-                ReleaseTime = releaseTime,
-                AttackCurve = attackCurve,
-                DecayReleaseCurve = decayReleaseCurve
             };
+            envelope.SetAttackTime(attackTime);
+            envelope.SetDecayTime(decayTime);
+            envelope.SetSustainLevel(sustainLevel);
+            envelope.SetReleaseTime(releaseTime);
+            envelope.SetAttackCurve(attackCurve);
+            envelope.SetDecayReleaseCurve(decayReleaseCurve);
+            envelope.SetAmplitude(envelopeAmplitude);
             envelopes.Add(envelope);
             return envelope;
         }

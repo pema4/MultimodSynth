@@ -2,80 +2,42 @@
 
 namespace BetterSynth
 {
-    class Filter
+    class Filter : AudioComponent
     {
         private const float BaseCutoff = 65.41f;
         
-        private Plugin plugin;
         private SvfFilter filter;
-        private float curve;
         private float noteFrequency;
         private float cutoffMultiplier;
         private float trackingCoeff;
         private float cutoff;
 
-        public Filter(Plugin plugin)
+        public Filter()
         {
-            this.plugin = plugin;
-
-            filter = new SvfFilter(plugin)
-            {
-                Cutoff = 20000,
-                Gain = 0,
-                Q = 1,
-                Type = SvfFilterType.Low,
-            };
-        }
-        
-        public float SampleRate
-        {
-            get => filter.SampleRate;
-            set => filter.SampleRate = value;
+            filter = new SvfFilter(type: SvfFilterType.Low);
         }
 
-        public SvfFilterType FilterType
+        public void SetFilterType(SvfFilterType value)
         {
-            get => filter.Type;
-            set => filter.Type = value;
+            filter.SetType(value);
         }
 
-        public float CutoffMultiplier
+        public void SetCutoffMultiplier(float value)
         {
-            get => cutoffMultiplier;
-            set
-            {
-                if (cutoffMultiplier != value)
-                {
-                    cutoffMultiplier = value;
-                    CalculateCutoff();
-                }
-            }
+            cutoffMultiplier = value;
+            CalculateCutoff();
         }
 
-        public float NoteFrequency
+        public void SetNoteFrequency(float value)
         {
-            get => noteFrequency;
-            set
-            {
-                if (noteFrequency != value)
-                {
-                    noteFrequency = value;
-                    CalculateCutoff();
-                }
-            }
+            noteFrequency = value;
+            CalculateCutoff();
         }
 
-        public float TrackingCoeff
+        public void SetTrackingCoeff(float value)
         {
-            get => trackingCoeff;
-            set
-            {
-                if (trackingCoeff != value)
-                {
-                    trackingCoeff = value;
-                    CalculateCutoff();
-                }
-            }
+            trackingCoeff = value;
+            CalculateCutoff();
         }
 
         private void CalculateCutoff()
@@ -84,32 +46,32 @@ namespace BetterSynth
             cutoff = cutoffMultiplier * trackedCutoff;
         }
 
-        public float Curve
+        public void SetCurve(float value)
         {
-            get => curve;
-            set
-            {
-                curve = value;
-                float q;
-                if (value >= 0.5f)
-                    q = (float)Math.Pow(16, 2 * value - 1);
-                else
-                    q = (float)Math.Pow(4, 2 * value - 1);
+            float q;
+            if (value >= 0.5f)
+                q = (float)Math.Pow(16, 2 * value - 1);
+            else
+                q = (float)Math.Pow(4, 2 * value - 1);
                 
-                filter.Q = q;
-            }
+            filter.SetQ(q);
         }
 
         public float Process(float input, float cutoffModulation = 0)
         {
-            var modulatedCutoff = cutoff * (1 + cutoffModulation * 305);
+            var modulatedCutoff = cutoff * (1 + (float)Math.Pow(2, 10 * cutoffModulation));
             if (modulatedCutoff > 20000)
                 modulatedCutoff = 20000;
-            filter.Cutoff = modulatedCutoff;
+            filter.SetCutoff(modulatedCutoff);
 
             return filter.Process(input);
         }
 
         public void Reset() => filter.Reset();
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            filter.SampleRate = newSampleRate;
+        }
     }
 }

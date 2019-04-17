@@ -19,24 +19,16 @@
 
         public WaveTable WaveTable { get; set; }
 
-        public float NoteFrequency
+        public void SetNoteFrequency(float value)
         {
-            get => noteFrequency;
-            set
-            {
-                noteFrequency = value;
-                UpdateCoefficients();
-            }
+            noteFrequency = value;
+            UpdateCoefficients();
         }
 
-        public float PitchMultiplier
+        public void SetPitchMultiplier(float value)
         {
-            get => pitchMultiplier;
-            set
-            {
-                pitchMultiplier = value;
-                UpdateCoefficients();
-            }
+            pitchMultiplier = value;
+            UpdateCoefficients();
         }
 
         private void UpdateCoefficients()

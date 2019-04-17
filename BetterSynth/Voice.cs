@@ -55,9 +55,9 @@ namespace BetterSynth
             oscB.ResetPhase();
             filter.Reset();
 
-            oscA.NoteFrequency = noteFrequency;
-            oscB.NoteFrequency = noteFrequency;
-            filter.NoteFrequency = noteFrequency;
+            oscA.SetNoteFrequency(noteFrequency);
+            oscB.SetNoteFrequency(noteFrequency);
+            filter.SetNoteFrequency(noteFrequency);
 
             envA.TriggerAttack();
             envB.TriggerAttack();

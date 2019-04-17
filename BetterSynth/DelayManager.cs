@@ -1,4 +1,5 @@
 ﻿using Jacobi.Vst.Framework;
+using System;
 using System.Windows.Forms;
 
 namespace BetterSynth
@@ -13,6 +14,7 @@ namespace BetterSynth
             PingPong,
         }
 
+        private const float MaxLfoDepth = 0.05f;
         private float dryCoeff = 1;
         private float wetCoeff;
         private int wetSign = 1;
@@ -104,7 +106,7 @@ namespace BetterSynth
             LfoRateManager = factory.CreateParameterManager(
                 name: "RATE",
                 minValue: 0,
-                maxValue: 20,
+                maxValue: 5,
                 defaultValue: 0,
                 valueChangedHandler: SetLfoRate);
             CreateRedirection(LfoRateManager, nameof(LfoRateManager));
@@ -229,7 +231,7 @@ namespace BetterSynth
             }
             else
             {
-                currentDelay.SetDelay(time * SampleRate * (1 + lfoDepth * lfo.Process()));
+                currentDelay.SetDelay(SampleRate * Math.Min(1, time * (1 + MaxLfoDepth * lfoDepth * lfo.Process())));
                 currentDelay.Process(inputL, inputR, out var wetL, out var wetR);
                 outputL = dryCoeff * inputL + wetSign * wetCoeff * wetL;
                 outputR = dryCoeff * inputL + wetSign * wetCoeff * wetR;
@@ -238,6 +240,10 @@ namespace BetterSynth
         
         protected override void OnSampleRateChanged(float newSampleRate)
         {
+            timeFilter.SampleRate = newSampleRate;
+            stereoAmountFilter.SampleRate = newSampleRate;
+            mixFilter.SampleRate = newSampleRate;
+
             stereoOffsetDelay.SampleRate = newSampleRate;
             stereoOffsetDelay.SetDelay(time * newSampleRate);
 
@@ -248,8 +254,6 @@ namespace BetterSynth
             pingPongDelay.SetDelay(time * newSampleRate);
 
             lfo.SampleRate = newSampleRate;
-
-            timeFilter.SampleRate = newSampleRate;
         }
     }
 }

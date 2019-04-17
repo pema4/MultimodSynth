@@ -87,7 +87,7 @@ namespace BetterSynth
         {
             pitchMultiplier = value;
             foreach (var oscillator in oscillators)
-                oscillator.PitchMultiplier = pitchMultiplier;
+                oscillator.SetPitchMultiplier(pitchMultiplier);
         }
 
         private void SetWaveTable(float value)
@@ -126,10 +126,10 @@ namespace BetterSynth
         {
             var res = new Oscillator()
             {
-                PitchMultiplier = pitchMultiplier,
                 WaveTable = waveTable.Clone()
             };
             res.WaveTable.Position = waveTablePosition;
+            res.SetPitchMultiplier(pitchMultiplier);
             oscillators.Add(res);
             return res;
         }
