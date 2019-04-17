@@ -15,15 +15,18 @@ namespace BetterSynth
 
         private float dryCoeff = 1;
         private float wetCoeff;
+        private int wetSign = 1;
         private float time;
         private StereoMode mode;
         private PingPongDelay pingPongDelay;
         private VariousTimeDelay variousTimeDelay;
         private StereoOffsetDelay stereoOffsetDelay;
         private IDelay currentDelay;
+        private SineLFO lfo;
         private ParameterFilter timeFilter;
         private ParameterFilter stereoAmountFilter;
         private ParameterFilter mixFilter;
+        private float lfoDepth;
 
         public VstParameterManager ModeManager { get; set; }
 
@@ -50,6 +53,7 @@ namespace BetterSynth
             stereoOffsetDelay = new StereoOffsetDelay();
             variousTimeDelay = new VariousTimeDelay();
             pingPongDelay = new PingPongDelay();
+            lfo = new SineLFO();
             InitializeParameters();
         }
         
@@ -91,6 +95,24 @@ namespace BetterSynth
                 valueChangedHandler: SetMixTarget);
             CreateRedirection(MixManager, nameof(MixManager));
             mixFilter = new ParameterFilter(UpdateMix, 0);
+
+            InvertManager = factory.CreateParameterManager(
+                name: "INV",
+                valueChangedHandler: SetInvert);
+            CreateRedirection(InvertManager, nameof(InvertManager));
+
+            LfoRateManager = factory.CreateParameterManager(
+                name: "RATE",
+                minValue: 0,
+                maxValue: 20,
+                defaultValue: 0,
+                valueChangedHandler: SetLfoRate);
+            CreateRedirection(LfoRateManager, nameof(LfoRateManager));
+
+            LfoDepthManager = factory.CreateParameterManager(
+                name: "DEPTH",
+                valueChangedHandler: SetLfoDepth);
+            CreateRedirection(LfoDepthManager, nameof(LfoDepthManager));
         }
 
         private void SetMode(float value)
@@ -176,22 +198,41 @@ namespace BetterSynth
             dryCoeff = 1 - value;
         }
 
+        private void SetInvert(float value)
+        {
+            if (value < 1)
+                wetSign = 1;
+            else
+                wetSign = -1;
+        }
+
+        private void SetLfoRate(float value)
+        {
+            lfo.SetFrequency(value);
+        }
+
+        private void SetLfoDepth(float value)
+        {
+            lfoDepth = value;
+        }
+
         public void Process(float inputL, float inputR, out float outputL, out float outputR)
         {
             timeFilter.Process();
             mixFilter.Process();
             stereoAmountFilter.Process();
 
-            if (mode != StereoMode.None)
-            {
-                currentDelay.Process(inputL, inputR, out var wetL, out var wetR);
-                outputL = dryCoeff * inputL + wetCoeff * wetL;
-                outputR = dryCoeff * inputL + wetCoeff * wetR;
-            }
-            else
+            if (mode == StereoMode.None)
             {
                 outputL = inputL;
                 outputR = inputR;
+            }
+            else
+            {
+                currentDelay.SetDelay(time * SampleRate * (1 + lfoDepth * lfo.Process()));
+                currentDelay.Process(inputL, inputR, out var wetL, out var wetR);
+                outputL = dryCoeff * inputL + wetSign * wetCoeff * wetL;
+                outputR = dryCoeff * inputL + wetSign * wetCoeff * wetR;
             }
         }
         
@@ -205,6 +246,8 @@ namespace BetterSynth
 
             pingPongDelay.SampleRate = newSampleRate;
             pingPongDelay.SetDelay(time * newSampleRate);
+
+            lfo.SampleRate = newSampleRate;
 
             timeFilter.SampleRate = newSampleRate;
         }
