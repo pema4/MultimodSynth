@@ -78,17 +78,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DelayManager.cs" />
-    <Compile Include="Effects\AbsClipper.cs" />
+    <Compile Include="Effects\Distortion\AbsClipper.cs" />
     <Compile Include="AudioComponent.cs" />
     <Compile Include="AudioComponentWithParameters.cs" />
     <Compile Include="DistortionManager.cs" />
-    <Compile Include="Effects\BitCrusher.cs" />
-    <Compile Include="Effects\CubicClipper.cs" />
+    <Compile Include="Effects\Distortion\BitCrusher.cs" />
+    <Compile Include="Effects\Distortion\CubicClipper.cs" />
     <Compile Include="Effects\Delays\IDelay.cs" />
     <Compile Include="Effects\Delays\PingPongDelay.cs" />
     <Compile Include="Effects\Delays\StereoOffsetDelay.cs" />
     <Compile Include="Effects\Delays\VariousTimeDelay.cs" />
-    <Compile Include="Effects\IDistortion.cs" />
+    <Compile Include="Effects\Distortion\IDistortion.cs" />
     <Compile Include="Files\PluginState.cs" />
     <Compile Include="Files\ProgramReader.cs" />
     <Compile Include="Filters\DCBlocker.cs" />
@@ -96,7 +96,7 @@
     <Compile Include="Generators\AdsrEnvelope.cs" />
     <Compile Include="AudioProcessor.cs" />
     <Compile Include="Filters\Downsampler.cs" />
-    <Compile Include="Effects\SampleRateReductor.cs" />
+    <Compile Include="Effects\Distortion\SampleRateReductor.cs" />
     <Compile Include="Envelope.cs" />
     <Compile Include="EnvelopesManager.cs" />
     <Compile Include="Filter.cs" />
@@ -113,7 +113,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing.cs" />
     <Compile Include="Filters\SvfFilter.cs" />
-    <Compile Include="Effects\SoftClipper.cs" />
+    <Compile Include="Effects\Distortion\SoftClipper.cs" />
     <Compile Include="Generators\SineLFO.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Voice.cs" />

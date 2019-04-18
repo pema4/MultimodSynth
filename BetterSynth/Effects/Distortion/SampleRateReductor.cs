@@ -1,34 +1,23 @@
-﻿namespace BetterSynth
+﻿using System;
+
+namespace BetterSynth
 {
-    class SampleRateReductor : AudioComponent
+    class SampleRateReductor : AudioComponent, IDistortion
     {
         private float holdTime;
         private float phasor;
         private float phaseIncrement;
         private float sample;
 
-        public SampleRateReductor()
+        public void SetAmount(float value)
         {
-        }
-
-        public float HoldTime
-        {
-            get => holdTime;
-            set
-            {
-                holdTime = value;
-                UpdateCoefficients();
-            }
-        }
-
-        protected override void OnSampleRateChanged(float newSampleRate)
-        {
+            holdTime = (float)Math.Pow(44100, 1 - value);
             UpdateCoefficients();
         }
 
         private void UpdateCoefficients()
         {
-            phaseIncrement = HoldTime / SampleRate;
+            phaseIncrement = holdTime / SampleRate;
         }
 
         public float Process(float input)
@@ -43,6 +32,11 @@
             }
 
             return output;
+        }
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            UpdateCoefficients();
         }
     }
 }

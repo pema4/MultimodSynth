@@ -2,14 +2,13 @@
 
 namespace BetterSynth
 {
-    class BitCrusher
+    class BitCrusher : IDistortion
     {
         private float bits;
         
-        public float Bits
+        public void SetAmount(float value)
         {
-            get => bits;
-            set => bits = value;
+            bits = (float)Math.Pow(1 << 16, 1 - value);
         }
 
         public float Process(float input)

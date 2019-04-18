@@ -3,22 +3,18 @@
     /// <summary>
     /// http://www.musicdsp.org/en/latest/Effects/42-soft-saturation.html
     /// </summary>
-    class SoftClipper
+    class SoftClipper : IDistortion
     {
         private float treshold;
         private float denominator;
         private float normalizationCoeff;
 
-        public float Treshold
+        public void SetAmount(float value)
         {
-            get => treshold;
-            set
-            {
-                treshold = value;
-                var temp = 1 - treshold;
-                denominator = temp * temp;
-                normalizationCoeff = 1 / ((treshold + 1) / 2);
-            }
+            treshold = 1 - value;
+            var temp = 1 - treshold;
+            denominator = temp * temp;
+            normalizationCoeff = 1 / ((treshold + 1) / 2);
         }
 
         public float Process(float input)

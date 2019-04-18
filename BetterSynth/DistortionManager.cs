@@ -1,8 +1,5 @@
 ﻿using Jacobi.Vst.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace BetterSynth
 {
@@ -21,7 +18,7 @@ namespace BetterSynth
             SampleRateReduction,
         }
 
-        private float flavour;
+        private float amount;
         private float wetCoeff;
         private float dryCoeff = 1;
         private ParameterFilter ampFilter;
@@ -37,23 +34,11 @@ namespace BetterSynth
         private CubicClipper cubicClipper;
         private BitCrusher bitCrusher;
         private SampleRateReductor sampleRateReductor;
-        
-        public DistortionMode Mode
-        {
-            get => mode;
-            set
-            {
-                if (value != mode)
-                {
-                    mode = value;
-                    OnPropertyChanged(nameof(Mode));
-                }
-            }
-        }
+        private IDistortion currentDistortion;
 
         public VstParameterManager ModeManager { get; private set; }
 
-        public VstParameterManager FlavourManager { get; private set; }
+        public VstParameterManager AmountManager { get; private set; }
 
         public VstParameterManager AsymmetryManager { get; private set; }
 
@@ -90,11 +75,11 @@ namespace BetterSynth
                 valueChangedHandler: SetMode);
             CreateRedirection(ModeManager, nameof(ModeManager));
 
-            FlavourManager = factory.CreateParameterManager(
-                name: "FLAV",
+            AmountManager = factory.CreateParameterManager(
+                name: "AMNT",
                 defaultValue: 0.5f,
-                valueChangedHandler: SetFlavour);
-            CreateRedirection(FlavourManager, nameof(FlavourManager));
+                valueChangedHandler: SetAmount);
+            CreateRedirection(AmountManager, nameof(AmountManager));
 
             AsymmetryManager = factory.CreateParameterManager(
                 name: "ASYM",
@@ -130,25 +115,62 @@ namespace BetterSynth
         private void SetMode(float value)
         {
             if (value < 1)
-                Mode = DistortionMode.None;
+            {
+                if (mode != DistortionMode.None)
+                    mode = DistortionMode.None;
+            }
             else if (value < 2)
-                Mode = DistortionMode.AbsClipping;
+            {
+                if (mode != DistortionMode.AbsClipping)
+                {
+                    mode = DistortionMode.AbsClipping;
+                    ChangeDistortion(absClipper);
+                }
+            }
             else if (value < 3)
-                Mode = DistortionMode.SoftClipping;
+            {
+                if (mode != DistortionMode.SoftClipping)
+                {
+                    mode = DistortionMode.SoftClipping;
+                    ChangeDistortion(softClipper);
+                }
+            }
             else if (value < 4)
-                Mode = DistortionMode.CubicClipping;
+            {
+                if (mode != DistortionMode.CubicClipping)
+                {
+                    mode = DistortionMode.CubicClipping;
+                    ChangeDistortion(cubicClipper);
+                }
+            }
             else if (value < 5)
-                Mode = DistortionMode.BitCrush;
+            {
+                if (mode != DistortionMode.BitCrush)
+                {
+                    mode = DistortionMode.BitCrush;
+                    ChangeDistortion(bitCrusher);
+                }
+            }
             else
-                Mode = DistortionMode.SampleRateReduction;
+            {
+                if (mode != DistortionMode.SampleRateReduction)
+                {
+                    mode = DistortionMode.SampleRateReduction;
+                    ChangeDistortion(sampleRateReductor);
+                }
+            }
         }
 
-        private void SetFlavour(float value)
+        private void ChangeDistortion(IDistortion newDistortion)
         {
-            flavour = value;
-            softClipper.Treshold = 1 - value;
-            bitCrusher.Bits = (float)Math.Pow(1 << 16, 1 - value);
-            sampleRateReductor.HoldTime = (float)Math.Pow(44100, 1 - value);
+            currentDistortion = newDistortion;
+            currentDistortion.SetAmount(amount);
+        }
+
+        private void SetAmount(float value)
+        {
+            amount = value;
+            currentDistortion?.SetAmount(amount);
         }
 
         private void SetAsymmetryTarget(float value) => asymmetryFilter.SetTarget(value);
@@ -157,9 +179,6 @@ namespace BetterSynth
 
         private void SetLowPassCutoff(float value)
         {
-            // 14.287712379549449 == Math.Log(2, 20000)
-            // 0.30249265803205166 == Math.Log(2, 20) / 14.287712379549449
-            // 0.6975073419679482 = 1 - 0.30249265803205166
             var cutoff = (float)Math.Pow(2, 14.287712379549449 * (0.30249265803205166 + 0.69750734196794828 * value));
             lowPass.SetCutoff(cutoff);
         }
@@ -179,35 +198,14 @@ namespace BetterSynth
             asymmetryFilter.Process();
 
             input =  amp * lowPass.Process(input);
-            float output = 0;
-            switch (Mode)
+            if (mode == DistortionMode.None)
+                return input;
+            else
             {
-                case DistortionMode.AbsClipping:
-                    output = absClipper.Process(input + dcOffset);
-                    break;
-
-                case DistortionMode.BitCrush:
-                    output = bitCrusher.Process(input + dcOffset);
-                    break;
-
-                case DistortionMode.CubicClipping:
-                    output = cubicClipper.Process(input + dcOffset);
-                    break;
-
-                case DistortionMode.SoftClipping:
-                    output = softClipper.Process(input + dcOffset);
-                    break;
-
-                case DistortionMode.SampleRateReduction:
-                    output = sampleRateReductor.Process(input + dcOffset);
-                    break;
-
-                default:
-                    return input;
+                var output = currentDistortion.Process(input + dcOffset);
+                output = dcBlocker.Process(output);
+                return dryCoeff * input + wetCoeff * output;
             }
-
-            output = dcBlocker.Process(output);
-            return dryCoeff * input + wetCoeff * output;
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)

@@ -6,6 +6,9 @@ namespace BetterSynth
 {
     class DelayManager : AudioComponentWithParameters
     {
+        private const float MaxLfoDepth = 0.05f;
+        private const float MaxTime = 1f;
+
         public enum StereoMode
         {
             None,
@@ -14,11 +17,14 @@ namespace BetterSynth
             PingPong,
         }
 
-        private const float MaxLfoDepth = 0.05f;
         private float dryCoeff = 1;
         private float wetCoeff;
         private int wetSign = 1;
-        private float time;
+        private float delay;
+        private float maxDelay;
+        private float feedback;
+        private float lfoDepth;
+        private float stereoAmount;
         private StereoMode mode;
         private PingPongDelay pingPongDelay;
         private VariousTimeDelay variousTimeDelay;
@@ -28,7 +34,6 @@ namespace BetterSynth
         private ParameterFilter timeFilter;
         private ParameterFilter stereoAmountFilter;
         private ParameterFilter mixFilter;
-        private float lfoDepth;
 
         public VstParameterManager ModeManager { get; set; }
 
@@ -122,18 +127,14 @@ namespace BetterSynth
             if (value < 1)
             {
                 if (mode != StereoMode.None)
-                {
                     mode = StereoMode.None;
-                    currentDelay?.Reset();
-                }
             }
             else if (value < 2)
             {
                 if (mode != StereoMode.StereoOffset)
                 {
                     mode = StereoMode.StereoOffset;
-                    currentDelay?.Reset();
-                    currentDelay = stereoOffsetDelay;
+                    ChangeDelay(stereoOffsetDelay);
                 }
             }
             else if (value < 3)
@@ -141,8 +142,7 @@ namespace BetterSynth
                 if (mode != StereoMode.VariousTime)
                 {
                     mode = StereoMode.VariousTime;
-                    currentDelay?.Reset();
-                    currentDelay = variousTimeDelay;
+                    ChangeDelay(variousTimeDelay);
                 }
             }
             else
@@ -150,28 +150,35 @@ namespace BetterSynth
                 if (mode != StereoMode.PingPong)
                 {
                     mode = StereoMode.PingPong;
-                    currentDelay?.Reset();
-                    currentDelay = pingPongDelay;
+                    ChangeDelay(pingPongDelay);
                 }
             }
         }
 
+        private void ChangeDelay(IDelay newDelay)
+        {
+            currentDelay = newDelay;
+            currentDelay.Reset();
+            currentDelay.SetFeedback(feedback);
+            currentDelay.SetStereo(stereoAmount);
+        }
+
         private void SetTimeTarget(float value)
         {
-            time = value / 1000;
-            timeFilter.SetTarget(time);
+            var target =  value / 1000;
+            timeFilter.SetTarget(target);
         }
 
         private void UpdateTime(float value)
         {
-            time = value;
+            delay = value * SampleRate;
+            // delay time is updated in a process loop.
         }
 
         private void SetFeedback(float value)
         {
-            pingPongDelay.SetFeedback(value);
-            stereoOffsetDelay.SetFeedback(value);
-            variousTimeDelay.SetFeedback(value);
+            feedback = value;
+            currentDelay?.SetFeedback(feedback);
         }
 
         private void SetStereoAmountTarget(float value)
@@ -181,9 +188,8 @@ namespace BetterSynth
 
         private void UpdateStereoAmount(float value)
         {
-            pingPongDelay.SetStereo(value);
-            stereoOffsetDelay.SetStereo(value);
-            variousTimeDelay.SetStereo(value);
+            stereoAmount = value;
+            currentDelay?.SetStereo(stereoAmount);
         }
 
         private void SetMixTarget(float value)
@@ -228,7 +234,7 @@ namespace BetterSynth
             }
             else
             {
-                currentDelay.SetDelay(SampleRate * Math.Min(1, time * (1 + MaxLfoDepth * lfoDepth * lfo.Process())));
+                currentDelay.SetDelay(Math.Min(maxDelay, delay * (1 + MaxLfoDepth * lfoDepth * lfo.Process())));
                 currentDelay.Process(inputL, inputR, out var wetL, out var wetR);
                 outputL = dryCoeff * inputL + wetSign * wetCoeff * wetL;
                 outputR = dryCoeff * inputL + wetSign * wetCoeff * wetR;
@@ -240,17 +246,12 @@ namespace BetterSynth
             timeFilter.SampleRate = newSampleRate;
             stereoAmountFilter.SampleRate = newSampleRate;
             mixFilter.SampleRate = newSampleRate;
-
             stereoOffsetDelay.SampleRate = newSampleRate;
-            stereoOffsetDelay.SetDelay(time * newSampleRate);
-
             variousTimeDelay.SampleRate = newSampleRate;
-            variousTimeDelay.SetDelay(time * newSampleRate);
-
             pingPongDelay.SampleRate = newSampleRate;
-            pingPongDelay.SetDelay(time * newSampleRate);
-
             lfo.SampleRate = newSampleRate;
+
+            maxDelay = MaxTime * newSampleRate;
         }
     }
 }
