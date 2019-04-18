@@ -14,10 +14,10 @@ namespace BetterSynth
 
         public Filter()
         {
-            filter = new SvfFilter(type: SvfFilterType.Low);
+            filter = new SvfFilter(type: SvfFilter.FilterType.Low);
         }
 
-        public void SetFilterType(SvfFilterType value)
+        public void SetFilterType(SvfFilter.FilterType value)
         {
             filter.SetType(value);
         }

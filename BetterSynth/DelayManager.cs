@@ -164,10 +164,7 @@ namespace BetterSynth
 
         private void UpdateTime(float value)
         {
-            var delay = SampleRate * value;
-            pingPongDelay.SetDelay(delay);
-            stereoOffsetDelay.SetDelay(delay);
-            variousTimeDelay.SetDelay(delay);
+            time = value;
         }
 
         private void SetFeedback(float value)

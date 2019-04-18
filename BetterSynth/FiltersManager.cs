@@ -10,7 +10,7 @@ namespace BetterSynth
         private ParameterFilter cutoffMultiplierFilter;
         private float curve;
         private List<Filter> filters;
-        private SvfFilterType filterType;
+        private SvfFilter.FilterType filterType;
         private float trackingCoeff;
 
         public VstParameterManager FilterTypeManager { get; private set; }
@@ -61,16 +61,16 @@ namespace BetterSynth
         
         private void SetFilterType(float value)
         {
-            SvfFilterType newType;
+            SvfFilter.FilterType newType;
 
             if (value < 0.25f)
-                newType = SvfFilterType.Low;
+                newType = SvfFilter.FilterType.Low;
             else if (value < 0.5f)
-                newType = SvfFilterType.Band;
+                newType = SvfFilter.FilterType.Band;
             else if (value < 0.75f)
-                newType = SvfFilterType.Notch;
+                newType = SvfFilter.FilterType.Notch;
             else
-                newType = SvfFilterType.High;
+                newType = SvfFilter.FilterType.High;
 
             if (filterType != newType)
             {

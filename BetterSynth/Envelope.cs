@@ -20,7 +20,7 @@ namespace BetterSynth
             envelope = new AdsrEnvelope();
         }
 
-        public bool IsActive => envelope.State != AdsrEnvelopeState.Idle;
+        public bool IsActive => envelope.State != AdsrEnvelope.EnvelopeState.Idle;
 
         public void SetAttackTime(float value)
         {

@@ -89,6 +89,8 @@
     <Compile Include="Effects\Delays\StereoOffsetDelay.cs" />
     <Compile Include="Effects\Delays\VariousTimeDelay.cs" />
     <Compile Include="Effects\IDistortion.cs" />
+    <Compile Include="Files\PluginState.cs" />
+    <Compile Include="Files\ProgramReader.cs" />
     <Compile Include="Filters\DCBlocker.cs" />
     <Compile Include="ParameterFilter.cs" />
     <Compile Include="Generators\AdsrEnvelope.cs" />
@@ -106,6 +108,7 @@
     <Compile Include="ParameterFactory.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="PluginCommandStub.cs" />
+    <Compile Include="Files\PluginPersistence.cs" />
     <Compile Include="PluginPrograms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing.cs" />

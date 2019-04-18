@@ -70,7 +70,7 @@ namespace BetterSynth
             : base(plugin, parameterPrefix, parameterCategory)
         {
             dcBlocker = new DCBlocker(10);
-            lowPass = new SvfFilter(type: SvfFilterType.Low);
+            lowPass = new SvfFilter(type: SvfFilter.FilterType.Low);
             absClipper = new AbsClipper();
             softClipper = new SoftClipper();
             cubicClipper = new CubicClipper();

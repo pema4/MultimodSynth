@@ -33,7 +33,6 @@ namespace BetterSynth
 
             plugin.MidiProcessor.NoteOn += MidiProcessor_NoteOn;
             plugin.MidiProcessor.NoteOff += MidiProcessor_NoteOff;
-            plugin.Opened += (sender, e) => SampleRate = plugin.AudioProcessor.SampleRate;
 
             InitializeParameters();
         }

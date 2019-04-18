@@ -2,17 +2,17 @@
 
 namespace BetterSynth
 {
-    public enum ModulationType
-    {
-        None,
-        FrequencyModulationA,
-        FrequencyModulationB,
-        AmplitudeModulationA,
-        AmplitudeModulationB,
-    }
-
     class Voice : AudioComponent
     {
+        public enum ModulationType
+        {
+            None,
+            FrequencyModulationA,
+            FrequencyModulationB,
+            AmplitudeModulationA,
+            AmplitudeModulationB,
+        }
+
         private Oscillator oscA;
         private Oscillator oscB;
         private Filter filter;
@@ -43,7 +43,7 @@ namespace BetterSynth
 
         public MidiNote Note { get; private set; }
 
-        public ModulationType ModulationType { get; set; }
+        public ModulationType Modulation { get; set; }
 
         public void PlayNote(MidiNote note)
         {
@@ -79,7 +79,7 @@ namespace BetterSynth
                 return 0;
             
             float oscMix = 0;
-            switch (ModulationType)
+            switch (Modulation)
             {
                 case ModulationType.None:
                     if (envA.IsActive)

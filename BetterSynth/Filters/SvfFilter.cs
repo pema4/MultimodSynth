@@ -2,23 +2,23 @@
 
 namespace BetterSynth
 {
-    public enum SvfFilterType
-    {
-        None,
-        Low,
-        Band,
-        High,
-        Notch,
-        Peak,
-        All,
-        Bell,
-        LowShelf,
-        HighShelf,
-    };
-
     class SvfFilter : AudioComponent
     {
-        private SvfFilterType type;
+        public enum FilterType
+        {
+            None,
+            Low,
+            Band,
+            High,
+            Notch,
+            Peak,
+            All,
+            Bell,
+            LowShelf,
+            HighShelf,
+        };
+
+        private FilterType type;
         private float cutoff;
         private float q = 1;
         private float ic1eq = 0;
@@ -35,7 +35,7 @@ namespace BetterSynth
         private float gain;
 
         public SvfFilter(
-            SvfFilterType type = SvfFilterType.None,
+            FilterType type = FilterType.None,
             float cutoff = 20000,
             float q = 1,
             float gain = 0)
@@ -46,7 +46,7 @@ namespace BetterSynth
             SetGain(gain);
         }
 
-        public void SetType(SvfFilterType value)
+        public void SetType(FilterType value)
         {
             type = value;
             UpdateCoefficients();
@@ -78,7 +78,7 @@ namespace BetterSynth
         {
             switch (type)
             {
-                case SvfFilterType.Low:
+                case FilterType.Low:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -89,7 +89,7 @@ namespace BetterSynth
                     m2 = 1;
                     break;
 
-                case SvfFilterType.Band:
+                case FilterType.Band:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -100,7 +100,7 @@ namespace BetterSynth
                     m2 = 0;
                     break;
 
-                case SvfFilterType.High:
+                case FilterType.High:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -111,7 +111,7 @@ namespace BetterSynth
                     m2 = -1;
                     break;
 
-                case SvfFilterType.Notch:
+                case FilterType.Notch:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -122,7 +122,7 @@ namespace BetterSynth
                     m2 = 0;
                     break;
 
-                case SvfFilterType.Peak:
+                case FilterType.Peak:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -133,7 +133,7 @@ namespace BetterSynth
                     m2 = -2;
                     break;
 
-                case SvfFilterType.All:
+                case FilterType.All:
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
@@ -144,7 +144,7 @@ namespace BetterSynth
                     m2 = 0;
                     break;
 
-                case SvfFilterType.Bell:
+                case FilterType.Bell:
                     A = (float)Math.Pow(10, gain / 40);
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / (q * A);
@@ -156,7 +156,7 @@ namespace BetterSynth
                     m2 = 0;
                     break;
 
-                case SvfFilterType.LowShelf:
+                case FilterType.LowShelf:
                     A = (float)Math.Pow(10, gain / 40);
                     g = (float)(Math.Tan(Math.PI * cutoff / SampleRate) / Math.Sqrt(A));
                     k = 1 / q;
@@ -168,7 +168,7 @@ namespace BetterSynth
                     m2 = A * A - 1;
                     break;
 
-                case SvfFilterType.HighShelf:
+                case FilterType.HighShelf:
                     A = (float)Math.Pow(10, gain / 40);
                     g = (float)(Math.Tan(Math.PI * cutoff / SampleRate) * Math.Sqrt(A));
                     k = 1 / q;

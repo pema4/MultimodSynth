@@ -2,25 +2,25 @@
 
 namespace BetterSynth
 {
-    enum AdsrEnvelopeState
-    {
-        Idle,
-        Attack,
-        Decay,
-        Sustain,
-        Release
-    }
-
     /// <summary>
     /// Almost translation of http://www.earlevel.com/main/2013/06/01/envelope-generators/
     /// </summary>
     class AdsrEnvelope
     {
+        public enum EnvelopeState
+        {
+            Idle,
+            Attack,
+            Decay,
+            Sustain,
+            Release
+        }
+
         private double attackBase;
         private double attackCoef;
         private double attackRate;
         private double attackTargetRatio;
-        private AdsrEnvelopeState state;
+        private EnvelopeState state;
         private double currValue;
         private double decayBase;
         private double decayCoef;
@@ -41,7 +41,7 @@ namespace BetterSynth
             SetDecayReleaseTargetRatio(0.0001f);
         }
 
-        public AdsrEnvelopeState State => state;
+        public EnvelopeState State => state;
 
         public void SetAttackRate(double rate)
         {
@@ -98,40 +98,40 @@ namespace BetterSynth
         {
             switch (state)
             {
-                case AdsrEnvelopeState.Idle:
+                case EnvelopeState.Idle:
                     break;
 
-                case AdsrEnvelopeState.Attack:
+                case EnvelopeState.Attack:
                     currValue = attackBase + currValue * attackCoef;
                     if (currValue >= 1f)
                     {
                         currValue = 1f;
                         if (decayCoef != 0)
-                            state = AdsrEnvelopeState.Decay;
+                            state = EnvelopeState.Decay;
                         else
-                            state = AdsrEnvelopeState.Sustain;
+                            state = EnvelopeState.Sustain;
                     }
                     break;
 
-                case AdsrEnvelopeState.Decay:
+                case EnvelopeState.Decay:
                     currValue = decayBase + currValue * decayCoef;
                     if (currValue <= sustainLevel)
                     {
                         currValue = sustainLevel;
-                        state = AdsrEnvelopeState.Sustain;
+                        state = EnvelopeState.Sustain;
                     }
                     break;
 
-                case AdsrEnvelopeState.Sustain:
+                case EnvelopeState.Sustain:
                     currValue = sustainLevel;
                     break;
 
-                case AdsrEnvelopeState.Release:
+                case EnvelopeState.Release:
                     currValue = releaseBase + currValue * releaseCoef;
                     if (currValue <= 0)
                     {
                         currValue = 0;
-                        state = AdsrEnvelopeState.Idle;
+                        state = EnvelopeState.Idle;
                         OnSoundStop();
                     }
                     break;
@@ -155,20 +155,20 @@ namespace BetterSynth
             if (attackCoef != 0)
             {
                 currValue = 0;
-                state = AdsrEnvelopeState.Attack;
+                state = EnvelopeState.Attack;
             }
             else if (decayCoef != 0)
             {
                 currValue = 1;
-                state = AdsrEnvelopeState.Decay;
+                state = EnvelopeState.Decay;
             }
             else
-                state = AdsrEnvelopeState.Sustain;
+                state = EnvelopeState.Sustain;
         }
 
         public void TriggerRelease()
         {
-            state = AdsrEnvelopeState.Release;
+            state = EnvelopeState.Release;
         }
     }
 }

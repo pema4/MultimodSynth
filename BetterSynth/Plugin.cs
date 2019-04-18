@@ -51,5 +51,17 @@ namespace BetterSynth
 
             return base.CreatePrograms(instance);
         }
+
+        /*
+        protected override IVstPluginPersistence CreatePersistence(IVstPluginPersistence instance)
+        {
+            if (instance == null)
+            {
+                return new PluginPersistence(this);
+            }
+
+            return base.CreatePersistence(instance);
+        }
+        */
     }
 }

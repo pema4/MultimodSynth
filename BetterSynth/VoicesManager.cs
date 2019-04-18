@@ -12,7 +12,7 @@ namespace BetterSynth
         private List<Voice> activeVoices;
         private Dictionary<byte, List<Voice>> noteToVoicesMapping;
         private SortedSet<int> freeVoicesIndices;
-        private ModulationType modulationType;
+        private Voice.ModulationType modulationType;
 
         public OscillatorsManager OscAManager { get; set; }
 
@@ -59,18 +59,18 @@ namespace BetterSynth
         private void SetModulationType(float value)
         {
             if (value < 0.2f)
-                modulationType = ModulationType.None;
+                modulationType = Voice.ModulationType.None;
             else if (value < 0.4f)
-                modulationType = ModulationType.AmplitudeModulationA;
+                modulationType = Voice.ModulationType.AmplitudeModulationA;
             else if (value < 0.6f)
-                modulationType = ModulationType.AmplitudeModulationB;
+                modulationType = Voice.ModulationType.AmplitudeModulationB;
             else if (value < 0.8f)
-                modulationType = ModulationType.FrequencyModulationA;
+                modulationType = Voice.ModulationType.FrequencyModulationA;
             else
-                modulationType = ModulationType.FrequencyModulationB;
+                modulationType = Voice.ModulationType.FrequencyModulationB;
 
             foreach (var voice in voicesPool)
-                voice.ModulationType = modulationType;
+                voice.Modulation = modulationType;
         }
 
         protected override void OnSampleRateChanged(float newSampleRate)
@@ -91,7 +91,7 @@ namespace BetterSynth
             var voice = new Voice(Plugin, voiceOscA, voiceOscB, voiceFilter,
                 oscAEnvelope, oscBEnvelope, filterEnvelope);
 
-            voice.ModulationType = modulationType;
+            voice.Modulation = modulationType;
             voice.SoundStop += (sender, e) => StopVoice(voice);
 
             return voice;
