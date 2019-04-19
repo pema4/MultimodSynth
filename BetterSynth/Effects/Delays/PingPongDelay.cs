@@ -18,10 +18,10 @@
 
         public void Process(float inputL, float inputR, out float outputL, out float outputR)
         {
-            outputL = delayL.Peek() * feedback;
-            outputR = delayR.Peek() * feedback;
-            delayL.Process(inputL * leftCoeff + outputR);
-            delayR.Process(inputR * rightCoeff + outputL);
+            outputL = delayL.Peek();
+            outputR = delayR.Peek();
+            delayL.Process(inputL * leftCoeff + outputR * feedback);
+            delayR.Process(inputR * rightCoeff + outputL * feedback);
         }
 
         public void Reset()

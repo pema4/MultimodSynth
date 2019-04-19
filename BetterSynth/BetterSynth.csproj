@@ -92,6 +92,7 @@
     <Compile Include="Files\PluginState.cs" />
     <Compile Include="Files\ProgramReader.cs" />
     <Compile Include="Filters\DCBlocker.cs" />
+    <Compile Include="Generators\WaveTableOscillator.cs" />
     <Compile Include="ParameterFilter.cs" />
     <Compile Include="Generators\AdsrEnvelope.cs" />
     <Compile Include="AudioProcessor.cs" />
@@ -118,7 +119,6 @@
     <Compile Include="Utilities.cs" />
     <Compile Include="Voice.cs" />
     <Compile Include="VoicesManager.cs" />
-    <Compile Include="Generators\WaveTable.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

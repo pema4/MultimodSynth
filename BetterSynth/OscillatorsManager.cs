@@ -14,17 +14,13 @@ namespace BetterSynth
         private float pitchSemi;
         private float pitchMultiplier;
         private ParameterFilter pitchMultiplierFilter;
-        private WaveTable waveTable = Utilities.WaveTables[0];
-        private float waveTablePosition;
-        private ParameterFilter waveTablePositionFilter;
+        private WaveTableOscillator waveTable = Utilities.WaveTables[0];
 
         public VstParameterManager PitchSemiManager { get; private set; }
 
         public VstParameterManager PitchFineManager { get; private set; }
 
         public VstParameterManager WaveTableManager { get; private set; }
-
-        public VstParameterManager WaveTablePositionManager { get; private set; }
 
         public OscillatorsManager(
             Plugin plugin,
@@ -58,15 +54,9 @@ namespace BetterSynth
             pitchMultiplierFilter = new ParameterFilter(UpdatePitchMultiplier, 0);
 
             WaveTableManager = factory.CreateParameterManager(
-                name: "WT",
+                name: "TYPE",
                 valueChangedHandler: SetWaveTable);
             CreateRedirection(WaveTableManager, nameof(WaveTableManager));
-
-            WaveTablePositionManager = factory.CreateParameterManager(
-                name: "WP",
-                valueChangedHandler: SetWaveTablePosition);
-            CreateRedirection(WaveTablePositionManager, nameof(WaveTablePositionManager));
-            waveTablePositionFilter = new ParameterFilter(UpdateWaveTablePosition, 0);
         }
 
         private void SetPitchSemi(float value)
@@ -103,33 +93,15 @@ namespace BetterSynth
             {
                 waveTable = newWaveTable;
                 foreach (var oscillator in oscillators)
-                {
-                    oscillator.WaveTable = waveTable.Clone();
-                    oscillator.WaveTable.Position = waveTablePosition;
-                }
+                    oscillator.SetWaveTable(waveTable.Clone());
             }
-        }
-
-        private void SetWaveTablePosition(float value)
-        {
-            waveTablePositionFilter.SetTarget(value);
-        }
-
-        private void UpdateWaveTablePosition(float value)
-        {
-            waveTablePosition = value;
-            foreach (var oscillator in oscillators)
-                oscillator.WaveTable.Position = waveTablePosition;
         }
 
         public Oscillator CreateNewOscillator()
         {
-            var res = new Oscillator()
-            {
-                WaveTable = waveTable.Clone()
-            };
-            res.WaveTable.Position = waveTablePosition;
+            var res = new Oscillator();
             res.SetPitchMultiplier(pitchMultiplier);
+            res.SetWaveTable(waveTable.Clone());
             oscillators.Add(res);
             return res;
         }
@@ -142,7 +114,6 @@ namespace BetterSynth
         public void Process()
         {
             pitchMultiplierFilter.Process();
-            waveTablePositionFilter.Process();
         }
     }
 }

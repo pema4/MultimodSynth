@@ -1,4 +1,6 @@
-﻿namespace BetterSynth
+﻿using System;
+
+namespace BetterSynth
 {
     class Oscillator : AudioComponent
     {
@@ -7,6 +9,7 @@
         private float phaseIncrement;
         private float pitchMultiplier;
         private float phasor;
+        private WaveTableOscillator waveTable;
 
         public Oscillator()
         {
@@ -17,7 +20,11 @@
             phaseIncrement = overallFrequency / newSampleRate;
         }
 
-        public WaveTable WaveTable { get; set; }
+        public void SetWaveTable(WaveTableOscillator waveTable)
+        {
+            this.waveTable = waveTable;
+            this.waveTable.SetPhaseIncrement(phaseIncrement);
+        }
 
         public void SetNoteFrequency(float value)
         {
@@ -35,23 +42,20 @@
         {
             overallFrequency = noteFrequency * pitchMultiplier;
             phaseIncrement = overallFrequency / SampleRate;
+            waveTable?.SetPhaseIncrement(phaseIncrement);
         }
 
         public float Process(float phaseModulation = 0)
         {
-            float output = WaveTable.Process(phasor);
+            var phase = phasor + phaseModulation;
+            phase -= (float)Math.Floor(phase);
+            var result = waveTable.Process(phase);
 
-            phasor = phasor + phaseIncrement + phaseModulation;
-            if (phasor >= 2)
-                phasor -= 2;
-            else if (phasor >= 1)
+            phasor += phaseIncrement;
+            if (phasor >= 1)
                 phasor -= 1;
-            else if (phasor < -1)
-                phasor += 2;
-            else if (phasor < 0)
-                phasor += 1;
 
-            return output;
+            return result;
         }
 
         public void ResetPhase() => phasor = 0;

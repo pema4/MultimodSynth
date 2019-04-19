@@ -5,7 +5,17 @@ namespace BetterSynth
     class Filter : AudioComponent
     {
         private const float BaseCutoff = 65.41f;
-        
+
+        static Filter()
+        {
+            var length = 1000;
+            FilterModulationLookup = new float[length];
+            for (int i = 0; i < length; ++i)
+                FilterModulationLookup[i] = (float)Math.Pow(2, 10.0 * i / (length - 1));
+        }
+
+        private static float[] FilterModulationLookup;
+
         private SvfFilter filter;
         private float noteFrequency;
         private float cutoffMultiplier;
@@ -59,7 +69,8 @@ namespace BetterSynth
 
         public float Process(float input, float cutoffModulation = 0)
         {
-            var modulatedCutoff = cutoff * (1 + (float)Math.Pow(2, 10 * cutoffModulation));
+            var modulatedCutoff = cutoff;
+            modulatedCutoff *= 1 + FilterModulationLookup[(int)(999 * cutoffModulation)];
             if (modulatedCutoff > 20000)
                 modulatedCutoff = 20000;
             filter.SetCutoff(modulatedCutoff);

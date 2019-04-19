@@ -199,7 +199,7 @@ namespace BetterSynth
 
             input =  amp * lowPass.Process(input);
             if (mode == DistortionMode.None)
-                return input;
+                return dcBlocker.Process(input);
             else
             {
                 var output = currentDistortion.Process(input + dcOffset);

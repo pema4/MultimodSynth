@@ -126,7 +126,7 @@ namespace BetterSynth
                     {
                         float mod = 0;
                         if (envB.IsActive)
-                            mod = fmAmountMultiplier * oscB.Process() * envB.Process();
+                            mod = 10 * oscB.Process() * envB.Process();
                         oscMix = oscA.Process(phaseModulation: mod) * envA.Process();
                     }
                     else
@@ -138,7 +138,7 @@ namespace BetterSynth
                     {
                         float mod = 0;
                         if (envA.IsActive)
-                            mod = fmAmountMultiplier * oscA.Process() * envA.Process();
+                            mod = 10 * oscA.Process() * envA.Process();
                         oscMix = oscB.Process(phaseModulation: mod) * envB.Process();
                     }
                     else
