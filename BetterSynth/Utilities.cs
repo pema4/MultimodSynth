@@ -1,9 +1,5 @@
-﻿using Jacobi.Vst.Core;
-using System;
+﻿using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Windows.Forms;
 
 namespace BetterSynth
 {
@@ -29,19 +25,19 @@ namespace BetterSynth
             try
             {
                 using (var file = new FileStream(path, FileMode.Open))
+                using (var reader = new BinaryReader(file))
                 {
-                    var formatter = new BinaryFormatter();
-                    WaveTables = (WaveTableOscillator[])formatter.Deserialize(file);
+                    WaveTables = new WaveTableOscillator[6];
+                    for (int i = 0; i < WaveTables.Length; ++i)
+                        WaveTables[i] = WaveTableOscillator.Deserialize(reader);
                 }
             }
-            catch (Exception ex) when 
-                (ex is DirectoryNotFoundException ||
-                 ex is FileNotFoundException ||
-                 ex is SerializationException)
+            catch (IOException)
             {
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
                 using (var file = new FileStream(path, FileMode.Create))
+                using (var writer = new BinaryWriter(file))
                 {
                     WaveTables = new[]
                     {
@@ -52,8 +48,8 @@ namespace BetterSynth
                         new WaveTableOscillator(HalfSquareGenerator, 20, DefaultSampleRate / 2),
                         new WaveTableOscillator(QuarterSquareGenerator, 20, DefaultSampleRate / 2),
                     };
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(file, WaveTables);
+                    foreach (var vt in WaveTables)
+                        WaveTableOscillator.Serialize(writer, vt);
                 }
             }
         }
@@ -76,7 +72,7 @@ namespace BetterSynth
         {
             int harmonicsCount = (int)(maxFreq / freq);
             double res = 0;
-            for (int i = 1; i < harmonicsCount; ++i)
+            for (int i = 1; i <= harmonicsCount; ++i)
                 res += Math.Pow(-1, i + 1) * Math.Sin(2 * Math.PI * i * phase) / i;
             return res;
         }

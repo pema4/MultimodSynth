@@ -197,11 +197,12 @@ namespace BetterSynth
             mixFilter.Process();
             asymmetryFilter.Process();
 
-            input =  amp * lowPass.Process(input);
+            input *= amp;
             if (mode == DistortionMode.None)
                 return dcBlocker.Process(input);
             else
             {
+                input = lowPass.Process(input);
                 var output = currentDistortion.Process(input + dcOffset);
                 output = dcBlocker.Process(output);
                 return dryCoeff * input + wetCoeff * output;

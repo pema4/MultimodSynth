@@ -44,7 +44,7 @@ namespace BetterSynth
                 defaultValue: 1,
                 valueChangedHandler: SetCutoffMultiplierTarget);
             CreateRedirection(CutoffManager, nameof(CutoffManager));
-            cutoffMultiplierFilter = new ParameterFilter(UpdateCutoffMultiplier, 1);
+            cutoffMultiplierFilter = new ParameterFilter(UpdateCutoffMultiplier, 1, 10);
 
             TrackingCoeffManager = factory.CreateParameterManager(
                 name: "TRK",

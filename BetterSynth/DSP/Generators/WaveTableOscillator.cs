@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace BetterSynth
 {
@@ -8,7 +9,7 @@ namespace BetterSynth
         private const double DefaultSampleRate = 44100;
 
         [Serializable]
-        private class WaveTable
+        public class WaveTable
         {
             public int Length;
             public float[] Samples;
@@ -40,28 +41,44 @@ namespace BetterSynth
                     Samples = samples,
                 };
             }
+            Normalize();
         }
 
         private static float[] PrepareSamples(GeneratorFunction generator, double freq, double maxFreq)
         {
-            var result = new float[(int)(2 * DefaultSampleRate / freq)];
+            var length = (int)DefaultSampleRate;
+            var result = new float[length];
             for (int i = 0; i < result.Length; ++i)
                 result[i] = (float)generator((double)i / result.Length, freq, maxFreq);
 
             return result;
         }
 
-        private WaveTableOscillator(WaveTable[] waveTables)
+        private void Normalize()
         {
-            this.waveTables = waveTables;
-            waveTablesAmount = waveTables.Length;
+            float maxAbs = 0;
+            foreach (var wt in waveTables)
+                foreach (var sample in wt.Samples)
+                    if (Math.Abs(sample) > maxAbs)
+                        maxAbs = Math.Abs(sample);
+            foreach (var wt in waveTables)
+                for (int i = 0; i < wt.Samples.Length; ++i)
+                    wt.Samples[i] /= maxAbs;
+        }
+
+        private WaveTableOscillator()
+        {
         }
 
         public WaveTableOscillator Clone()
         {
-            return new WaveTableOscillator(waveTables);
+            return new WaveTableOscillator
+            {
+                waveTables = waveTables,
+                waveTablesAmount = waveTables.Length
+            };
         }
-        
+
         public void SetPhaseIncrement(double phaseIncrement)
         {
             this.phaseIncrement = (float)phaseIncrement;
@@ -86,6 +103,44 @@ namespace BetterSynth
             float rightCoeff = temp - leftIndex;
             float leftCoeff = 1 - rightCoeff;
             return leftCoeff * waveTable.Samples[leftIndex] + rightCoeff * waveTable.Samples[rightIndex];
+        }
+
+        public static void Serialize(BinaryWriter writer, WaveTableOscillator obj)
+        {
+            writer.Write(obj.waveTablesAmount);
+            foreach (var waveTable in obj.waveTables)
+            {
+                writer.Write(waveTable.Length);
+                writer.Write(waveTable.PhaseIncrement);
+                foreach (var sample in waveTable.Samples)
+                    writer.Write(sample);
+            }
+        }
+
+        public static WaveTableOscillator Deserialize(BinaryReader reader)
+        {
+            var waveTablesAmount = reader.ReadInt32();
+            var waveTables = new WaveTable[waveTablesAmount];
+            for (int i = 0; i < waveTables.Length; ++i)
+            {
+                var length = reader.ReadInt32();
+                var phaseIncrement = reader.ReadSingle();
+                var samples = new float[length];
+                for (int j = 0; j < samples.Length; ++j)
+                    samples[j] = reader.ReadSingle();
+                waveTables[i] = new WaveTable
+                {
+                    Length = length,
+                    PhaseIncrement = phaseIncrement,
+                    Samples = samples,
+                };
+            }
+
+            return new WaveTableOscillator
+            {
+                waveTablesAmount = waveTablesAmount,
+                waveTables = waveTables,
+            };
         }
     }
 }

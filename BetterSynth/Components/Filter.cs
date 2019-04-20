@@ -6,6 +6,8 @@ namespace BetterSynth
     {
         private const float BaseCutoff = 65.41f;
 
+        private static float[] FilterModulationLookup;
+
         static Filter()
         {
             var length = 1000;
@@ -13,8 +15,6 @@ namespace BetterSynth
             for (int i = 0; i < length; ++i)
                 FilterModulationLookup[i] = (float)Math.Pow(2, 10.0 * i / (length - 1));
         }
-
-        private static float[] FilterModulationLookup;
 
         private SvfFilter filter;
         private float noteFrequency;

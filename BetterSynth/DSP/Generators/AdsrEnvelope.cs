@@ -5,6 +5,7 @@ namespace BetterSynth
     /// <summary>
     /// Almost translation of http://www.earlevel.com/main/2013/06/01/envelope-generators/
     /// </summary>
+    [Serializable]
     class AdsrEnvelope
     {
         public enum EnvelopeState

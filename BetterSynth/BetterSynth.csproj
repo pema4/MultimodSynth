@@ -23,7 +23,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <LangVersion>7.3</LangVersion>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -65,10 +65,14 @@
     <Reference Include="Jacobi.Vst.Interop">
       <HintPath>$(SolutionDir)\Lib\VST.NET.1.1\CLR4\$(PlatformName)\Release\Jacobi.Vst.Interop.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -77,48 +81,46 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DelayManager.cs" />
-    <Compile Include="Effects\Distortion\AbsClipper.cs" />
-    <Compile Include="AudioComponent.cs" />
-    <Compile Include="AudioComponentWithParameters.cs" />
-    <Compile Include="DistortionManager.cs" />
-    <Compile Include="Effects\Distortion\BitCrusher.cs" />
-    <Compile Include="Effects\Distortion\CubicClipper.cs" />
-    <Compile Include="Effects\Delays\IDelay.cs" />
-    <Compile Include="Effects\Delays\PingPongDelay.cs" />
-    <Compile Include="Effects\Delays\StereoOffsetDelay.cs" />
-    <Compile Include="Effects\Delays\VariousTimeDelay.cs" />
-    <Compile Include="Effects\Distortion\IDistortion.cs" />
-    <Compile Include="Files\PluginState.cs" />
-    <Compile Include="Files\ProgramReader.cs" />
-    <Compile Include="Filters\DCBlocker.cs" />
-    <Compile Include="Generators\WaveTableOscillator.cs" />
-    <Compile Include="ParameterFilter.cs" />
-    <Compile Include="Generators\AdsrEnvelope.cs" />
-    <Compile Include="AudioProcessor.cs" />
-    <Compile Include="Filters\Downsampler.cs" />
-    <Compile Include="Effects\Distortion\SampleRateReductor.cs" />
-    <Compile Include="Envelope.cs" />
-    <Compile Include="EnvelopesManager.cs" />
-    <Compile Include="Filter.cs" />
-    <Compile Include="FiltersManager.cs" />
-    <Compile Include="MidiProcessor.cs" />
-    <Compile Include="Effects\Delays\MonoDelay.cs" />
-    <Compile Include="Oscillator.cs" />
-    <Compile Include="OscillatorsManager.cs" />
-    <Compile Include="ParameterFactory.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="PluginCommandStub.cs" />
-    <Compile Include="Files\PluginPersistence.cs" />
-    <Compile Include="PluginPrograms.cs" />
+    <Compile Include="Components\DelayManager.cs" />
+    <Compile Include="DSP\Effects\Distortion\AbsClipper.cs" />
+    <Compile Include="Components\AudioComponent.cs" />
+    <Compile Include="Components\AudioComponentWithParameters.cs" />
+    <Compile Include="Components\DistortionManager.cs" />
+    <Compile Include="DSP\Effects\Distortion\BitCrusher.cs" />
+    <Compile Include="DSP\Effects\Distortion\CubicClipper.cs" />
+    <Compile Include="DSP\Effects\Delays\IDelay.cs" />
+    <Compile Include="DSP\Effects\Delays\PingPongDelay.cs" />
+    <Compile Include="DSP\Effects\Delays\StereoOffsetDelay.cs" />
+    <Compile Include="DSP\Effects\Delays\VariousTimeDelay.cs" />
+    <Compile Include="DSP\Effects\Distortion\IDistortion.cs" />
+    <Compile Include="DSP\Filters\DCBlocker.cs" />
+    <Compile Include="DSP\Generators\WaveTableOscillator.cs" />
+    <Compile Include="Components\ParameterFilter.cs" />
+    <Compile Include="DSP\Generators\AdsrEnvelope.cs" />
+    <Compile Include="Plugin Parts\AudioProcessor.cs" />
+    <Compile Include="DSP\Filters\Downsampler.cs" />
+    <Compile Include="DSP\Effects\Distortion\SampleRateReductor.cs" />
+    <Compile Include="Components\Envelope.cs" />
+    <Compile Include="Components\EnvelopesManager.cs" />
+    <Compile Include="Components\Filter.cs" />
+    <Compile Include="Components\FiltersManager.cs" />
+    <Compile Include="Plugin Parts\MidiProcessor.cs" />
+    <Compile Include="DSP\Effects\Delays\MonoDelay.cs" />
+    <Compile Include="Components\Oscillator.cs" />
+    <Compile Include="Components\OscillatorsManager.cs" />
+    <Compile Include="Plugin Parts\ParameterFactory.cs" />
+    <Compile Include="Plugin Parts\Plugin.cs" />
+    <Compile Include="Plugin Parts\PluginCommandStub.cs" />
+    <Compile Include="Plugin Parts\PluginPrograms.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Routing.cs" />
-    <Compile Include="Filters\SvfFilter.cs" />
-    <Compile Include="Effects\Distortion\SoftClipper.cs" />
-    <Compile Include="Generators\SineLFO.cs" />
+    <Compile Include="Plugin Parts\Routing.cs" />
+    <Compile Include="DSP\Filters\SvfFilter.cs" />
+    <Compile Include="DSP\Effects\Distortion\SoftClipper.cs" />
+    <Compile Include="DSP\Generators\SineLFO.cs" />
+    <Compile Include="UI\WpfControlWrapper.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="Voice.cs" />
-    <Compile Include="VoicesManager.cs" />
+    <Compile Include="Components\Voice.cs" />
+    <Compile Include="Components\VoicesManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
