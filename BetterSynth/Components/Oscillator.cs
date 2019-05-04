@@ -2,49 +2,86 @@
 
 namespace BetterSynth
 {
+    /// <summary>
+    /// Компонент голоса плагина, представляющий осциллятор.
+    /// </summary>
     class Oscillator : AudioComponent
     {
+        /// <summary>
+        /// Частота играемой ноты.
+        /// </summary>
         private float noteFrequency;
-        private float overallFrequency;
+
+        /// <summary>
+        /// Играемая частота.
+        /// </summary>
+        private float frequency;
+
+        /// <summary>
+        /// Изменение фазы за 1 сэмпл.
+        /// </summary>
         private float phaseIncrement;
+
+        /// <summary>
+        /// Множитель частоты.
+        /// </summary>
         private float pitchMultiplier;
+
+        /// <summary>
+        /// Текущая фаза осциллятора.
+        /// </summary>
         private float phasor;
+
+        /// <summary>
+        /// Ссылка на используемый объект класса WaveTable.
+        /// </summary>
         private WaveTableOscillator waveTable;
 
-        public Oscillator()
-        {
-        }
-
-        protected override void OnSampleRateChanged(float newSampleRate)
-        {
-            phaseIncrement = overallFrequency / newSampleRate;
-        }
-
+        /// <summary>
+        /// Устанавливает новый объект класса WaveTable.
+        /// </summary>
+        /// <param name="waveTable"></param>
         public void SetWaveTable(WaveTableOscillator waveTable)
         {
             this.waveTable = waveTable;
             this.waveTable.SetPhaseIncrement(phaseIncrement);
         }
 
+        /// <summary>
+        /// Устанавливает новое значение частоты играемой ноты.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetNoteFrequency(float value)
         {
             noteFrequency = value;
             UpdateCoefficients();
         }
 
+        /// <summary>
+        /// Устанавливает новое значение множителя частоты.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetPitchMultiplier(float value)
         {
             pitchMultiplier = value;
             UpdateCoefficients();
         }
 
+        /// <summary>
+        /// Обновляет все коэффициенты.
+        /// </summary>
         private void UpdateCoefficients()
         {
-            overallFrequency = noteFrequency * pitchMultiplier;
-            phaseIncrement = overallFrequency / SampleRate;
+            frequency = noteFrequency * pitchMultiplier;
+            phaseIncrement = frequency / SampleRate;
             waveTable?.SetPhaseIncrement(phaseIncrement);
         }
 
+        /// <summary>
+        /// Обработка новых входных данных.
+        /// </summary>
+        /// <param name="phaseModulation">Фазовая модуляция.</param>
+        /// <returns>Выходной сигнал.</returns>
         public float Process(float phaseModulation = 0)
         {
             var phase = phasor + phaseModulation;
@@ -63,6 +100,11 @@ namespace BetterSynth
             return result;
         }
 
-        public void ResetPhase() => phasor = 0;
+        public void Reset() => phasor = 0;
+
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            phaseIncrement = frequency / newSampleRate;
+        }
     }
 }

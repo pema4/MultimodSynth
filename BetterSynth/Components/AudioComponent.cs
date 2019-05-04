@@ -1,14 +1,14 @@
 ﻿namespace BetterSynth
 {
     /// <summary>
-    /// Base class that provides sample rate property and sample rate changed handler.
+    /// Базовый класс, предоставляющий своим наследникам информацию о частоте дискретизации.
     /// </summary>
     abstract class AudioComponent
     {
         private float sampleRate;
 
         /// <summary>
-        /// Sample rate at which component should process its inputs and outputs.
+        /// Частота дискретизации, на которой работает данный компонент
         /// </summary>
         public float SampleRate
         {
@@ -24,10 +24,9 @@
         }
 
         /// <summary>
-        /// Handles changes of the SampleRate property.
-        /// Used mainly for updating other properties sample rate value.
+        /// Обработчик изменения частоты дискретизации.
         /// </summary>
-        /// <param name="newSampleRate">New sample rate</param>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected virtual void OnSampleRateChanged(float newSampleRate)
         {
         }

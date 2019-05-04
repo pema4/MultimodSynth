@@ -4,12 +4,12 @@ using System;
 namespace BetterSynth
 {
     /// <summary>
-    /// Represents a delay effect component of the plugin.
+    /// Компонент плагина, отвечающий за эффект "дисторшн".
     /// </summary>
     class DistortionManager : AudioComponentWithParameters
     {
         /// <summary>
-        /// Specifies a distortion mode.
+        /// Указывает тип эффекта дисторшн.
         /// </summary>
         public enum DistortionMode
         {
@@ -20,61 +20,129 @@ namespace BetterSynth
             BitCrush,
             SampleRateReduction,
         }
-
+        
+        /// <summary>
+        /// Текущая сила эффекта дисторшн.
+        /// </summary>
         private float amount;
+
+        /// <summary>
+        /// Текущий уровень громкости входного сигнала.
+        /// </summary>
         private float amp = 1;
+
+        /// <summary>
+        /// Текущее значение постоянного амплитудного смещения.
+        /// </summary>
         private float dcOffset;
+
+        /// <summary>
+        /// Текущий коэффициент "чистого" сигнала без эффекта.
+        /// </summary>
         private float dryCoeff = 1;
+
+        /// <summary>
+        /// Текущий тип эффекта дисторшн.
+        /// </summary>
         private DistortionMode mode;
+
+        /// <summary>
+        /// Текущий коэффициент сигнала с применённым к нему эффектом.
+        /// </summary>
         private float wetCoeff;
+
+        /// <summary>
+        /// Текущий объект эффекта дисторшн.
+        /// </summary>
         private IDistortion currentDistortion;
-        private SoftClipper softClipper;
-        private AbsClipper absClipper;
-        private CubicClipper cubicClipper;
-        private BitCrusher bitCrusher;
-        private SampleRateReductor sampleRateReductor;
+
+        /// <summary>
+        /// Объект класса SoftClipper.
+        /// </summary>
+        private readonly SoftClipper softClipper;
+
+        /// <summary>
+        /// Объект класса AbsClipper.
+        /// </summary>
+        private readonly AbsClipper absClipper;
+
+        /// <summary>
+        /// Объект класса CubicClipper.
+        /// </summary>
+        private readonly CubicClipper cubicClipper;
+
+        /// <summary>
+        /// Объект класса BitCrusher.
+        /// </summary>
+        private readonly BitCrusher bitCrusher;
+
+        /// <summary>
+        /// Объект класса SampleRateReductor.
+        /// </summary>
+        private readonly SampleRateReductor sampleRateReductor;
+
+        /// <summary>
+        /// Фильтр высоких частот для устранения постоянного амплитудного смещения.
+        /// </summary>
         private DCBlocker dcBlocker;
+
+        /// <summary>
+        /// Фильтр низких частот, применяющийся к входному сигналу.
+        /// </summary>
         private SvfFilter lowPass;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра
+        /// уровня громкости входного сигнала.
+        /// </summary>
         private ParameterFilter ampFilter;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра количества входного и выходного сигналов.
+        /// </summary>
         private ParameterFilter mixFilter;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра постоянного амплитудного сдвига.
+        /// </summary>
         private ParameterFilter asymmetryFilter;
 
         /// <summary>
-        /// Manager of the distortion mode parameter.
+        /// Объект, управляющий параметром типа эффекта.
         /// </summary>
         public VstParameterManager ModeManager { get; private set; }
 
         /// <summary>
-        /// Manager of the distortion amount parameter.
+        /// Объект, управляющий параметром силы эффекта.
         /// </summary>
         public VstParameterManager AmountManager { get; private set; }
 
         /// <summary>
-        /// Manager of the distortion asymmetry parameter.
+        /// Объект, управляющий параметром постоянного амплитудного сдвига.
         /// </summary>
         public VstParameterManager AsymmetryManager { get; private set; }
 
         /// <summary>
-        /// Manager of the distortion preamp parameter.
+        /// Объект, управляющий параметром громкости входного сигнала.
         /// </summary>
         public VstParameterManager AmpManager { get; private set; }
 
         /// <summary>
-        /// Manager of the distortion lowpass cutoff parameter.
+        /// Объект, управляющий параметром частоты среза фильтра низких частот.
         /// </summary>
         public VstParameterManager LowPassCutoffManager { get; private set; }
 
         /// <summary>
-        /// Manager of the distortion mix parameter.
+        /// Объект, управляющий параметром количества выходного и входного сигналов.
         /// </summary>
         public VstParameterManager MixManager { get; private set; }
 
         /// <summary>
-        /// Initialized a new DistortionManager class instance that belongs to given plugin
-        /// and has specified parameter name prefix.
+        /// Инициализирует новый объект класса DistortionManager, принадлежащий переданному плагину
+        /// и имеющий переданный префикс названия параметров.
         /// </summary>
-        /// <param name="plugin">A plugin instance to which a new distortion belongs.</param>
-        /// <param name="parameterPrefix">A prefix for parameter's names.</param>
+        /// <param name="plugin">Плагин, которому принадлежит создаваемый объект.</param>
+        /// <param name="parameterPrefix">Префикс названия параметров.</param>
         public DistortionManager(
             Plugin plugin,
             string parameterPrefix = "D")
@@ -92,43 +160,43 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Initializes parameter managers of the DistortionManager class instance.
+        /// Инициализирует параметры с помощью переданной фабрики параметров.
         /// </summary>
-        /// <param name="factory">A parameter factory used for parameter initialization.</param>
+        /// <param name="factory">Фабрика параметров</param>
         protected override void InitializeParameters(ParameterFactory factory)
         {
-            // Distortion mode parameter.
+            // Параметр типа дисторшна.
             ModeManager = factory.CreateParameterManager(
                 name: "TYPE",
                 valueChangedHandler: SetMode);
 
-            // Distotion amount parameter.
+            // Параметр силы эффекта.
             AmountManager = factory.CreateParameterManager(
                 name: "AMNT",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetAmount);
 
-            // Distortion asymmetry parameter.
+            // Параметр постоянного амплитудного сдвига.
             AsymmetryManager = factory.CreateParameterManager(
                 name: "ASYM",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetAsymmetryTarget);
             asymmetryFilter = new ParameterFilter(UpdateAsymmetry, 0);
 
-            // Distortion amp parameter.
+            // Параметр уровня громкости входного сигнала.
             AmpManager = factory.CreateParameterManager(
                 name: "AMP",
                 defaultValue: 0.25f,
                 valueChangedHandler: SetAmpTarget);
             ampFilter = new ParameterFilter(UpdateAmp, 1);
 
-            // Distortion lowpass cutoff parameter.
+            // Параметр частоты среза фильтра низких частот для входного сигнала.
             LowPassCutoffManager = factory.CreateParameterManager(
                 name: "LP",
                 defaultValue: 1,
                 valueChangedHandler: SetLowPassCutoff);
 
-            // Distortion mix parameter.
+            // Параметр количества выходного и входного сигналов.
             MixManager = factory.CreateParameterManager(
                 name: "MIX",
                 defaultValue: 0.5f,
@@ -137,9 +205,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the distortion mode parameter changes.
+        /// Обработчик изменения типа дисторшна.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetMode(float value)
         {
             var newMode = Converters.ToDistortionMode(value);
@@ -168,9 +236,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Changes a current distortion.
+        /// Изменяет текущий объект дисторшна на новый.
         /// </summary>
-        /// <param name="newDelay">A new current distortion.</param>
+        /// <param name="newDistortion">Новый объект дисторшна.</param>
         private void ChangeDistortion(IDistortion newDistortion)
         {
             currentDistortion = newDistortion;
@@ -178,9 +246,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the amount parameter changes.
+        /// Обработчик изменения силы эффекта.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetAmount(float value)
         {
             amount = value;
@@ -188,28 +256,27 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the asymmetry parameter changes.
-        /// Updates a target value of the asymmetry smoothing filter.
+        /// Обработчик изменения коэффициента постоянного амплитудного сдвига.
         /// </summary>
-        /// <param name="target">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetAsymmetryTarget(float value)
         {
             asymmetryFilter.SetTarget(value);
         }
 
         /// <summary>
-        /// Handles the asymmetry parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения постоянного амплитудного сдвига.
         /// </summary>
-        /// <param name="value">A new value of the asymmetry.</param>
+        /// <param name="value">Новое значение постоянного амплитудного сдвига.</param>
         private void UpdateAsymmetry(float value)
         {
             dcOffset = (float)Converters.ToAsymmetry(value);
         }
 
         /// <summary>
-        /// Handles the lowpass cutoff parameter changes.
+        /// Обработчик изменения частоты среза фильтра низких частот.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetLowPassCutoff(float value)
         {
             var cutoff = (float)Converters.ToDistortionLowpassCutoff(value);
@@ -217,9 +284,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the dry-wet mix parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения количества выходного и входного сигнала.
         /// </summary>
-        /// <param name="value">A new value of the dry-wet mix.</param>
+        /// <param name="value">Новое значение.</param>
         private void UpdateMix(float value)
         {
             wetCoeff = value;
@@ -227,29 +294,28 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the preamp parameter changes.
-        /// Updates a target value of the preamp smoothing filter.
+        /// Обработчик изменения уровня входного сигнала.
         /// </summary>
-        /// <param name="target">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetAmpTarget(float value)
         {
             ampFilter.SetTarget((float)Converters.ToDistortionAmp(value));
         }
 
         /// <summary>
-        /// Handles the preamp parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения уровня входного сигнала.
         /// </summary>
-        /// <param name="value">A new value of the preamp.</param>
+        /// <param name="value">Новое значение уровня входного сигнала.</param>
         private void UpdateAmp(float value)
         {
             amp = value;
         }
 
         /// <summary>
-        /// Performs a processing turn.
+        /// Обработка новых входных данных.
         /// </summary>
-        /// <param name="input">Input.</param>
-        /// <returns>Output.</returns>
+        /// <param name="input">Входящий сигнал</param>
+        /// <returns>Выходящий сигнал</returns>
         public float Process(float input)
         {
             ampFilter.Process();
@@ -269,9 +335,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the sample rate value changes.
+        /// Обработчик изменения частоты дискретизации.
         /// </summary>
-        /// <param name="newSampleRate">A new sample rate value.</param>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             dcBlocker.SampleRate = newSampleRate;

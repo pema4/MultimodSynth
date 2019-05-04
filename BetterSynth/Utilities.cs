@@ -19,7 +19,7 @@ namespace BetterSynth
 
         private static void GetOrGenerateWaveTables()
         {
-            var directory = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\BetterSynthData";
+            var directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var path = directory + @"\waveTables.bin";
 
             try

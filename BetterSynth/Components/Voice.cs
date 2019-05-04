@@ -51,8 +51,8 @@ namespace BetterSynth
             noteVolume = note.Velocity / 128f;
             var noteFrequency = (float)Utilities.MidiNoteToFrequency(note.NoteNo);
 
-            oscA.ResetPhase();
-            oscB.ResetPhase();
+            oscA.Reset();
+            oscB.Reset();
             filter.Reset();
 
             oscA.SetNoteFrequency(noteFrequency);

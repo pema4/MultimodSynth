@@ -72,17 +72,7 @@ namespace BetterSynth.UI
             ADecayReleaseCurve.AttachTo(envA.DecayReleaseCurveManager, color,
                 Converters.EnvelopeCurveToString);
         }
-
-        private string ShowPercents(double x) => $"{100 * x:F1}%";
-
-        private string ShowCurve(double x) => $"{100 * x:F1}% linear";
-
-        private string ShowCents(double x) => $"{x:F0} cents";
-
-        private string ShowTime(double x) => $"{x:F2} s";
-
-        private string ShowSemitones(double x) => $"{x:F0} semitones";
-
+        
         private void BindOscB(OscillatorsManager oscB, EnvelopesManager envB)
         {
             var color = (SolidColorBrush)Resources["oscBKnobColor"];

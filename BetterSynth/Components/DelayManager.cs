@@ -4,12 +4,12 @@ using System;
 namespace BetterSynth
 {
     /// <summary>
-    /// Represents a delay effect component of the plugin.
+    /// Компонент плагина, отвечающий за эффект "дилэй".
     /// </summary>
     class DelayManager : AudioComponentWithParameters
     {
         /// <summary>
-        /// Specifies a delay stereo mode.
+        /// Указывает тип эффекта дилэй.
         /// </summary>
         public enum StereoMode
         {
@@ -19,73 +19,149 @@ namespace BetterSynth
             PingPong,
         }
 
+        /// <summary>
+        /// Максимальная амплитуда генератора низких частот.
+        /// </summary>
         private const float MaxLfoDepth = 0.05f;
+
+        /// <summary>
+        /// Максимальное время задержки в секундах.
+        /// </summary>
         private const float MaxTime = 1f;
 
+        /// <summary>
+        /// Текущее время задержки (в секундах).
+        /// </summary>
         private float delay;
+
+        /// <summary>
+        /// Текущий коэффициент "чистого" сигнала без эффекта.
+        /// </summary>
         private float dryCoeff = 1;
+
+        /// <summary>
+        /// Текущий коэффициент обратной связи.
+        /// </summary>
         private float feedback;
+        
+        /// <summary>
+        /// Текущая амплитуда генератора низких частот
+        /// (в диапазоне [0, 1]).
+        /// </summary>
         private float lfoDepth;
+
+        /// <summary>
+        /// Максимальное значение времени задержки (в сэмплах).
+        /// </summary>
         private float maxDelay;
+
+        /// <summary>
+        /// Текущий тип эффекта дилэй.
+        /// </summary>
         private StereoMode mode;
+
+        /// <summary>
+        /// Текущее значение коэффициента, показывающего, как сильно
+        /// отличаются левый и правый канал выходного сигнала (значение в диапазоне [-1, 1]).
+        /// </summary>
         private float stereoAmount;
+
+        /// <summary>
+        /// Текущий коффициент сигнала с применённым к нему эффектом.
+        /// </summary>
         private float wetCoeff;
+
+        /// <summary>
+        /// Знак сигнала с применённым к нему эффектом.
+        /// </summary>
         private int wetSign = 1;
+
+        /// <summary>
+        /// Текущий объект эффекта дилэй.
+        /// </summary>
         private IDelay currentDelay;
-        private PingPongDelay pingPongDelay;
-        private VariousTimeDelay variousTimeDelay;
-        private StereoOffsetDelay stereoOffsetDelay;
+
+        /// <summary>
+        /// Объект класа PingPongDelay.
+        /// </summary>
+        private readonly PingPongDelay pingPongDelay;
+
+        /// <summary>
+        /// Объект класса VariousTimeDelay.
+        /// </summary>
+        private readonly VariousTimeDelay variousTimeDelay;
+
+        /// <summary>
+        /// Объект класса StereoOffsetDelay.
+        /// </summary>
+        private readonly StereoOffsetDelay stereoOffsetDelay;
+
+        /// <summary>
+        /// Генератор низких частот.
+        /// </summary>
         private SineLFO lfo;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра времени задержки.
+        /// </summary>
         private ParameterFilter timeFilter;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра стерео.
+        /// </summary>
         private ParameterFilter stereoAmountFilter;
+
+        /// <summary>
+        /// Фильтр низких частот, используемый для сглаживания параметра количество входного сигнала и выходного.
+        /// </summary>
         private ParameterFilter mixFilter;
 
         /// <summary>
-        /// Manager of the delay stereo mode parameter.
+        /// Объект, управляющий параметром типа эффекта.
         /// </summary>
         public VstParameterManager ModeManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay time parameter.
+        /// Объект, управляющий параметром времени задержки.
         /// </summary>
         public VstParameterManager TimeManager { get; set; }
         
         /// <summary>
-        /// Manager of the delay feedback parameter.
+        /// Объект, управляющий параметром коэффициента обратной связи.
         /// </summary>
         public VstParameterManager FeedbackManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay stereo amount parameter.
+        /// Объект, управляющий параметром стерео.
         /// </summary>
         public VstParameterManager StereoAmountManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay mix parameter.
+        /// Объект, управляющий параметром количества входного и выходного сигналов.
         /// </summary>
         public VstParameterManager MixManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay invert parameter.
+        /// Объект, управляющий параметром инвертирования выходного сигнала.
         /// </summary>
         public VstParameterManager InvertManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay lfo rate parameter.
+        /// Объект, управляющий параметром частоты генератора низких частот.
         /// </summary>
         public VstParameterManager LfoRateManager { get; set; }
 
         /// <summary>
-        /// Manager of the delay lfo depth parameter.
+        /// Объект, управляющий параметром амплитуды генератора низких частот.
         /// </summary>
         public VstParameterManager LfoDepthManager { get; set; }
 
         /// <summary>
-        /// Initialized a new DelayManager class instance that belongs to given plugin
-        /// and has specified parameter name prefix.
+        /// Инициализирует новый объект класса DelayManager, принадлежащий переданному плагину
+        /// и имеющий переданный префикс названия параметров.
         /// </summary>
-        /// <param name="plugin">A plugin instance to which a new delay belongs.</param>
-        /// <param name="parameterPrefix">A prefix for parameter's names.</param>
+        /// <param name="plugin">Плагин, которому принадлежит создаваемый объект.</param>
+        /// <param name="parameterPrefix">Префикс названия параметров.</param>
         public DelayManager(Plugin plugin, string parameterPrefix = "DL")
             : base(plugin, parameterPrefix)
         {
@@ -96,19 +172,19 @@ namespace BetterSynth
 
             InitializeParameters();
         }
-        
+
         /// <summary>
-        /// Initializes parameter managers of the DelayManager class instance.
+        /// Инициализирует параметры с помощью переданной фабрики параметров.
         /// </summary>
-        /// <param name="factory">A parameter factory used for parameters initialization.</param>
+        /// <param name="factory">Фабрика параметров</param>
         protected override void InitializeParameters(ParameterFactory factory)
         {
-            // Delay mode parameter.
+            // Параметр типа дилэя.
             ModeManager = factory.CreateParameterManager(
                 name: "MODE",
                 valueChangedHandler: SetMode);
 
-            // Delay time parameter.
+            // Параметр времени задержки.
             TimeManager = factory.CreateParameterManager(
                 name: "TIME",
                 defaultValue: 0.8f,
@@ -120,46 +196,46 @@ namespace BetterSynth
                     currentDelay?.Reset();
             };
 
-            // Delay feedback parameter.
+            // Параметр коэффициента обратной связи.
             FeedbackManager = factory.CreateParameterManager(
                 name: "FB",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetFeedback);
 
-            // Delay stereo amount parameter.
+            // Параметр стерео-эффекта.
             StereoAmountManager = factory.CreateParameterManager(
                 name: "STER",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetStereoAmountTarget);
             stereoAmountFilter = new ParameterFilter(UpdateStereoAmount, 0, 100);
 
-            // Delay mix parameter.
+            // Параметр количества выходного и входного сигналов.
             MixManager = factory.CreateParameterManager(
                 name: "MIX",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetMixTarget);
             mixFilter = new ParameterFilter(UpdateMix, 0);
 
-            // Delay invert parameter.
+            // Параметр инвертирования выходного сигнала.
             InvertManager = factory.CreateParameterManager(
                 name: "INV",
                 valueChangedHandler: SetInvert);
 
-            // Delay lfo rate parameter.
+            // Параметр частоты генератора низких частот.
             LfoRateManager = factory.CreateParameterManager(
                 name: "RATE",
                 valueChangedHandler: SetLfoRate);
 
-            // Delay lfo depth parameter.
+            // Параметр амплитуды генератора низких частот.
             LfoDepthManager = factory.CreateParameterManager(
                 name: "DEPTH",
                 valueChangedHandler: SetLfoDepth);
         }
 
         /// <summary>
-        /// Handles the delay mode parameter changes.
+        /// Обработчик изменения типа дилэя.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetMode(float value)
         {
             var newMode = Converters.ToDelayMode(value);
@@ -182,9 +258,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Changes a current delay.
+        /// Изменяет текущий объект дилэя на новый.
         /// </summary>
-        /// <param name="newDelay">A new current delay.</param>
+        /// <param name="newDelay">Новый объект дилэя.</param>
         private void ChangeDelay(IDelay newDelay)
         {
             currentDelay = newDelay;
@@ -194,28 +270,27 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the delay time parameter changes.
-        /// Updates a target value of the delay time smoothing filter.
+        /// Обработчик изменения времени задержки.
         /// </summary>
-        /// <param name="target">A new target value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetTimeTarget(float target)
         {
             timeFilter.SetTarget((float)Converters.ToDelayTime(target));
         }
 
         /// <summary>
-        /// Handles the delay time parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения времени задержки.
         /// </summary>
-        /// <param name="value">A new value of the delay time.</param>
+        /// <param name="value">Новое значение времени задержки.</param>
         private void UpdateTime(float value)
         {
             delay = value * SampleRate;
         }
 
         /// <summary>
-        /// Handles the delay feedback parameter changes.
+        /// Обработчик изменения коэффициента обратной связи.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetFeedback(float value)
         {
             feedback = value;
@@ -223,19 +298,18 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the stereo amount parameter changes.
-        /// Updates a target value of the stereo amount smoothing filter.
+        /// Обработчик изменения параметра стерео-эффекта.
         /// </summary>
-        /// <param name="target">A new target value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetStereoAmountTarget(float target)
         {
             stereoAmountFilter.SetTarget((float)Converters.ToStereoAmount(target));
         }
 
         /// <summary>
-        /// Handles the delay time parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения параметра стерео-эффекта.
         /// </summary>
-        /// <param name="value">A new value of the stereo amount.</param>
+        /// <param name="value">Новое значение стерео-эффекта.</param>
         private void UpdateStereoAmount(float value)
         {
             stereoAmount = value;
@@ -243,19 +317,18 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the dry-wet mix parameter changes.
-        /// Updates a target value of the dry-wet mix smoothing filter.
+        /// Обработчик изменения параметра количества выходного и входного сигнала.
         /// </summary>
-        /// <param name="target">A new target value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetMixTarget(float target)
         {
             mixFilter.SetTarget(target);
         }
 
         /// <summary>
-        /// Handles the dry-wet mix parameter filter changes (called every processing turn).
+        /// Обработчик изменения "сглаженного" значения количества выходного и входного сигнала.
         /// </summary>
-        /// <param name="value">A new value of the dry-wet mix.</param>
+        /// <param name="value">Новое значение.</param>
         private void UpdateMix(float value)
         {
             wetCoeff = value;
@@ -263,9 +336,9 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the wet inversion parameter changes.
+        /// Обработчик изменения параметра инвертирования выходного сигнала.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetInvert(float value)
         {
             if (value < 0.5)
@@ -275,33 +348,33 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Handles the lfo rate parameter changes.
+        /// Обработчик изменения частоты генератора низких частот.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetLfoRate(float value)
         {
             lfo.SetFrequency((float)Converters.ToDelayLfoRate(value));
         }
 
         /// <summary>
-        /// Handles the lfo depth parameter changes.
+        /// Обработчик изменения амплитуды генератора низких частот.
         /// </summary>
-        /// <param name="value">A new value of the parameter.</param>
+        /// <param name="target">Нормированное новое значение параметра.</param>
         private void SetLfoDepth(float value)
         {
             lfoDepth = value;
         }
 
         /// <summary>
-        /// Perform a processing turn.
+        /// Обработка новых входных данных.
         /// </summary>
-        /// <param name="inputL">Left channel input.</param>
-        /// <param name="inputR">Right channel input.</param>
-        /// <param name="outputL">Left channel output.</param>
-        /// <param name="outputR">Right channel output.</param>
+        /// <param name="inputL">Левый канал входного сигнала</param>
+        /// <param name="inputR">Правый канал входного сигнала</param>
+        /// <param name="outputL">Левый канал выходного сигнала.</param>
+        /// <param name="outputR">Правый канал выходного сигнала.</param>
         public void Process(float inputL, float inputR, out float outputL, out float outputR)
         {
-            // Parameter filter's updates.
+            // Сглаживание значений параметров.
             timeFilter.Process();
             mixFilter.Process();
             stereoAmountFilter.Process();
@@ -322,12 +395,11 @@ namespace BetterSynth
         }
         
         /// <summary>
-        /// Handles the sample rate value changes.
+        /// Обработчик изменения частоты дискретизации.
         /// </summary>
-        /// <param name="newSampleRate">A new sample rate value.</param>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
-            // Pass a new sample rate to inner components.
             timeFilter.SampleRate = newSampleRate;
             stereoAmountFilter.SampleRate = newSampleRate;
             mixFilter.SampleRate = newSampleRate;
