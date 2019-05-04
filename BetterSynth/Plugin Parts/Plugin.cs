@@ -1,6 +1,8 @@
 ﻿using Jacobi.Vst.Core;
 using Jacobi.Vst.Framework;
 using Jacobi.Vst.Framework.Plugin;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace BetterSynth
 {
@@ -52,16 +54,14 @@ namespace BetterSynth
             return base.CreatePrograms(instance);
         }
 
-        /*
-        protected override IVstPluginPersistence CreatePersistence(IVstPluginPersistence instance)
+        protected override IVstPluginEditor CreateEditor(IVstPluginEditor instance)
         {
             if (instance == null)
             {
-                return new PluginPersistence(this);
+                return new PluginEditor(this);
             }
 
-            return base.CreatePersistence(instance);
+            return base.CreateEditor(instance);
         }
-        */
     }
 }

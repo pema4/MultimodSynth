@@ -53,21 +53,11 @@ namespace BetterSynth
             ModulationTypeManager = factory.CreateParameterManager(
                 name: "_MT",
                 valueChangedHandler: SetModulationType);
-            CreateRedirection(ModulationTypeManager, nameof(ModulationTypeManager));
         }
 
         private void SetModulationType(float value)
         {
-            if (value < 0.2f)
-                modulationType = Voice.ModulationType.None;
-            else if (value < 0.4f)
-                modulationType = Voice.ModulationType.AmplitudeModulationA;
-            else if (value < 0.6f)
-                modulationType = Voice.ModulationType.AmplitudeModulationB;
-            else if (value < 0.8f)
-                modulationType = Voice.ModulationType.FrequencyModulationA;
-            else
-                modulationType = Voice.ModulationType.FrequencyModulationB;
+            modulationType = Converters.ToModulationType(value);
 
             foreach (var voice in voicesPool)
                 voice.Modulation = modulationType;
@@ -87,6 +77,7 @@ namespace BetterSynth
             var oscAEnvelope = OscAVolumeEnvelopeManager.CreateNewEnvelope();
             var oscBEnvelope = OscBVolumeEnvelopeManager.CreateNewEnvelope();
             var filterEnvelope = FilterCutoffEnvelopeManager.CreateNewEnvelope();
+            filterEnvelope.SetAmplitude(0);
 
             var voice = new Voice(Plugin, voiceOscA, voiceOscB, voiceFilter,
                 oscAEnvelope, oscBEnvelope, filterEnvelope);

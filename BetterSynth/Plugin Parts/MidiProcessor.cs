@@ -45,14 +45,28 @@ namespace BetterSynth
 
         private int pressedNotesCount = 0;
 
-        protected void OnNoteOff(byte noteNo, byte velocity)
+        private void OnNoteOff(byte noteNo, byte velocity)
         {
             NoteOff?.Invoke(this, new MidiNoteEventArgs(noteNo, velocity, pressedNotesCount));
         }
 
-        protected void OnNoteOn(byte noteNo, byte velocity)
+        private void OnNoteOn(byte noteNo, byte velocity)
         {
             NoteOn?.Invoke(this, new MidiNoteEventArgs(noteNo, velocity, pressedNotesCount));
+        }
+
+        internal void PressNoteFromUI(byte noteNo, byte velocity)
+        {
+            plugin.AudioProcessor.ProcessingMutex.WaitOne();
+            OnNoteOn(noteNo, velocity);
+            plugin.AudioProcessor.ProcessingMutex.ReleaseMutex();
+        }
+
+        internal void ReleaseNoteFromUI(byte noteNo, byte velocity)
+        {
+            plugin.AudioProcessor.ProcessingMutex.WaitOne();
+            OnNoteOff(noteNo, velocity);
+            plugin.AudioProcessor.ProcessingMutex.ReleaseMutex();
         }
     }
 

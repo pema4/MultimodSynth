@@ -37,40 +37,27 @@ namespace BetterSynth
                 name: "TYPE",
                 canBeAutomated: false,
                 valueChangedHandler: SetFilterType);
-            CreateRedirection(FilterTypeManager, nameof(FilterTypeManager));
 
             CutoffManager = factory.CreateParameterManager(
                 name: "CUT",
                 defaultValue: 1,
                 valueChangedHandler: SetCutoffMultiplierTarget);
-            CreateRedirection(CutoffManager, nameof(CutoffManager));
             cutoffMultiplierFilter = new ParameterFilter(UpdateCutoffMultiplier, 1, 10);
 
             TrackingCoeffManager = factory.CreateParameterManager(
                 name: "TRK",
                 defaultValue: 1,
                 valueChangedHandler: SetTrackingCoeff);
-            CreateRedirection(TrackingCoeffManager, nameof(TrackingCoeffManager));
 
             CurveManager = factory.CreateParameterManager(
                 name: "CRV",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetCurve);
-            CreateRedirection(CurveManager, nameof(CurveManager));
         }
         
         private void SetFilterType(float value)
         {
-            SvfFilter.FilterType newType;
-
-            if (value < 0.25f)
-                newType = SvfFilter.FilterType.Low;
-            else if (value < 0.5f)
-                newType = SvfFilter.FilterType.Band;
-            else if (value < 0.75f)
-                newType = SvfFilter.FilterType.Notch;
-            else
-                newType = SvfFilter.FilterType.High;
+            var newType = Converters.ToFilterType(value);
 
             if (filterType != newType)
             {
@@ -83,7 +70,8 @@ namespace BetterSynth
 
         private void SetCutoffMultiplierTarget(float value)
         {
-            cutoffMultiplierFilter.SetTarget((float)Math.Pow(2, 13 * value) / 4);
+            var mult = (float)Converters.ToFilterCutoffMultiplier(value);
+            cutoffMultiplierFilter.SetTarget(mult);
         }
 
         private void UpdateCutoffMultiplier(float value)

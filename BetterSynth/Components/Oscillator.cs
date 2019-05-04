@@ -49,7 +49,12 @@ namespace BetterSynth
         {
             var phase = phasor + phaseModulation;
             phase -= (float)Math.Floor(phase);
-            var result = waveTable.Process(phase);
+            var waveTable = this.waveTable;
+            float result;
+            if (waveTable == null)
+                result = 0;
+            else
+                result = waveTable.Process(phase);
 
             phasor += phaseIncrement;
             if (phasor >= 1)

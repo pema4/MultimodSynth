@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Jacobi.Vst.Framework;
+using System;
 using System.Linq;
-using Jacobi.Vst.Framework;
 
 namespace BetterSynth
 {
     class ParameterFactory
     {
+        private Plugin plugin;
         private PluginPrograms programs;
         private VstParameterCategory parameterCategory;
         private string namePrefix;
 
         public ParameterFactory(Plugin plugin, string category = "", string namePrefix = "")
         {
+            this.plugin = plugin;
             programs = plugin.Programs;
             this.namePrefix = namePrefix;
             parameterCategory = new VstParameterCategory() { Name = category };
@@ -29,6 +31,7 @@ namespace BetterSynth
             bool canBeAutomated = true,
             Action<float> valueChangedHandler = null)
         {
+
             var parameterInfo = new VstParameterInfo()
             {
                 Category = parameterCategory,
@@ -40,14 +43,27 @@ namespace BetterSynth
                 DefaultValue = defaultValue,
                 CanBeAutomated = canBeAutomated,
             };
+
             VstParameterNormalizationInfo.AttachTo(parameterInfo);
+
             programs.ParameterInfos.Add(parameterInfo);
+
             var manager = new VstParameterManager(parameterInfo);
+
+            plugin.Opened += (sender, e) =>
+            {
+                manager.HostAutomation = plugin.Host.GetInstance<IVstHostAutomation>();
+            };
+
             if (valueChangedHandler != null)
                 manager.PropertyChanged += (sender, e) =>
                 {
                     if (e.PropertyName == "CurrentValue" || e.PropertyName == "ActiveParameter")
+                    {
+                        plugin.AudioProcessor.ProcessingMutex.WaitOne();
                         valueChangedHandler(manager.CurrentValue);
+                        plugin.AudioProcessor.ProcessingMutex.ReleaseMutex();
+                    }
                 };
             return manager;
         }

@@ -4,10 +4,13 @@ using System;
 namespace BetterSynth
 {
     /// <summary>
-    /// http://www.musicdsp.org/en/latest/Effects/42-soft-saturation.html
+    /// Represents a delay effect component of the plugin.
     /// </summary>
     class DistortionManager : AudioComponentWithParameters
     {
+        /// <summary>
+        /// Specifies a distortion mode.
+        /// </summary>
         public enum DistortionMode
         {
             None,
@@ -19,40 +22,63 @@ namespace BetterSynth
         }
 
         private float amount;
-        private float wetCoeff;
-        private float dryCoeff = 1;
-        private ParameterFilter ampFilter;
-        private ParameterFilter mixFilter;
-        private ParameterFilter asymmetryFilter;
-        private float dcOffset;
-        private DistortionMode mode;
         private float amp = 1;
-        private DCBlocker dcBlocker;
-        private SvfFilter lowPass;
+        private float dcOffset;
+        private float dryCoeff = 1;
+        private DistortionMode mode;
+        private float wetCoeff;
+        private IDistortion currentDistortion;
         private SoftClipper softClipper;
         private AbsClipper absClipper;
         private CubicClipper cubicClipper;
         private BitCrusher bitCrusher;
         private SampleRateReductor sampleRateReductor;
-        private IDistortion currentDistortion;
+        private DCBlocker dcBlocker;
+        private SvfFilter lowPass;
+        private ParameterFilter ampFilter;
+        private ParameterFilter mixFilter;
+        private ParameterFilter asymmetryFilter;
 
+        /// <summary>
+        /// Manager of the distortion mode parameter.
+        /// </summary>
         public VstParameterManager ModeManager { get; private set; }
 
+        /// <summary>
+        /// Manager of the distortion amount parameter.
+        /// </summary>
         public VstParameterManager AmountManager { get; private set; }
 
+        /// <summary>
+        /// Manager of the distortion asymmetry parameter.
+        /// </summary>
         public VstParameterManager AsymmetryManager { get; private set; }
 
+        /// <summary>
+        /// Manager of the distortion preamp parameter.
+        /// </summary>
         public VstParameterManager AmpManager { get; private set; }
 
+        /// <summary>
+        /// Manager of the distortion lowpass cutoff parameter.
+        /// </summary>
         public VstParameterManager LowPassCutoffManager { get; private set; }
 
+        /// <summary>
+        /// Manager of the distortion mix parameter.
+        /// </summary>
         public VstParameterManager MixManager { get; private set; }
 
+        /// <summary>
+        /// Initialized a new DistortionManager class instance that belongs to given plugin
+        /// and has specified parameter name prefix.
+        /// </summary>
+        /// <param name="plugin">A plugin instance to which a new distortion belongs.</param>
+        /// <param name="parameterPrefix">A prefix for parameter's names.</param>
         public DistortionManager(
             Plugin plugin,
-            string parameterPrefix = "D",
-            string parameterCategory = "effects")
-            : base(plugin, parameterPrefix, parameterCategory)
+            string parameterPrefix = "D")
+            : base(plugin, parameterPrefix)
         {
             dcBlocker = new DCBlocker(10);
             lowPass = new SvfFilter(type: SvfFilter.FilterType.Low);
@@ -65,132 +91,165 @@ namespace BetterSynth
             InitializeParameters();
         }
 
+        /// <summary>
+        /// Initializes parameter managers of the DistortionManager class instance.
+        /// </summary>
+        /// <param name="factory">A parameter factory used for parameter initialization.</param>
         protected override void InitializeParameters(ParameterFactory factory)
         {
+            // Distortion mode parameter.
             ModeManager = factory.CreateParameterManager(
                 name: "TYPE",
-                minValue: 0,
-                maxValue: 6,
-                defaultValue: 0,
                 valueChangedHandler: SetMode);
-            CreateRedirection(ModeManager, nameof(ModeManager));
 
+            // Distotion amount parameter.
             AmountManager = factory.CreateParameterManager(
                 name: "AMNT",
                 defaultValue: 0.5f,
                 valueChangedHandler: SetAmount);
-            CreateRedirection(AmountManager, nameof(AmountManager));
 
+            // Distortion asymmetry parameter.
             AsymmetryManager = factory.CreateParameterManager(
                 name: "ASYM",
-                minValue: -1,
-                maxValue: 1,
+                defaultValue: 0.5f,
                 valueChangedHandler: SetAsymmetryTarget);
-            CreateRedirection(AsymmetryManager, nameof(AsymmetryManager));
             asymmetryFilter = new ParameterFilter(UpdateAsymmetry, 0);
 
+            // Distortion amp parameter.
             AmpManager = factory.CreateParameterManager(
                 name: "AMP",
-                minValue: 0,
-                maxValue: 4,
-                defaultValue: 1,
-                valueChangedHandler: x => ampFilter.SetTarget(x));
-            CreateRedirection(AmpManager, nameof(AmpManager));
+                defaultValue: 0.25f,
+                valueChangedHandler: SetAmpTarget);
             ampFilter = new ParameterFilter(UpdateAmp, 1);
 
+            // Distortion lowpass cutoff parameter.
             LowPassCutoffManager = factory.CreateParameterManager(
                 name: "LP",
                 defaultValue: 1,
                 valueChangedHandler: SetLowPassCutoff);
-            CreateRedirection(LowPassCutoffManager, nameof(LowPassCutoffManager));
 
+            // Distortion mix parameter.
             MixManager = factory.CreateParameterManager(
                 name: "MIX",
-                defaultValue: 0,
+                defaultValue: 0.5f,
                 valueChangedHandler: x => mixFilter.SetTarget(x));
-            CreateRedirection(MixManager, nameof(MixManager));
             mixFilter = new ParameterFilter(UpdateMix, 0);
         }
 
+        /// <summary>
+        /// Handles the distortion mode parameter changes.
+        /// </summary>
+        /// <param name="value">A new value of the parameter.</param>
         private void SetMode(float value)
         {
-            if (value < 1)
+            var newMode = Converters.ToDistortionMode(value);
+            if (newMode != mode)
             {
-                if (mode != DistortionMode.None)
-                    mode = DistortionMode.None;
-            }
-            else if (value < 2)
-            {
-                if (mode != DistortionMode.AbsClipping)
+                mode = newMode;
+                switch (mode)
                 {
-                    mode = DistortionMode.AbsClipping;
-                    ChangeDistortion(absClipper);
-                }
-            }
-            else if (value < 3)
-            {
-                if (mode != DistortionMode.SoftClipping)
-                {
-                    mode = DistortionMode.SoftClipping;
-                    ChangeDistortion(softClipper);
-                }
-            }
-            else if (value < 4)
-            {
-                if (mode != DistortionMode.CubicClipping)
-                {
-                    mode = DistortionMode.CubicClipping;
-                    ChangeDistortion(cubicClipper);
-                }
-            }
-            else if (value < 5)
-            {
-                if (mode != DistortionMode.BitCrush)
-                {
-                    mode = DistortionMode.BitCrush;
-                    ChangeDistortion(bitCrusher);
-                }
-            }
-            else
-            {
-                if (mode != DistortionMode.SampleRateReduction)
-                {
-                    mode = DistortionMode.SampleRateReduction;
-                    ChangeDistortion(sampleRateReductor);
+                    case DistortionMode.AbsClipping:
+                        ChangeDistortion(absClipper);
+                        break;
+                    case DistortionMode.SoftClipping:
+                        ChangeDistortion(softClipper);
+                        break;
+                    case DistortionMode.CubicClipping:
+                        ChangeDistortion(cubicClipper);
+                        break;
+                    case DistortionMode.BitCrush:
+                        ChangeDistortion(bitCrusher);
+                        break;
+                    case DistortionMode.SampleRateReduction:
+                        ChangeDistortion(sampleRateReductor);
+                        break;
                 }
             }
         }
 
+        /// <summary>
+        /// Changes a current distortion.
+        /// </summary>
+        /// <param name="newDelay">A new current distortion.</param>
         private void ChangeDistortion(IDistortion newDistortion)
         {
             currentDistortion = newDistortion;
-            currentDistortion.SetAmount(amount);
+            currentDistortion?.SetAmount(amount);
         }
 
+        /// <summary>
+        /// Handles the amount parameter changes.
+        /// </summary>
+        /// <param name="value">A new value of the parameter.</param>
         private void SetAmount(float value)
         {
             amount = value;
             currentDistortion?.SetAmount(amount);
         }
 
-        private void SetAsymmetryTarget(float value) => asymmetryFilter.SetTarget(value);
+        /// <summary>
+        /// Handles the asymmetry parameter changes.
+        /// Updates a target value of the asymmetry smoothing filter.
+        /// </summary>
+        /// <param name="target">A new value of the parameter.</param>
+        private void SetAsymmetryTarget(float value)
+        {
+            asymmetryFilter.SetTarget(value);
+        }
 
-        private void UpdateAsymmetry(float value) => dcOffset = value;
+        /// <summary>
+        /// Handles the asymmetry parameter filter changes (called every processing turn).
+        /// </summary>
+        /// <param name="value">A new value of the asymmetry.</param>
+        private void UpdateAsymmetry(float value)
+        {
+            dcOffset = (float)Converters.ToAsymmetry(value);
+        }
 
+        /// <summary>
+        /// Handles the lowpass cutoff parameter changes.
+        /// </summary>
+        /// <param name="value">A new value of the parameter.</param>
         private void SetLowPassCutoff(float value)
         {
-            var cutoff = (float)Math.Pow(2, 14.287712379549449 * (0.30249265803205166 + 0.69750734196794828 * value));
+            var cutoff = (float)Converters.ToDistortionLowpassCutoff(value);
             lowPass.SetCutoff(cutoff);
         }
 
+        /// <summary>
+        /// Handles the dry-wet mix parameter filter changes (called every processing turn).
+        /// </summary>
+        /// <param name="value">A new value of the dry-wet mix.</param>
         private void UpdateMix(float value)
         {
             wetCoeff = value;
             dryCoeff = 1 - value;
         }
 
-        private void UpdateAmp(float value) => amp = value;
+        /// <summary>
+        /// Handles the preamp parameter changes.
+        /// Updates a target value of the preamp smoothing filter.
+        /// </summary>
+        /// <param name="target">A new value of the parameter.</param>
+        private void SetAmpTarget(float value)
+        {
+            ampFilter.SetTarget((float)Converters.ToDistortionAmp(value));
+        }
 
+        /// <summary>
+        /// Handles the preamp parameter filter changes (called every processing turn).
+        /// </summary>
+        /// <param name="value">A new value of the preamp.</param>
+        private void UpdateAmp(float value)
+        {
+            amp = value;
+        }
+
+        /// <summary>
+        /// Performs a processing turn.
+        /// </summary>
+        /// <param name="input">Input.</param>
+        /// <returns>Output.</returns>
         public float Process(float input)
         {
             ampFilter.Process();
@@ -198,17 +257,21 @@ namespace BetterSynth
             asymmetryFilter.Process();
 
             input *= amp;
+            input = lowPass.Process(input);
             if (mode == DistortionMode.None)
                 return dcBlocker.Process(input);
             else
             {
-                input = lowPass.Process(input);
                 var output = currentDistortion.Process(input + dcOffset);
                 output = dcBlocker.Process(output);
                 return dryCoeff * input + wetCoeff * output;
             }
         }
 
+        /// <summary>
+        /// Handles the sample rate value changes.
+        /// </summary>
+        /// <param name="newSampleRate">A new sample rate value.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             dcBlocker.SampleRate = newSampleRate;

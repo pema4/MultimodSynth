@@ -46,51 +46,42 @@ namespace BetterSynth
         {
             AttackTimeManager = factory.CreateParameterManager(
                 name: "AT",
-                maxValue: MaximumTime,
-                defaultValue: 0.01f,
+                defaultValue: 0.001f,
                 valueChangedHandler: SetAttackTime);
-            CreateRedirection(AttackTimeManager, nameof(AttackTimeManager));
 
             DecayTimeManager = factory.CreateParameterManager(
                 name: "DT",
-                maxValue: MaximumTime,
                 valueChangedHandler: SetDecayTime);
-            CreateRedirection(DecayTimeManager, nameof(DecayTimeManager));
 
             SustainLevelManager = factory.CreateParameterManager(
                 name: "SL",
                 defaultValue: 1,
                 valueChangedHandler: SetSustainLevel);
-            CreateRedirection(SustainLevelManager, nameof(SustainLevelManager));
 
             ReleaseTimeManager = factory.CreateParameterManager(
                 name: "RT",
-                maxValue: MaximumTime,
-                defaultValue: 0.01f,
+                defaultValue: 0.001f,
                 valueChangedHandler: SetReleaseTime);
-            CreateRedirection(ReleaseTimeManager, nameof(ReleaseTimeManager));
 
             AttackCurveManager = factory.CreateParameterManager(
                 name: "AC",
+                defaultValue: 1,
                 valueChangedHandler: SetAttackCurve);
-            CreateRedirection(AttackCurveManager, nameof(AttackCurveManager));
 
             DecayReleaseCurveManager = factory.CreateParameterManager(
                 name: "DRC",
                 valueChangedHandler: SetDecayReleaseCurve);
-            CreateRedirection(DecayReleaseCurveManager, nameof(DecayReleaseCurveManager));
 
             EnvelopeAmplitudeManager = factory.CreateParameterManager(
                 name: "AMP",
                 defaultValue: 1f,
                 valueChangedHandler: x => envelopeAmplitudeFilter.SetTarget(x));
-            CreateRedirection(EnvelopeAmplitudeManager, nameof(EnvelopeAmplitudeManager));
             envelopeAmplitudeFilter = new ParameterFilter(UpdateEnvelopeAmplitude, 1);
         }
         
         private void SetAttackTime(float value)
         {
-            attackTime = value;
+            attackTime = (float)Converters.ToEnvelopeTime(value);
             
             foreach (var envelope in envelopes)
                 envelope.SetAttackTime(attackTime);
@@ -98,7 +89,7 @@ namespace BetterSynth
 
         private void SetDecayTime(float value)
         {
-            decayTime = value;
+            decayTime = (float)Converters.ToEnvelopeTime(value);
 
             foreach (var envelope in envelopes)
                 envelope.SetDecayTime(decayTime);
@@ -114,7 +105,7 @@ namespace BetterSynth
 
         private void SetReleaseTime(float value)
         {
-            releaseTime = value;
+            releaseTime = (float)Converters.ToEnvelopeTime(value);
 
             foreach (var envelope in envelopes)
                 envelope.SetReleaseTime(releaseTime);

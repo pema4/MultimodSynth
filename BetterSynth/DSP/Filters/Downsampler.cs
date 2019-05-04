@@ -169,10 +169,6 @@
         private int currBufferIndex = 0;
         private int order;
 
-        public Downsampler()
-        {
-        }
-
         public int Order
         {
             get => order;

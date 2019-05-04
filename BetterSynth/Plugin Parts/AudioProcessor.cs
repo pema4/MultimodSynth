@@ -1,12 +1,16 @@
 ﻿using Jacobi.Vst.Core;
 using Jacobi.Vst.Framework.Plugin;
+using System.Threading;
 
 namespace BetterSynth
 {
     internal class AudioProcessor : VstPluginAudioProcessorBase
     {
         private Plugin plugin;
+
         public Routing Routing { get; private set; }
+
+        public Mutex ProcessingMutex { get; set; } = new Mutex();
 
         public override float SampleRate { get => Routing.SampleRate; set => Routing.SampleRate = value; }
 
@@ -18,6 +22,7 @@ namespace BetterSynth
 
         public override void Process(VstAudioBuffer[] inChannels, VstAudioBuffer[] outChannels)
         {
+            ProcessingMutex.WaitOne();
             var outputLeft = outChannels[0];
             var outputRight = outChannels[1];
 
@@ -28,6 +33,7 @@ namespace BetterSynth
                 outputLeft[i] = left;
                 outputRight[i] = right;
             }
+            ProcessingMutex.ReleaseMutex();
         }
     }
 }

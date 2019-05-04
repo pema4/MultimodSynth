@@ -19,6 +19,9 @@ namespace BetterSynth
 
         public void SetDelay(float delay)
         {
+            if (this.delay == delay)
+                return;
+
             this.delay = delay;
             double delayedPoint = (double)writePoint - delay;
             if (delayedPoint < 0)
@@ -50,27 +53,19 @@ namespace BetterSynth
 
         public float Process(float input)
         {
-            if (delay == 0)
-            {
-                buffer[writePoint] = input;
-                writePoint += 1;
-                if (writePoint == bufferLength)
-                    writePoint = 0;
-                readPoint = writePoint;
-                return input;
-            }
+            buffer[writePoint] = input;
 
-            float output = CalculateOutput();
+            float delayedSample = CalculateOutput();
             readPoint += 1;
             if (readPoint == bufferLength)
                 readPoint = 0;
 
-            buffer[writePoint] = input + output * feedback;
+            buffer[writePoint] += delayedSample * feedback;
             writePoint += 1;
             if (writePoint == bufferLength)
                 writePoint = 0;
-            
-            return output;
+
+            return delayedSample;
         }
 
         public float Peek() => CalculateOutput();

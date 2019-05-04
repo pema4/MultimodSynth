@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace BetterSynth
 {
@@ -25,6 +26,8 @@ namespace BetterSynth
         public float Process(float x)
         {
             var y = normalizationCoeff * (x - xm1) + r * ym1;
+            if (float.IsNaN(y))
+                MessageBox.Show("wait that's illegal");
             xm1 = x;
             ym1 = y;
             return y;

@@ -3,21 +3,19 @@ using System.IO;
 
 namespace BetterSynth
 {
-    [Serializable]
     public class WaveTableOscillator
     {
         private const double DefaultSampleRate = 44100;
-
-        [Serializable]
-        public class WaveTable
+        
+        private class WaveTable
         {
             public int Length;
             public float[] Samples;
             public float PhaseIncrement;
         }
 
-        private WaveTable[] waveTables;
-        private WaveTable waveTable;
+        private volatile WaveTable[] waveTables;
+        private volatile WaveTable waveTable;
         private int waveTablesAmount;
         private float phaseIncrement;
 
@@ -95,7 +93,12 @@ namespace BetterSynth
             if (phase >= 1)
                 phase -= 1;
 
-            float temp = phase * waveTable.Length;
+            var waveTable = this.waveTable;
+            if (waveTable == null)
+                return 0;
+
+            var tableLength = waveTable.Length;
+            float temp = phase * tableLength;
             int leftIndex = (int)temp;
             int rightIndex = leftIndex + 1;
             if (rightIndex == waveTable.Length)
