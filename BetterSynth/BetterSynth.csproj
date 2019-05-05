@@ -106,6 +106,7 @@
   <ItemGroup>
     <Compile Include="Components\DelayManager.cs" />
     <Compile Include="Converters.cs" />
+    <Compile Include="DSP\Effects\Delays\DelayLine.cs" />
     <Compile Include="DSP\Effects\Distortion\AbsClipper.cs" />
     <Compile Include="Components\AudioComponent.cs" />
     <Compile Include="Components\AudioComponentWithParameters.cs" />
@@ -129,7 +130,6 @@
     <Compile Include="Components\Filter.cs" />
     <Compile Include="Components\FiltersManager.cs" />
     <Compile Include="Plugin Parts\MidiProcessor.cs" />
-    <Compile Include="DSP\Effects\Delays\MonoDelay.cs" />
     <Compile Include="Components\Oscillator.cs" />
     <Compile Include="Components\OscillatorsManager.cs" />
     <Compile Include="Plugin Parts\ParameterFactory.cs" />

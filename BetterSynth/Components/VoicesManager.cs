@@ -4,32 +4,84 @@ using Jacobi.Vst.Framework;
 
 namespace BetterSynth
 {
+    /// <summary>
+    /// Компонент плагина, управляющий всем голосами.
+    /// </summary>
     class VoicesManager : AudioComponentWithParameters
     {
+        /// <summary>
+        /// Максимальное количество голосов.
+        /// </summary>
         private const int MaxVoicesCount = 32;
         
+        /// <summary>
+        /// Список ссылок на все используемые и неиспользуемые голоса.
+        /// </summary>
         private List<Voice> voicesPool;
+
+        /// <summary>
+        /// Список активных голосов.
+        /// </summary>
         private List<Voice> activeVoices;
+
+        /// <summary>
+        /// Отображение номера ноты в список голосов, играющих эту ноту.
+        /// </summary>
         private Dictionary<byte, List<Voice>> noteToVoicesMapping;
+
+        /// <summary>
+        /// Отсортированное множество номеров свободных голосов.
+        /// </summary>
         private SortedSet<int> freeVoicesIndices;
+
+        /// <summary>
+        /// Текущий тип модуляции.
+        /// </summary>
         private Voice.ModulationType modulationType;
 
+        /// <summary>
+        /// Менеджер всех осцилляторов A во всех голосах.
+        /// </summary>
         public OscillatorsManager OscAManager { get; set; }
 
+        /// <summary>
+        /// Менеджер всех осцилляторов B во всех голосах.
+        /// </summary>
         public OscillatorsManager OscBManager { get; set; }
 
+        /// <summary>
+        /// Менеджер фильра во всех голосах.
+        /// </summary>
         public FiltersManager FilterManager { get; set; }
 
+        /// <summary>
+        /// Менеджер всех огибающих уровня осциллятора A во всех голосах.
+        /// </summary>
         public EnvelopesManager OscAVolumeEnvelopeManager { get; set; }
 
+        /// <summary>
+        /// Менеджер всех огибающих уровня осциллятора B во всех голосах.
+        /// </summary>
         public EnvelopesManager OscBVolumeEnvelopeManager { get; set; }
 
+        /// <summary>
+        /// Менеджер всех огибающих частоты среза фильтра во всех голосах.
+        /// </summary>
         public EnvelopesManager FilterCutoffEnvelopeManager { get; set; }
 
+        /// <summary>
+        /// Объект, управляющий параметром типа модуляции.
+        /// </summary>
         public VstParameterManager ModulationTypeManager { get; private set; }
 
-        public VoicesManager(Plugin plugin, string parameterPrefix, string parameterCategory = "voices")
-            : base(plugin, parameterPrefix, parameterCategory)
+        /// <summary>
+        /// Инициализирует новый объект класса VoicesManager, принадлежащий переданному плагину
+        /// и имеющий переданный префикс названия параметров.
+        /// </summary>
+        /// <param name="plugin">Плагин, которому принадлежит создаваемый объект.</param>
+        /// <param name="parameterPrefix">Префикс названия параметров.</param>
+        public VoicesManager(Plugin plugin, string parameterPrefix)
+            : base(plugin, parameterPrefix)
         {
             OscAManager = new OscillatorsManager(plugin, "A_");
             OscAVolumeEnvelopeManager = new EnvelopesManager(plugin, "A_");
@@ -48,6 +100,10 @@ namespace BetterSynth
             InitializeParameters();
         }
 
+        /// <summary>
+        /// Инициализирует параметры с помощью переданной фабрики параметров.
+        /// </summary>
+        /// <param name="factory">Фабрика параметров</param>
         protected override void InitializeParameters(ParameterFactory factory)
         {
             ModulationTypeManager = factory.CreateParameterManager(
@@ -55,6 +111,10 @@ namespace BetterSynth
                 valueChangedHandler: SetModulationType);
         }
 
+        /// <summary>
+        /// Обработчик изменения типа модуляции.
+        /// </summary>
+        /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetModulationType(float value)
         {
             modulationType = Converters.ToModulationType(value);
@@ -63,12 +123,10 @@ namespace BetterSynth
                 voice.Modulation = modulationType;
         }
 
-        protected override void OnSampleRateChanged(float newSampleRate)
-        {
-            foreach (var voice in voicesPool)
-                voice.SampleRate = newSampleRate;
-        }
-
+        /// <summary>
+        /// Возвращает новый объект голоса, связанный с этим объектом.
+        /// </summary>
+        /// <returns></returns>
         private Voice CreateVoice()
         {
             var voiceOscA = OscAManager.CreateNewOscillator();
@@ -83,11 +141,14 @@ namespace BetterSynth
                 oscAEnvelope, oscBEnvelope, filterEnvelope);
 
             voice.Modulation = modulationType;
-            voice.SoundStop += (sender, e) => StopVoice(voice);
 
             return voice;
         }
 
+        /// <summary>
+        /// Играет переданную ноту.
+        /// </summary>
+        /// <param name="note">Нота, которую необходимо проиграть.</param>
         public void PlayNote(MidiNote note)
         {
             Voice voice;
@@ -113,6 +174,10 @@ namespace BetterSynth
             voice.PlayNote(note);
         }
 
+        /// <summary>
+        /// Отпускает переданную ноту.
+        /// </summary>
+        /// <param name="note">Нота, которую необходимо отпустить.</param>
         public void ReleaseNote(MidiNote note)
         {
             byte noteNo = note.NoteNo;
@@ -124,6 +189,10 @@ namespace BetterSynth
             }
         }
 
+        /// <summary>
+        /// Останавливает переданный голос и помечает его как неиспользуемый.
+        /// </summary>
+        /// <param name="note">Голос, который необходимо остановить.</param>
         private void StopVoice(Voice voice)
         {
             activeVoices.Remove(voice);
@@ -135,6 +204,10 @@ namespace BetterSynth
             freeVoicesIndices.Add(voiceIndex);
         }
 
+        /// <summary>
+        /// Генерация новых выходных данных.
+        /// </summary>
+        /// <returns>Выходной сигнал.</returns>
         public float Process()
         {
             OscAManager.Process();
@@ -157,6 +230,16 @@ namespace BetterSynth
             }
             
             return sum;
+        }
+
+        /// <summary>
+        /// Обработчик изменения частоты дискретизации.
+        /// </summary>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
+        protected override void OnSampleRateChanged(float newSampleRate)
+        {
+            foreach (var voice in voicesPool)
+                voice.SampleRate = newSampleRate;
         }
     }
 }

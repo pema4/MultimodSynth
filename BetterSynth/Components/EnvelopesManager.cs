@@ -94,9 +94,7 @@ namespace BetterSynth
         /// </summary>
         /// <param name="plugin">Плагин, которому принадлежит создаваемый объект.</param>
         /// <param name="parameterPrefix">Префикс названия параметров.</param>
-        public EnvelopesManager(
-            Plugin plugin,
-            string parameterPrefix = "E")
+        public EnvelopesManager(Plugin plugin, string parameterPrefix = "E")
             : base(plugin, parameterPrefix)
         {
             envelopes = new List<Envelope>();

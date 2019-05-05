@@ -1,9 +1,13 @@
-﻿using System;
-
-namespace BetterSynth
+﻿namespace BetterSynth
 {
+    /// <summary>
+    /// Компонент плагина, представляющий собой один голос.
+    /// </summary>
     class Voice : AudioComponent
     {
+        /// <summary>
+        /// Указывает тип взаимодействия двух осцилляторов.
+        /// </summary>
         public enum ModulationType
         {
             None,
@@ -13,15 +17,71 @@ namespace BetterSynth
             AmplitudeModulationB,
         }
 
+        /// <summary>
+        /// Осциллятор A.
+        /// </summary>
         private Oscillator oscA;
+
+        /// <summary>
+        /// Осциллятор B.
+        /// </summary>
         private Oscillator oscB;
+
+        /// <summary>
+        /// Фильтр.
+        /// </summary>
         private Filter filter;
+
+        /// <summary>
+        /// Огибающая громкости осциллятора A.
+        /// </summary>
         private Envelope envA;
+
+        /// <summary>
+        /// Огибающая громкости осциллятора B.
+        /// </summary>
         private Envelope envB;
+
+        /// <summary>
+        /// Огибающая частоты среза фильтра.
+        /// </summary>
         private Envelope envFilter;
-        private float noteVolume;
+
+        /// <summary>
+        /// Сила нажатия текущей играемой ноты.
+        /// </summary>
+        private float noteVelocity;
+
+        /// <summary>
+        /// Максимальная "сила" частотной модуляции.
+        /// </summary>
         private float fmAmountMultiplier;
 
+        /// <summary>
+        /// Указывает, активен ли данный голос.
+        /// </summary>
+        public bool IsActive { get; private set; }
+
+        /// <summary>
+        /// Текущая играемая нота.
+        /// </summary>
+        public MidiNote Note { get; private set; }
+
+        /// <summary>
+        /// Текущий тип модуляции.
+        /// </summary>
+        public ModulationType Modulation { get; set; }
+
+        /// <summary>
+        /// Инициализирует новый объект класса Voice, имеющий переданные компоненты.
+        /// </summary>
+        /// <param name="plugin">Плагин, которому принадлежит создаваемый объект.</param>
+        /// <param name="oscA">Осциллятор А.</param>
+        /// <param name="oscB">Осциллятор B.</param>
+        /// <param name="filter">Фильтр.</param>
+        /// <param name="envA">Огибающая уровня осциллятора A.</param>
+        /// <param name="envB">Огибающая уровня оциллятора B.</param>
+        /// <param name="envFilter">Огибающая частоты среза фильтра.</param>
         public Voice(
             Plugin plugin,
             Oscillator oscA,
@@ -39,16 +99,14 @@ namespace BetterSynth
             this.envFilter = envFilter;
         }
 
-        public bool IsActive { get; private set; }
-
-        public MidiNote Note { get; private set; }
-
-        public ModulationType Modulation { get; set; }
-
+        /// <summary>
+        /// Играет переданную ноту.
+        /// </summary>
+        /// <param name="note">Нота, которую необходимо проиграть.</param>
         public void PlayNote(MidiNote note)
         {
             Note = note;
-            noteVolume = note.Velocity / 128f;
+            noteVelocity = note.Velocity / 128f;
             var noteFrequency = (float)Utilities.MidiNoteToFrequency(note.NoteNo);
 
             oscA.Reset();
@@ -66,6 +124,9 @@ namespace BetterSynth
             IsActive = true;
         }
 
+        /// <summary>
+        /// Прекращает проигрывание ноты.
+        /// </summary>
         public void TriggerRelease()
         {
             envA.TriggerRelease();
@@ -73,6 +134,10 @@ namespace BetterSynth
             envFilter.TriggerRelease();
         }
 
+        /// <summary>
+        /// Генерация новых выходных данных.
+        /// </summary>
+        /// <returns>Выходной сигнал.</returns>
         public float Process()
         {
             if (!IsActive)
@@ -147,19 +212,17 @@ namespace BetterSynth
 
                 default:
                     IsActive = false;
-                    //OnSoundStop();
                     return 0;
             }
 
             var filterEnvOut = envFilter.Process();
-            return noteVolume * filter.Process(oscMix, filterEnvOut);
+            return noteVelocity * filter.Process(oscMix, filterEnvOut);
         }
 
-        public event EventHandler SoundStop;
-
-        private void OnSoundStop() =>
-            SoundStop?.Invoke(this, new EventArgs());
-
+        /// <summary>
+        /// Обработчик изменения частоты дискретизации.
+        /// </summary>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             fmAmountMultiplier = 5000 / SampleRate;

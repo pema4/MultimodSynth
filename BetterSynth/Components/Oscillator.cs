@@ -100,8 +100,15 @@ namespace BetterSynth
             return result;
         }
 
+        /// <summary>
+        /// Сбрасывает текущее состояние осциллятора.
+        /// </summary>
         public void Reset() => phasor = 0;
 
+        /// <summary>
+        /// Обработчик изменения частоты дискретизации.
+        /// </summary>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             phaseIncrement = frequency / newSampleRate;
