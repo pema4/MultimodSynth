@@ -2,15 +2,40 @@
 using System;
 using System.Linq;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
+    /// <summary>
+    /// Представляет собой фабрику для удобного создания параметров.
+    /// </summary>
     class ParameterFactory
     {
+        /// <summary>
+        /// Ссылка на плагин, которому принадлежит этот компонент.
+        /// </summary>
         private Plugin plugin;
+
+        /// <summary>
+        /// Ссылка на компонент PluginPrograms данного плагина.
+        /// </summary>
         private PluginPrograms programs;
+
+        /// <summary>
+        /// Категория параметров.
+        /// </summary>
         private VstParameterCategory parameterCategory;
+
+        /// <summary>
+        /// Префикс названия параметра.
+        /// </summary>
         private string namePrefix;
 
+        /// <summary>
+        /// Инициализирует новый объект типа ParameterFactory, принадлежащий заданному
+        /// плагину и имеющий переданную категорию и префикс имени параметра.
+        /// </summary>
+        /// <param name="plugin"></param>
+        /// <param name="category"></param>
+        /// <param name="namePrefix"></param>
         public ParameterFactory(Plugin plugin, string category = "", string namePrefix = "")
         {
             this.plugin = plugin;
@@ -21,27 +46,23 @@ namespace BetterSynth
                 programs.ParameterCategories.Add(parameterCategory);
         }
 
+        /// <summary>
+        /// Создаёт новый параметр и регистрирует его.
+        /// </summary>
+        /// <param name="name">Имя параметра.</param>
+        /// <param name="defaultValue">Начальное значение.</param>
+        /// <param name="valueChangedHandler">Обработчик изменения значения параметра.</param>
+        /// <returns>Объект, управляющий созданным параметром.</returns>
         public VstParameterManager CreateParameterManager(
             string name = null,
-            string label = null,
-            string shortLabel = null,
-            int minValue = 0,
-            int maxValue = 1,
             float defaultValue = 0,
-            bool canBeAutomated = true,
             Action<float> valueChangedHandler = null)
         {
-
             var parameterInfo = new VstParameterInfo()
             {
                 Category = parameterCategory,
                 Name = namePrefix + name,
-                Label = label,
-                ShortLabel = shortLabel,
-                MinInteger = minValue,
-                MaxInteger = maxValue,
                 DefaultValue = defaultValue,
-                CanBeAutomated = canBeAutomated,
             };
 
             VstParameterNormalizationInfo.AttachTo(parameterInfo);

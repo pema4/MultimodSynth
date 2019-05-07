@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, управляющий одним осциллятором многих голосов.
@@ -99,7 +99,7 @@ namespace BetterSynth
         /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetPitchSemi(float value)
         {
-            pitchSemi = (float)Math.Pow(2, (int)Converters.ToSemitones(value) / 12.0);
+            pitchSemi = (float)Math.Pow(2, Converters.ToSemitones(value) / 12.0);
             var target = pitchSemi * pitchFine;
             pitchMultiplierFilter.SetTarget(target);
         }
@@ -110,7 +110,7 @@ namespace BetterSynth
         /// <param name="value">Нормированное новое значение параметра.</param>
         private void SetPitchFine(float value)
         {
-            pitchFine = (float)Math.Pow(2, (int)Converters.ToCents(value) / 1200.0);
+            pitchFine = (float)Math.Pow(2, Converters.ToCents(value) / 1200.0);
             var target = pitchSemi * pitchFine;
             pitchMultiplierFilter.SetTarget(target);
         }

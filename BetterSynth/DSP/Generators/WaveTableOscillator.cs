@@ -1,26 +1,74 @@
 ﻿using System;
 using System.IO;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
+    /// <summary>
+    /// Реализация осциллятора, основанного на таблицах сэмплов.
+    /// </summary>
     public class WaveTableOscillator
     {
+        /// <summary>
+        /// Стандартная частота дискретизации.
+        /// </summary>
         private const double DefaultSampleRate = 44100;
         
+        /// <summary>
+        /// Представляет собой одну таблицу сэмплов, записанную с заданным инкрементом фазы.
+        /// </summary>
         private class WaveTable
         {
+            /// <summary>
+            /// Длина таблицы.
+            /// </summary>
             public int Length;
+
+            /// <summary>
+            /// Сэмплы.
+            /// </summary>
             public float[] Samples;
+
+            /// <summary>
+            /// Инкремент фазы, с которым эта таблица была сгенерирована.
+            /// </summary>
             public float PhaseIncrement;
         }
+        
+        /// <summary>
+        /// Список всех таблиц.
+        /// </summary>
+        private WaveTable[] waveTables;
 
-        private volatile WaveTable[] waveTables;
-        private volatile WaveTable waveTable;
+        /// <summary>
+        /// Текущая таблица.
+        /// </summary>
+        private WaveTable waveTable;
+
+        /// <summary>
+        /// Общее количество таблиц.
+        /// </summary>
         private int waveTablesAmount;
+
+        /// <summary>
+        /// Текущий инкремент фазы.
+        /// </summary>
         private float phaseIncrement;
 
+        /// <summary>
+        /// Представляет собой функцию-генератор для создания таблицы.
+        /// </summary>
+        /// <param name="phase">Текущая фаза.</param>
+        /// <param name="freq">Минимальная частота, на которой будет проигрываться создаваемая таблица.</param>
+        /// <param name="maxFreq">Максимальная частота, на которой будет проигрываться создаваемая таблица.</param>
+        /// <returns>Значение функции-генератора при заданных параметрах.</returns>
         public delegate double GeneratorFunction(double phase, double freq, double maxFreq);
 
+        /// <summary>
+        /// Инициализирует новый объект типа WaveTableOscillator с заданными параметрами.
+        /// </summary>
+        /// <param name="generator">Функция-генератор.</param>
+        /// <param name="startFrequency">Минимальная частота, на которой планируется генерировать звук.</param>
+        /// <param name="endFrequency">Максимальная частота, на которой планируется генерировать звук.</param>
         public WaveTableOscillator(
             GeneratorFunction generator,
             double startFrequency,
@@ -42,6 +90,13 @@ namespace BetterSynth
             Normalize();
         }
 
+        /// <summary>
+        /// Метод, подготавливающий массив сэмплов.
+        /// </summary>
+        /// <param name="generator">Функция-генератор.</param>
+        /// <param name="startFrequency">Частота, на которой генерируется этот массив сэмплов.</param>
+        /// <param name="endFrequency">Максимальная частота, на которой планируется генерировать звук.</param>
+        /// <returns>Массив сэмплов.</returns>
         private static float[] PrepareSamples(GeneratorFunction generator, double freq, double maxFreq)
         {
             var length = (int)DefaultSampleRate;
@@ -52,6 +107,9 @@ namespace BetterSynth
             return result;
         }
 
+        /// <summary>
+        /// Метод, нормализующий все таблицы этого осциллятора.
+        /// </summary>
         private void Normalize()
         {
             float maxAbs = 0;
@@ -64,10 +122,17 @@ namespace BetterSynth
                     wt.Samples[i] /= maxAbs;
         }
 
+        /// <summary>
+        /// Инициализирует пустой объект типа WaveTableOscillator.
+        /// </summary>
         private WaveTableOscillator()
         {
         }
 
+        /// <summary>
+        /// Клонирует текущую таблицу сэмплов.
+        /// </summary>
+        /// <returns>Новая таблица сэмплов.</returns>
         public WaveTableOscillator Clone()
         {
             return new WaveTableOscillator
@@ -77,6 +142,10 @@ namespace BetterSynth
             };
         }
 
+        /// <summary>
+        /// Устанавливает новое значение инкремента фазы.
+        /// </summary>
+        /// <param name="phaseIncrement">Инкремент фазы.</param>
         public void SetPhaseIncrement(double phaseIncrement)
         {
             this.phaseIncrement = (float)phaseIncrement;
@@ -88,6 +157,11 @@ namespace BetterSynth
             waveTable = waveTables[wtIndex];
         }
 
+        /// <summary>
+        /// Метод, возвращающий сэмпл по заданной фазе.
+        /// </summary>
+        /// <param name="phase">Фаза.</param>
+        /// <returns>Выходной сэмпл.</returns>
         public float Process(float phase)
         {
             if (phase >= 1)
@@ -108,42 +182,58 @@ namespace BetterSynth
             return leftCoeff * waveTable.Samples[leftIndex] + rightCoeff * waveTable.Samples[rightIndex];
         }
 
-        public static void Serialize(BinaryWriter writer, WaveTableOscillator obj)
+        /// <summary>
+        /// Метод, записывающий объект WaveTableOscillator в поток.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="obj"></param>
+        public static void Serialize(Stream stream, WaveTableOscillator obj)
         {
-            writer.Write(obj.waveTablesAmount);
-            foreach (var waveTable in obj.waveTables)
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.Default, true))
             {
-                writer.Write(waveTable.Length);
-                writer.Write(waveTable.PhaseIncrement);
-                foreach (var sample in waveTable.Samples)
-                    writer.Write(sample);
+                writer.Write(obj.waveTablesAmount);
+                foreach (var waveTable in obj.waveTables)
+                {
+                    writer.Write(waveTable.Length);
+                    writer.Write(waveTable.PhaseIncrement);
+                    foreach (var sample in waveTable.Samples)
+                        writer.Write(sample);
+                }
             }
         }
 
-        public static WaveTableOscillator Deserialize(BinaryReader reader)
+        /// <summary>
+        /// Метод, восстанавливает объект WaveTableOscillator из потока.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
+        public static WaveTableOscillator Deserialize(Stream stream)
         {
-            var waveTablesAmount = reader.ReadInt32();
-            var waveTables = new WaveTable[waveTablesAmount];
-            for (int i = 0; i < waveTables.Length; ++i)
+            using (var reader = new BinaryReader(stream, System.Text.Encoding.Default, true))
             {
-                var length = reader.ReadInt32();
-                var phaseIncrement = reader.ReadSingle();
-                var samples = new float[length];
-                for (int j = 0; j < samples.Length; ++j)
-                    samples[j] = reader.ReadSingle();
-                waveTables[i] = new WaveTable
+                var waveTablesAmount = reader.ReadInt32();
+                var waveTables = new WaveTable[waveTablesAmount];
+                for (int i = 0; i < waveTables.Length; ++i)
                 {
-                    Length = length,
-                    PhaseIncrement = phaseIncrement,
-                    Samples = samples,
+                    var length = reader.ReadInt32();
+                    var phaseIncrement = reader.ReadSingle();
+                    var samples = new float[length];
+                    for (int j = 0; j < samples.Length; ++j)
+                        samples[j] = reader.ReadSingle();
+                    waveTables[i] = new WaveTable
+                    {
+                        Length = length,
+                        PhaseIncrement = phaseIncrement,
+                        Samples = samples,
+                    };
+                }
+
+                return new WaveTableOscillator
+                {
+                    waveTablesAmount = waveTablesAmount,
+                    waveTables = waveTables,
                 };
             }
-
-            return new WaveTableOscillator
-            {
-                waveTablesAmount = waveTablesAmount,
-                waveTables = waveTables,
-            };
         }
     }
 }

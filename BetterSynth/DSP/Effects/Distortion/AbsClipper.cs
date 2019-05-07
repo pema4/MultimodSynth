@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Представляет собой вариант эффект сатурации.

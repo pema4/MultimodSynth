@@ -1,19 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
-namespace BetterSynth.UI
+namespace MultimodSynth.UI
 {
+    /// <summary>
+    /// Представляет собой вариант ручки, стандартное значение которой находится на середине.
+    /// </summary>
     public class BipolarKnob : Knob
     {
-        public BipolarKnob() : base()
+        /// <summary>
+        /// Инициализирует новый объект типа BipolarKnob.
+        /// </summary>
+        public BipolarKnob()
         {
             coloredArcFigure.StartPoint = new System.Windows.Point(20, 4);
         }
 
+        /// <summary>
+        /// Обрабатывает вращение элементов.
+        /// </summary>
+        /// <param name="normalizedValue"></param>
         protected override void Rotate(double normalizedValue)
         {
             var angle = Math.PI * (1.25 - 1.5 * normalizedValue);

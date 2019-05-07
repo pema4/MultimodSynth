@@ -1,4 +1,4 @@
-﻿using BetterSynth.UI;
+﻿using MultimodSynth.UI;
 using Jacobi.Vst.Core;
 using Jacobi.Vst.Framework;
 using System;
@@ -8,40 +8,81 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
-    internal class PluginEditor : IVstPluginEditor
+    /// <summary>
+    /// Реализация интерфейса IVstPluginEditor, отвечающего за создание пользовательского интерфейса.
+    /// </summary>
+    class PluginEditor : IVstPluginEditor
     {
+        /// <summary>
+        /// Ссылка на плагин, которому принадлежит этот компонент.
+        /// </summary>
         private Plugin plugin;
+
+        /// <summary>
+        /// Объект типа HwndSource.
+        /// </summary>
         private HwndSource hwndSource;
+
+        /// <summary>
+        /// Текущие границы окна редактора.
+        /// </summary>
         private Rectangle? bounds;
+
+        /// <summary>
+        /// Ссылка на окно редактора.
+        /// </summary>
         private EditorView instance;
 
+        /// <summary>
+        /// Инициализирует новый объект типа PluginEditor, принадлежащий переданному плагину.
+        /// </summary>
+        /// <param name="plugin"></param>
         public PluginEditor(Plugin plugin)
         {
             this.plugin = plugin;
         }
 
+        /// <summary>
+        /// Тип переключателей редактора.
+        /// </summary>
         public VstKnobMode KnobMode { get; set; }
 
+        /// <summary>
+        /// Обрабатывает нажатия клавиш (не используется).
+        /// </summary>
+        /// <param name="ascii"></param>
+        /// <param name="virtualKey"></param>
+        /// <param name="modifers"></param>
+        /// <returns></returns>
         public bool KeyDown(byte ascii, VstVirtualKey virtualKey, VstModifierKeys modifers)
         {
             return false;
         }
 
+        /// <summary>
+        /// Обрабатывает отпускания клавиш клавиатуры (не используется).
+        /// </summary>
+        /// <param name="ascii"></param>
+        /// <param name="virtualKey"></param>
+        /// <param name="modifers"></param>
+        /// <returns></returns>
         public bool KeyUp(byte ascii, VstVirtualKey virtualKey, VstModifierKeys modifers)
         {
             return false;
         }
 
+        /// <summary>
+        /// Метод, вызываемый хостом, когда процессор бездействует (не используется).
+        /// </summary>
         public void ProcessIdle()
         {
         }
 
         /// <summary>
-        /// Returns the bounding rectangle of the Control.
+        /// Возвращает размеры текущего окна.
         /// </summary>
-        /// <remarks>The same size as in design-time.</remarks>
         public Rectangle Bounds
         {
             get
@@ -61,9 +102,8 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Opens and attaches the Control to the <paramref name="hWnd"/>.
+        /// Открывает и прикрепляет элемент управления к переданному hWnd.
         /// </summary>
-        /// <param name="hWnd">The native win32 handle to the main window of the host.</param>
         public void Open(IntPtr hWnd)
         {
             if (instance == null)
@@ -83,10 +123,11 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// https://stackoverflow.com/questions/3286175/how-do-i-convert-a-wpf-size-to-physical-pixels
+        /// Возвращает размер элемента в экранных пикселях.
         /// </summary>
         /// <param name="element"></param>
         /// <returns></returns>
+        /// <seealso cref="https://stackoverflow.com/questions/3286175/how-do-i-convert-a-wpf-size-to-physical-pixels"/>
         private System.Windows.Size GetElementPixelSize(UIElement element)
         {
             Matrix transformToDevice;
@@ -104,7 +145,7 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Closes and destroys the Control.
+        /// Закрывает редактор.
         /// </summary>
         public void Close()
         {

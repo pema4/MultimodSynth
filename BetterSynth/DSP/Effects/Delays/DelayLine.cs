@@ -1,4 +1,4 @@
-﻿namespace BetterSynth
+﻿namespace MultimodSynth
 {
     /// <summary>
     /// Представляет собой линию задержки.

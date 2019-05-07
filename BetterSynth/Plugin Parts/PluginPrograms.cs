@@ -4,21 +4,41 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
+    /// <summary>
+    /// Реализация интерфейса IVstPluginPrograms, отвечающего за работу с программами.
+    /// </summary>
     class PluginPrograms : VstPluginProgramsBase
     {
+        /// <summary>
+        /// Ссылка на плагин, которому принадлежит этот компонент.
+        /// </summary>
         private Plugin plugin;
 
+        /// <summary>
+        /// Инициализирует новых объект типа PluginPrograms, принадлежащий заданному плагину.
+        /// </summary>
+        /// <param name="plugin"></param>
         public PluginPrograms(Plugin plugin)
         {
             this.plugin = plugin;
         }
 
+        /// <summary>
+        /// Ссылка на коллекцию данных о параметрах.
+        /// </summary>
         public VstParameterInfoCollection ParameterInfos { get; protected set; } = new VstParameterInfoCollection();
 
+        /// <summary>
+        /// Ссылка на коллекцию категорий параметров.
+        /// </summary>
         public VstParameterCategoryCollection ParameterCategories { get; protected set; } = new VstParameterCategoryCollection();
         
+        /// <summary>
+        /// Создает коллекцию программ.
+        /// </summary>
+        /// <returns></returns>
         protected override VstProgramCollection CreateProgramCollection()
         {
             VstProgramCollection programs = new VstProgramCollection();
@@ -29,33 +49,6 @@ namespace BetterSynth
             programs.Add(defaultProgram);
 
             return programs;
-        }
-
-        public void ReadParameters(Stream stream)
-        {
-            using (var reader = new BinaryReader(stream, Encoding.Default, true))
-            {
-                var activeParameters = ActiveProgram.Parameters;
-                foreach (var param in activeParameters)
-                {
-                    var name = reader.ReadString();
-                    var normalizedValue = reader.ReadSingle();
-                    activeParameters[name].NormalizedValue = normalizedValue;
-                }
-            }
-        }
-
-        public void WriteParameters(Stream stream)
-        {
-            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
-            {
-                var activeParameters = ActiveProgram.Parameters;
-                foreach (var param in activeParameters)
-                {
-                    writer.Write(param.Info.Name);
-                    writer.Write(param.NormalizedValue);
-                }
-            }
         }
     }
 }

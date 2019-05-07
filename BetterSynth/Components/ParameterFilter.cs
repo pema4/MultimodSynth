@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Фильтр низких частот, используемый для сглаживания изменения параметров.
@@ -87,7 +87,7 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Выполняет очередной ход сглаживания.
+        /// Выполнение очередного шаг сглаживания.
         /// </summary>
         public void Process()
         {

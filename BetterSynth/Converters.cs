@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Windows;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Contains various method for convertation values from
@@ -8,14 +9,14 @@ namespace BetterSynth
     /// </summary>
     static class Converters
     {
-        public static double ToSemitones(double value) =>
-            -36 + value * 72;
+        public static int ToSemitones(double value) =>
+            (int)(-36 + value * 72);
 
         public static string SemitonesToString(double value) =>
             $"{ToSemitones(value):+0;-0} semitones";
 
-        public static double ToCents(double value) =>
-            -100 + value * 200;
+        public static int ToCents(double value) =>
+            (int)(-100 + value * 200);
 
         public static string CentsToString(double value) =>
             $"{ToCents(value):+0;-0} cents";
@@ -90,7 +91,7 @@ namespace BetterSynth
             else if (value == 0)
                 return $"centered";
             else
-                return $"{100 * value:F1}% right";
+                return $"{100 * -value:F1}% right";
         }
 
         public static string PercentsToString(double value) =>
@@ -174,7 +175,7 @@ namespace BetterSynth
             $"{ToEnvelopeTime(value):F2} s";
 
         public static string EnvelopeCurveToString(double value) =>
-            $"{value:F1}% linear";
+            $"{value * 100:F1}% linear";
 
         public static SvfFilter.FilterType ToFilterType(double value)
         {

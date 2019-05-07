@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Представляет собой эффект дилэй с отличающимся временем задержки в левом и правом канале.

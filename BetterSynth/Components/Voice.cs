@@ -1,4 +1,4 @@
-﻿namespace BetterSynth
+﻿namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, представляющий собой один голос.

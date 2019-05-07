@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент голоса плагина, представляющий ADSR-огибающую.
@@ -36,9 +36,9 @@ namespace BetterSynth
         /// Текущее значение изгиба огибающей в стадии атаки (в диапазоне [0, 1]).
         /// </summary>
         private float attackCurve;
-        
+
         /// <summary>
-        /// Уровень, к которому стремится огибающая в стадии атаки.
+        /// Значение, показывающее форму стадии атаки.
         /// </summary>
         private double attackTargetRatio;
 
@@ -48,7 +48,7 @@ namespace BetterSynth
         private float decayReleaseCurve;
 
         /// <summary>
-        /// Уровень, к которому стремится огибающая в стадиях спада и затухания.
+        /// Значение, показывающее форму стадии спада и затухания.
         /// </summary>
         private double decayReleaseTargetRatio;
 
@@ -71,7 +71,7 @@ namespace BetterSynth
         public bool IsActive => envelope.State != AdsrEnvelope.EnvelopeState.Idle;
 
         /// <summary>
-        /// Устанавливает новое значение времени стадии атаки.
+        /// Устанавливает новое значение длительности стадии атаки (в секундах).
         /// </summary>
         /// <param name="value">Время (в секундах).</param>
         public void SetAttackTime(float value)
@@ -81,7 +81,7 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Устанавливает новое значение времени стадии спада.
+        /// Устанавливает новое значение длительности стадии спада (в секундах).
         /// </summary>
         /// <param name="value">Время (в секундах).</param>
         public void SetDecayTime(float value)
@@ -101,7 +101,7 @@ namespace BetterSynth
         }
 
         /// <summary>
-        /// Устанавливает новое значение времени стадии затухания.
+        /// Устанавливает новое значение длительности стадии затухания (в секундах).
         /// </summary>
         /// <param name="value">Время (в секундах).</param>
         public void SetReleaseTime(float value)

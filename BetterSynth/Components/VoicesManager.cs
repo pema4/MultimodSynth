@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Jacobi.Vst.Framework;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, управляющий всем голосами.

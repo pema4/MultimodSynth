@@ -1,6 +1,6 @@
 ﻿using Jacobi.Vst.Framework;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, предстающий собой всю цепочку создания обработки звука.

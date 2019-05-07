@@ -1,4 +1,4 @@
-﻿namespace BetterSynth
+﻿namespace MultimodSynth
 {
     /// <summary>
     /// Базовый класс, предоставляющий своим наследникам информацию о частоте дискретизации.

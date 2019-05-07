@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="BetterSynth.AudioComponent" Collapsed="true">
+  <Class Name="MultimodSynth.AudioComponent" Collapsed="true">
     <Position X="25.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAAAAQAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Components\AudioComponent.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.AudioComponentWithParameters" Collapsed="true">
+  <Class Name="MultimodSynth.AudioComponentWithParameters" Collapsed="true">
     <Position X="9.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAIAAMAQAEgAgAAIAAAAAAAAAAAAA=</HashCode>
@@ -15,98 +15,98 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="BetterSynth.DelayManager" Collapsed="true">
+  <Class Name="MultimodSynth.DelayManager" Collapsed="true">
     <Position X="5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>MAAAAAgACUAQAwKAAhAAjglEgLzAAQAAQBAAIEAhALA=</HashCode>
       <FileName>Components\DelayManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.DistortionManager" Collapsed="true">
+  <Class Name="MultimodSynth.DistortionManager" Collapsed="true">
     <Position X="9.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IQBAwCAAAAEAIhCEYkAhBACEABjAwgAAAIAAAAARABA=</HashCode>
       <FileName>Components\DistortionManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Envelope" Collapsed="true">
+  <Class Name="MultimodSynth.Envelope" Collapsed="true">
     <Position X="34.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAIJAJAQIQAgAAEEgAEAAAFAIiAAAAAAAAAACAIAAg=</HashCode>
       <FileName>Components\Envelope.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.EnvelopesManager" Collapsed="true">
+  <Class Name="MultimodSynth.EnvelopesManager" Collapsed="true">
     <Position X="14" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIAIJAoAQIQIgAAHAgFEUAAAAKiwAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Components\EnvelopesManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Filter" Collapsed="true">
+  <Class Name="MultimodSynth.Filter" Collapsed="true">
     <Position X="45.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAhQAAERAAABgAAEAAAAACAAIAAAAQACAAgACA=</HashCode>
       <FileName>Components\Filter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.FiltersManager" Collapsed="true">
+  <Class Name="MultimodSynth.FiltersManager" Collapsed="true">
     <Position X="2.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgYAAAgAGAEAAAQgiQQAACAAAiAAAAAAAAAAAAgACA=</HashCode>
       <FileName>Components\FiltersManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Oscillator" Collapsed="true">
+  <Class Name="MultimodSynth.Oscillator" Collapsed="true">
     <Position X="18.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EBAAIAAAQQAAQAAAAgAAAAQBAACIAAABAAAAgAAAAAA=</HashCode>
       <FileName>Components\Oscillator.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.OscillatorsManager" Collapsed="true">
+  <Class Name="MultimodSynth.OscillatorsManager" Collapsed="true">
     <Position X="7.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ARCAAAAAAAAAAAACCgACBAQAAAkIAAAAAAAAkAoQCAA=</HashCode>
       <FileName>Components\OscillatorsManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.ParameterFilter" Collapsed="true">
+  <Class Name="MultimodSynth.ParameterFilter" Collapsed="true">
     <Position X="29.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABAAAAAAAAAAABAAIkAAABAAAACAQCAgARAAAAAAAAI=</HashCode>
       <FileName>Components\ParameterFilter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Routing" Collapsed="true">
+  <Class Name="MultimodSynth.Routing" Collapsed="true">
     <Position X="11.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAABABQAAgAEDAABAAiAABAIAAAAEAAAAAE=</HashCode>
       <FileName>Components\Routing.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Voice" Collapsed="true">
+  <Class Name="MultimodSynth.Voice" Collapsed="true">
     <Position X="41" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAKGBCAAkgEQEAAAAACAgAAAAEAAAAEAAAg=</HashCode>
       <FileName>Components\Voice.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.VoicesManager" Collapsed="true">
+  <Class Name="MultimodSynth.VoicesManager" Collapsed="true">
     <Position X="16.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABAAIEAQAAAEABABgggMAAAACAiAAAAAAAggBCIAIAA=</HashCode>
       <FileName>Components\VoicesManager.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.MonoDelay" Collapsed="true">
+  <Class Name="MultimodSynth.MonoDelay" Collapsed="true">
     <Position X="20.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BgAAAAAAAAAEBAIAAgAAAAggAQCQAAAAAABAAEAwAAA=</HashCode>
       <FileName>DSP\Effects\Delays\MonoDelay.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.PingPongDelay" Collapsed="true">
+  <Class Name="MultimodSynth.PingPongDelay" Collapsed="true">
     <Position X="25.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAQAAAAAAAABAIAAgAAAAgAAAKAAAAAAAACAEAgAAA=</HashCode>
@@ -114,7 +114,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="BetterSynth.StereoOffsetDelay" Collapsed="true">
+  <Class Name="MultimodSynth.StereoOffsetDelay" Collapsed="true">
     <Position X="32" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAQAAAAAAAABAAAAgAAoAgAAACAAAAAAAAAAAAgAAA=</HashCode>
@@ -122,7 +122,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="BetterSynth.VariousTimeDelay" Collapsed="true">
+  <Class Name="MultimodSynth.VariousTimeDelay" Collapsed="true">
     <Position X="36.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAQAAAAAAAABAAAAgAAAAgAAQCgAAAAAAAAAAAgAAA=</HashCode>
@@ -130,7 +130,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="BetterSynth.AbsClipper" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.AbsClipper" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="50.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -138,7 +138,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.BitCrusher" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.BitCrusher" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="55.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAEAAgAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -146,7 +146,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.CubicClipper" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.CubicClipper" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="57.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -154,7 +154,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.SampleRateReductor" Collapsed="true">
+  <Class Name="MultimodSynth.SampleRateReductor" Collapsed="true">
     <Position X="27.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAIAAAAQAAAAAAAgAAAASAAACAQAAAAAgAAAAAAAA=</HashCode>
@@ -162,7 +162,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="BetterSynth.SoftClipper" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.SoftClipper" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="57.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAgCAAAAAAAAAAAAgAAAACAAAAAAAAAAAAAAAAAAIA=</HashCode>
@@ -170,56 +170,56 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.DCBlocker" Collapsed="true">
+  <Class Name="MultimodSynth.DCBlocker" Collapsed="true">
     <Position X="38.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ABAAAAAAABgAABAAAgAAAAAAAACAQAAAABABAAAAAIA=</HashCode>
       <FileName>DSP\Filters\DCBlocker.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Downsampler" Collapsed="true">
+  <Class Name="MultimodSynth.Downsampler" Collapsed="true">
     <Position X="43.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAEAAAABAAAAAAAAQgAAQAAAABAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>DSP\Filters\Downsampler.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.SvfFilter" Collapsed="true">
+  <Class Name="MultimodSynth.SvfFilter" Collapsed="true">
     <Position X="47.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAABAACEgAAAAQAAgChAoAYgSAQIYAABBA=</HashCode>
       <FileName>DSP\Filters\SvfFilter.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.AdsrEnvelope" Collapsed="true">
+  <Class Name="MultimodSynth.AdsrEnvelope" Collapsed="true">
     <Position X="52" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAADAQAAABCgAIAAgAEAAABEAACgAIEAAIABGCICEg=</HashCode>
       <FileName>DSP\Generators\AdsrEnvelope.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.SineLFO" Collapsed="true">
+  <Class Name="MultimodSynth.SineLFO" Collapsed="true">
     <Position X="23" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAABAAAAAAAAAQACgAAEQQAAACAAACBAAAAAAAAAAQ=</HashCode>
       <FileName>DSP\Generators\SineLFO.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.WaveTableOscillator" Collapsed="true">
+  <Class Name="MultimodSynth.WaveTableOscillator" Collapsed="true">
     <Position X="52" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAICAAAAAAAAggUgAAAAAABCBAAAAAAAAAgAAAABA=</HashCode>
       <FileName>DSP\Generators\WaveTableOscillator.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.AudioProcessor" Collapsed="true">
+  <Class Name="MultimodSynth.AudioProcessor" Collapsed="true">
     <Position X="53.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAAAAAAAAAAACAAAgAAAAAgBAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Plugin Parts\AudioProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.MidiProcessor" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.MidiProcessor" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="55.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AACAAAAAAAIAAAAAggAAAAAABAAAAACAAgAAAAAAAAA=</HashCode>
@@ -227,35 +227,35 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.MidiNoteEventArgs" Collapsed="true">
+  <Class Name="MultimodSynth.MidiNoteEventArgs" Collapsed="true">
     <Position X="53.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
       <FileName>Plugin Parts\MidiProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.ParameterFactory" Collapsed="true">
+  <Class Name="MultimodSynth.ParameterFactory" Collapsed="true">
     <Position X="57.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAgAAAAAAAAAAAIAQAABAAAAAAAAAAAAAAgAAA=</HashCode>
       <FileName>Plugin Parts\ParameterFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Plugin" Collapsed="true">
+  <Class Name="MultimodSynth.Plugin" Collapsed="true">
     <Position X="50.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ACAAAAAAIAAGAAAAAABAAAAAAAAABAAABAAIAAQAAAA=</HashCode>
       <FileName>Plugin Parts\Plugin.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.PluginCommandStub" Collapsed="true">
+  <Class Name="MultimodSynth.PluginCommandStub" Collapsed="true">
     <Position X="52" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Plugin Parts\PluginCommandStub.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.PluginEditor" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.PluginEditor" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="53.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAoAAAAggAAAAAhABAAAACAAECAACAAgA=</HashCode>
@@ -263,28 +263,28 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.PluginPrograms" Collapsed="true">
+  <Class Name="MultimodSynth.PluginPrograms" Collapsed="true">
     <Position X="55.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAEAAAAAAAAIAAAAAAAJAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Plugin Parts\PluginPrograms.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.Utilities" Collapsed="true">
+  <Class Name="MultimodSynth.Utilities" Collapsed="true">
     <Position X="50.25" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>CAAAAAACAAAAAggAAAAEAgAAAAAAAAAAQAABAIAQAAA=</HashCode>
       <FileName>Utilities.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.UI.BipolarKnob" Collapsed="true">
+  <Class Name="MultimodSynth.UI.BipolarKnob" Collapsed="true">
     <Position X="0.5" Y="6" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>UI\BipolarKnob.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="BetterSynth.UI.DataClass" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.UI.DataClass" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="50.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAACAAAAAgAAAAAAA=</HashCode>
@@ -292,7 +292,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.UI.EditorView" Collapsed="true" BaseTypeListCollapsed="true">
+  <Class Name="MultimodSynth.UI.EditorView" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="52" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
@@ -300,7 +300,7 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="BetterSynth.UI.Knob" Collapsed="true">
+  <Class Name="MultimodSynth.UI.Knob" Collapsed="true">
     <Position X="0.5" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>gAAIAICAAIQAogEAMAAAAAQkkIgAAqQIAAAAEEAADAA=</HashCode>
@@ -308,21 +308,21 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Struct Name="BetterSynth.MidiNote" Collapsed="true">
+  <Struct Name="MultimodSynth.MidiNote" Collapsed="true">
     <Position X="50.25" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAEA=</HashCode>
       <FileName>Plugin Parts\MidiProcessor.cs</FileName>
     </TypeIdentifier>
   </Struct>
-  <Interface Name="BetterSynth.IDelay" Collapsed="true">
+  <Interface Name="MultimodSynth.IDelay" Collapsed="true">
     <Position X="50.25" Y="6" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAQAAAAAAAABAAAAgAAAAAAAAAAAAAAAAAAAAAgAAA=</HashCode>
       <FileName>DSP\Effects\Delays\IDelay.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="BetterSynth.IDistortion" Collapsed="true">
+  <Interface Name="MultimodSynth.IDistortion" Collapsed="true">
     <Position X="52" Y="6" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>

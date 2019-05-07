@@ -1,10 +1,38 @@
-﻿using System;
+﻿using Jacobi.Vst.Framework;
+using System;
 using System.IO;
+using System.Text;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     static class Utilities
     {
+
+        public static void ReadParameters(Stream stream, VstParameterCollection activeParameters)
+        {
+            using (var reader = new BinaryReader(stream, Encoding.Default, true))
+            {
+                foreach (var param in activeParameters)
+                {
+                    var name = reader.ReadString();
+                    var normalizedValue = reader.ReadSingle();
+                    activeParameters[name].NormalizedValue = normalizedValue;
+                }
+            }
+        }
+
+        public static void WriteParameters(Stream stream, VstParameterCollection activeParameters)
+        {
+            using (var writer = new BinaryWriter(stream, Encoding.Default, true))
+            {
+                foreach (var param in activeParameters)
+                {
+                    writer.Write(param.Info.Name);
+                    writer.Write(param.NormalizedValue);
+                }
+            }
+        }
+
         private const double DefaultSampleRate = 44100;
 
         public static double MidiNoteToFrequency(int note)
@@ -25,11 +53,10 @@ namespace BetterSynth
             try
             {
                 using (var file = new FileStream(path, FileMode.Open))
-                using (var reader = new BinaryReader(file))
                 {
                     WaveTables = new WaveTableOscillator[6];
                     for (int i = 0; i < WaveTables.Length; ++i)
-                        WaveTables[i] = WaveTableOscillator.Deserialize(reader);
+                        WaveTables[i] = WaveTableOscillator.Deserialize(file);
                 }
             }
             catch (IOException)
@@ -37,7 +64,6 @@ namespace BetterSynth
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
                 using (var file = new FileStream(path, FileMode.Create))
-                using (var writer = new BinaryWriter(file))
                 {
                     WaveTables = new[]
                     {
@@ -49,7 +75,7 @@ namespace BetterSynth
                         new WaveTableOscillator(QuarterSquareGenerator, 20, DefaultSampleRate / 2),
                     };
                     foreach (var vt in WaveTables)
-                        WaveTableOscillator.Serialize(writer, vt);
+                        WaveTableOscillator.Serialize(file, vt);
                 }
             }
         }

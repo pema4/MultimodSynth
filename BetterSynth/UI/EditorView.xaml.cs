@@ -8,15 +8,22 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace BetterSynth.UI
+namespace MultimodSynth.UI
 {
     /// <summary>
-    /// Interaction logic for EditorView.xaml
+    /// Представляет собой окно редактора плагина.
     /// </summary>
     public partial class EditorView : UserControl
     {
+        /// <summary>
+        /// Ссылка на плагин, связанный с этим редактором.
+        /// </summary>
         private Plugin plugin;
 
+        /// <summary>
+        /// Метод, привязывающий параметры плагина к редактору.
+        /// </summary>
+        /// <param name="plugin"></param>
         internal void BindToPlugin(Plugin plugin)
         {
             this.plugin = plugin;
@@ -25,7 +32,10 @@ namespace BetterSynth.UI
             BindKeyboard(plugin.MidiProcessor);
         }
 
-
+        /// <summary>
+        /// Метод, привязывающий параметры плагина к редактору.
+        /// </summary>
+        /// <param name="routing"></param>
         private void BindParameters(Routing routing)
         {
             BindOscA(routing.VoicesManager.OscAManager, routing.VoicesManager.OscAVolumeEnvelopeManager);
@@ -36,6 +46,11 @@ namespace BetterSynth.UI
             BindDelay(routing.DelayManager);
         }
 
+        /// <summary>
+        /// Метод, привязывающий параметры первого осциллятора плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindOscA(OscillatorsManager oscA, EnvelopesManager envA)
         {
             var color = (SolidColorBrush)Resources["oscAKnobColor"];
@@ -72,7 +87,12 @@ namespace BetterSynth.UI
             ADecayReleaseCurve.AttachTo(envA.DecayReleaseCurveManager, color,
                 Converters.EnvelopeCurveToString);
         }
-        
+
+        /// <summary>
+        /// Метод, привязывающий параметры второго осциллятора плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindOscB(OscillatorsManager oscB, EnvelopesManager envB)
         {
             var color = (SolidColorBrush)Resources["oscBKnobColor"];
@@ -110,6 +130,11 @@ namespace BetterSynth.UI
                 Converters.EnvelopeCurveToString);
         }
 
+        /// <summary>
+        /// Метод, привязывающий параметры фильтра плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindFilter(FiltersManager filter, EnvelopesManager env)
         {
             var color = (Brush)Resources["filterKnobColor"];
@@ -150,6 +175,11 @@ namespace BetterSynth.UI
                 Converters.EnvelopeCurveToString);
         }
 
+        /// <summary>
+        /// Метод, привязывающий некие другие параметры плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindMasterSettings(Routing routing)
         {
             var color = (Brush)Resources["masterKnobColor"];
@@ -164,6 +194,11 @@ namespace BetterSynth.UI
                 Converters.ModulationTypeToString);
         }
 
+        /// <summary>
+        /// Метод, привязывающий параметры эффекта дисторшн плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindDistortion(DistortionManager distortion)
         {
             var color = (Brush)Resources["distortionKnobColor"];
@@ -187,6 +222,11 @@ namespace BetterSynth.UI
                 Converters.PercentsToString);
         }
 
+        /// <summary>
+        /// Метод, привязывающий параметры эффекта дилэй плагина к редактору.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindDelay(DelayManager delay)
         {
             var color = (Brush)Resources["delayKnobColor"];
@@ -216,6 +256,11 @@ namespace BetterSynth.UI
                 Converters.DelayLfoRateToString);
         }
 
+        /// <summary>
+        /// Метод, привязывающий плагин к клавиатуре редактора.
+        /// </summary>
+        /// <param name="oscA"></param>
+        /// <param name="envA"></param>
         private void BindKeyboard(MidiProcessor midiProcessor)
         {
             Dictionary<int, Rectangle> keys = new Dictionary<int, Rectangle>();
@@ -285,18 +330,28 @@ namespace BetterSynth.UI
             };
         }
 
+        /// <summary>
+        /// Обработчик события нажатия на кнопку "Сохранить".
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             var fileDialog = new SaveFileDialog()
             {
+                Title = "Save preset file...",
                 DefaultExt = ".spreset",
+                Filter = "synth preset file|.spreset",
             };
             if (fileDialog.ShowDialog() == true)
             {
                 try
                 {
                     using (var fs = new FileStream(fileDialog.FileName, FileMode.OpenOrCreate))
-                        plugin.Programs.WriteParameters(fs);
+                    {
+                        var parameters = plugin.Programs.ActiveProgram.Parameters;
+                        Utilities.WriteParameters(fs, parameters);
+                    }
                 }
                 catch (Exception ex) when (
                     ex is IOException ||
@@ -309,21 +364,35 @@ namespace BetterSynth.UI
                         MessageBoxImage.Error,
                         MessageBoxResult.None);
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("hehe");
+                }
             }
         }
 
+        /// <summary>
+        /// Обработчик события нажатия на кнопку "Открыть".
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
             var fileDialog = new OpenFileDialog()
             {
+                Title = "Open preset file...",
                 DefaultExt = ".spreset",
+                Filter = "synth preset file|.spreset",
             };
             if (fileDialog.ShowDialog() == true)
             {
                 try
                 {
                     using (var fs = new FileStream(fileDialog.FileName, FileMode.Open))
-                        plugin.Programs.ReadParameters(fs);
+                    {
+                        var parameters = plugin.Programs.ActiveProgram.Parameters;
+                        Utilities.ReadParameters(fs, parameters);
+                    }
                 }
                 catch (Exception ex) when (
                     ex is IOException ||
@@ -335,6 +404,10 @@ namespace BetterSynth.UI
                         MessageBoxButton.OK,
                         MessageBoxImage.Error,
                         MessageBoxResult.None);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("hehe");
                 }
             }
         }

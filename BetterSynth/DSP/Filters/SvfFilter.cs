@@ -1,9 +1,16 @@
 ﻿using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
+    /// <summary>
+    /// Реализация SVF (State Variable Filter).
+    /// </summary>
+    /// <seealso cref="https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf"/>
     class SvfFilter : AudioComponent
     {
+        /// <summary>
+        /// Указывает тип фильтра.
+        /// </summary>
         public enum FilterType
         {
             None,
@@ -18,22 +25,73 @@ namespace BetterSynth
             HighShelf,
         };
 
+        /// <summary>
+        /// Текущий тип фильтра.
+        /// </summary>
         private FilterType type;
+
+        /// <summary>
+        /// Частота среза фильтра.
+        /// </summary>
         private float cutoff;
+
+        /// <summary>
+        /// "Ширина" фильтра.
+        /// </summary>
         private float q = 1;
+
+        /// <summary>
+        /// Первый аккумулятор.
+        /// </summary>
         private float ic1eq = 0;
+
+        /// <summary>
+        /// Второй аккумулятор.
+        /// </summary>
         private float ic2eq = 0;
-        private float g;
-        private float k;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float a1;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float a2;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float a3;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float m0;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float m1;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float m2;
-        private float A;
+
+        /// <summary>
+        /// Коэффициент фильтра.
+        /// </summary>
         private float gain;
 
+        /// <summary>
+        /// Инициализирует новый объект типа SvfFilter c заданными параметрами.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="cutoff"></param>
+        /// <param name="q"></param>
+        /// <param name="gain"></param>
         public SvfFilter(
             FilterType type = FilterType.None,
             float cutoff = 20000,
@@ -46,6 +104,10 @@ namespace BetterSynth
             SetGain(gain);
         }
 
+        /// <summary>
+        /// Устанавливает новое значение типа фильтра.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetType(FilterType value)
         {
             type = value;
@@ -53,6 +115,10 @@ namespace BetterSynth
             Reset();
         }
 
+        /// <summary>
+        /// Устанавливает новое значение частоты среза фильтра.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetCutoff(float value)
         {
             if (cutoff != value)
@@ -62,25 +128,36 @@ namespace BetterSynth
             }
         }
 
+        /// <summary>
+        /// Устанавливает новое значение "ширины" фильтра.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetQ(float value)
         {
             q = value;
             UpdateCoefficients();
         }
 
+        /// <summary>
+        /// Устанавливает новое значение увеличения уровня громкости.
+        /// </summary>
+        /// <param name="value"></param>
         public void SetGain(float value)
         {
             gain = value;
             UpdateCoefficients();
         }
 
+        /// <summary>
+        /// Выполняет обновление всех коэффициентов.
+        /// </summary>
         private void UpdateCoefficients()
         {
             switch (type)
             {
                 case FilterType.Low:
-                    g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
-                    k = 1 / q;
+                    var g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
+                    var k = 1 / q;
                     a1 = 1 / (1 + g * (g + k));
                     a2 = g * a1;
                     a3 = g * a2;
@@ -145,7 +222,7 @@ namespace BetterSynth
                     break;
 
                 case FilterType.Bell:
-                    A = (float)Math.Pow(10, gain / 40);
+                    var A = (float)Math.Pow(10, gain / 40);
                     g = (float)Math.Tan(Math.PI * cutoff / SampleRate);
                     k = 1 / (q * A);
                     a1 = 1 / (1 + g * (g + k));
@@ -182,6 +259,11 @@ namespace BetterSynth
             }
         }
 
+        /// <summary>
+        /// Обработка новых входных данных.
+        /// </summary>
+        /// <param name="v0">Входной сигнал.</param>
+        /// <returns>Выходной сигнал.</returns>
         public float Process(float v0)
         {
             float v3 = v0 - ic2eq;
@@ -193,12 +275,19 @@ namespace BetterSynth
             return m0 * v0 + m1 * v1 + m2 * v2;
         }
 
+        /// <summary>
+        /// Сбрасывает текущее состояние фильтра.
+        /// </summary>
         public void Reset()
         {
             ic1eq = 0;
             ic2eq = 0;
         }
 
+        /// <summary>
+        /// Обработчик изменения частоты дискретизации.
+        /// </summary>
+        /// <param name="newSampleRate">Новая частота дискретизации.</param>
         protected override void OnSampleRateChanged(float newSampleRate)
         {
             UpdateCoefficients();

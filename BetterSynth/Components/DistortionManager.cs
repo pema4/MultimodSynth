@@ -1,7 +1,7 @@
 ﻿using Jacobi.Vst.Framework;
 using System;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, отвечающий за эффект "дисторшн".

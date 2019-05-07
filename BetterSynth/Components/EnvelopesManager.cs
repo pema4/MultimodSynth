@@ -1,7 +1,7 @@
 ﻿using Jacobi.Vst.Framework;
 using System.Collections.Generic;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, управляющий одной огибающей многих голосов.

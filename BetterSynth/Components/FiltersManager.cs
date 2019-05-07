@@ -1,7 +1,7 @@
 ﻿using Jacobi.Vst.Framework;
 using System.Collections.Generic;
 
-namespace BetterSynth
+namespace MultimodSynth
 {
     /// <summary>
     /// Компонент плагина, управляющий одним фильтром многих голосов.
@@ -83,7 +83,6 @@ namespace BetterSynth
             // Параметр типа фильтра.
             FilterTypeManager = factory.CreateParameterManager(
                 name: "TYPE",
-                canBeAutomated: false,
                 valueChangedHandler: SetFilterType);
 
             // Параметр множителя частоты среза фильтра.
