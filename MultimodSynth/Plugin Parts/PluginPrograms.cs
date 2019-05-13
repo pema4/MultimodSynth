@@ -1,8 +1,6 @@
 ﻿using Jacobi.Vst.Framework;
 using Jacobi.Vst.Framework.Plugin;
-using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace MultimodSynth
 {

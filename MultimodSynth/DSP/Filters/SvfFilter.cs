@@ -271,7 +271,6 @@ namespace MultimodSynth
             float v2 = ic2eq + a2 * ic1eq + a3 * v3;
             ic1eq = 2 * v1 - ic1eq;
             ic2eq = 2 * v2 - ic2eq;
-
             return m0 * v0 + m1 * v1 + m2 * v2;
         }
 

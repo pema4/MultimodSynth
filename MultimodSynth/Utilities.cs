@@ -27,7 +27,11 @@ namespace MultimodSynth
                 foreach (var param in activeParameters)
                 {
                     var name = reader.ReadString();
+                    if (!activeParameters.Contains(name))
+                        throw new ArgumentException("File contains wrong values.");
                     var normalizedValue = reader.ReadSingle();
+                    if (normalizedValue < 0 || normalizedValue > 1)
+                        throw new ArgumentException("File contains wrong values.");
                     activeParameters[name].NormalizedValue = normalizedValue;
                 }
             }

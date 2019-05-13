@@ -18,7 +18,7 @@ namespace MultimodSynth.UI
         /// <summary>
         /// Показывает, как сильно меняется значение при перемещении на один пиксель.
         /// </summary>
-        private const double Delta = 0.0015;
+        private const double Delta = 0.0005;
 
         /// <summary>
         /// Начальная позиция мыши в момент её захвата относительно элемента.

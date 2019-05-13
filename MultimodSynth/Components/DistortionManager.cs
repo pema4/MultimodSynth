@@ -1,5 +1,4 @@
 ﻿using Jacobi.Vst.Framework;
-using System;
 
 namespace MultimodSynth
 {

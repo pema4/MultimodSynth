@@ -54,8 +54,6 @@ namespace MultimodSynth
         /// <returns>Выходной сигнал.</returns>
         public float Process(float input)
         {
-            var output = sample;
-
             phasor += phaseIncrement;
             if (phasor >= 1)
             {
@@ -63,7 +61,7 @@ namespace MultimodSynth
                 sample = input;
             }
 
-            return output;
+            return sample;
         }
 
         /// <summary>

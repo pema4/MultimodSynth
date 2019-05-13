@@ -232,6 +232,7 @@
         /// <returns>Выходной сигнал.</returns>
         public double Process(params double[] inputs)
         {
+            // order - коэффициент, во сколько раз нужно снизить частоту дискретизации
             if (order == 1)
                 return inputs[0];
 
@@ -239,8 +240,10 @@
 
             for (int inputIndex = 0; inputIndex < order; ++inputIndex)
             {
+                // Заносим сэмпл в буфер.
                 buffer[currBufferIndex] = inputs[inputIndex];
-                
+
+                // Оптимизация: фильтруется только первый входной сэмпл, остальные отбрасываются
                 if (inputIndex == 0)
                 {
                     int index = currBufferIndex;
@@ -254,6 +257,7 @@
                     }
                 }
 
+                // Указатель для записи в циклический буфер
                 currBufferIndex += 1;
                 if (currBufferIndex == buffer.Length)
                     currBufferIndex = 0;

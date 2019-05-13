@@ -210,6 +210,7 @@ namespace MultimodSynth
         /// <returns>Выходной сигнал.</returns>
         public float Process()
         {
+            // Вызовы этих методов обновляют значение параметров, которые подвержены сглаживанию.
             OscAManager.Process();
             OscBManager.Process();
             FilterManager.Process();
@@ -218,17 +219,19 @@ namespace MultimodSynth
             FilterCutoffEnvelopeManager.Process();
 
             float sum = 0;
-
             for (int i = 0; i < activeVoices.Count;)
             {
                 var voice = activeVoices[i];
                 sum += voice.Process();
                 if (!voice.IsActive)
+                    // StopVoice помечает голос как свободный 
+                    // и удаляет его из массива activeVoices.
+                    // При этом инкрементировать значение i не нужно, потому что
+                    // все элементы activeVoices сдвигаются влево
                     StopVoice(voice);
                 else
                     i += 1;
             }
-            
             return sum;
         }
 

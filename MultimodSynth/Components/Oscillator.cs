@@ -84,8 +84,10 @@ namespace MultimodSynth
         /// <returns>Выходной сигнал.</returns>
         public float Process(float phaseModulation = 0)
         {
+            // Расчёт текущей фазы.
             var phase = phasor + phaseModulation;
             phase -= (float)Math.Floor(phase);
+
             var waveTable = this.waveTable;
             float result;
             if (waveTable == null)
@@ -93,6 +95,7 @@ namespace MultimodSynth
             else
                 result = waveTable.Process(phase);
 
+            // Прибавление инкремента фазы текущей частоты.
             phasor += phaseIncrement;
             if (phasor >= 1)
                 phasor -= 1;

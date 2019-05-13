@@ -62,7 +62,7 @@ namespace MultimodSynth.UI
             APitchFine.AttachTo(oscA.PitchFineManager, color,
                 Converters.CentsToString);
 
-            ATembre.AttachTo(oscA.WaveTableManager, color,
+            ATimbre.AttachTo(oscA.WaveTableManager, color,
                 Converters.WaveTableToString);
 
             // OscA envelope
@@ -104,7 +104,7 @@ namespace MultimodSynth.UI
             BPitchFine.AttachTo(oscB.PitchFineManager, color,
                 Converters.CentsToString);
 
-            BTembre.AttachTo(oscB.WaveTableManager, color,
+            BTimbre.AttachTo(oscB.WaveTableManager, color,
                 Converters.WaveTableToString);
 
             // OscA envelope
@@ -331,6 +331,7 @@ namespace MultimodSynth.UI
             var fileDialog = new SaveFileDialog()
             {
                 Title = "Save preset file...",
+                Filter = "synth preset file|*.spreset",
                 DefaultExt = ".spreset",
             };
             if (fileDialog.ShowDialog() == true)
@@ -348,15 +349,11 @@ namespace MultimodSynth.UI
                     ex is System.Security.SecurityException)
                 {
                     MessageBox.Show(
-                        "File saving dialog",
+                        $"Preset saving error:\n{ex.Message}",
                         "Error",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error,
                         MessageBoxResult.None);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("hehe");
                 }
             }
         }
@@ -371,6 +368,7 @@ namespace MultimodSynth.UI
             var fileDialog = new OpenFileDialog()
             {
                 Title = "Open preset file...",
+                Filter = "synth preset file|*.spreset",
                 DefaultExt = ".spreset",
             };
             if (fileDialog.ShowDialog() == true)
@@ -385,7 +383,8 @@ namespace MultimodSynth.UI
                 }
                 catch (Exception ex) when (
                     ex is IOException ||
-                    ex is System.Security.SecurityException)
+                    ex is System.Security.SecurityException ||
+                    ex is ArgumentException)
                 {
                     MessageBox.Show(
                         "Preset opening error.",
@@ -393,10 +392,6 @@ namespace MultimodSynth.UI
                         MessageBoxButton.OK,
                         MessageBoxImage.Error,
                         MessageBoxResult.None);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("hehe");
                 }
             }
         }

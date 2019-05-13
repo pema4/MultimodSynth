@@ -11,8 +11,8 @@
         public enum ModulationType
         {
             None,
-            FrequencyModulationA,
-            FrequencyModulationB,
+            PhaseModulationA,
+            PhaseModulationB,
             AmplitudeModulationA,
             AmplitudeModulationB,
         }
@@ -143,35 +143,43 @@
             if (!IsActive)
                 return 0;
             
-            float oscMix = 0;
+            float oscMix = 0; // Здесь хранится результат
             switch (Modulation)
             {
                 case ModulationType.None:
-                    if (envA.IsActive)
+                    if (envA.IsActive) // Если первый осциллятор активен, то
                     {
-                        oscMix += envA.Process() * oscA.Process();
-                        if (envB.IsActive)
-                            oscMix += envB.Process() * oscB.Process();
+                        oscMix += envA.Process() * oscA.Process(); // Прибавляем сигнал первого осциллятора
+                        if (envB.IsActive) // Если второй осциллятор активен
+                            oscMix += envB.Process() * oscB.Process(); // Прибавляем сигнал второго осциллятора
                     }
-                    else
+                    else 
                     {
-                        if (envB.IsActive)
-                            oscMix = envB.Process() * oscB.Process();
+                        if (envB.IsActive) // Если второй осциллятор активен, то
+                            oscMix = envB.Process() * oscB.Process(); // Прибавляем сигнал второго осциллятора
                         else
-                            goto default;
+                        {
+                            // Оба осциллятора неактивны, этот голос прекратил производить сигнал
+                            IsActive = false;
+                            return 0;
+                        }
                     }
                     break;
 
                 case ModulationType.AmplitudeModulationA:
-                    if (envA.IsActive)
+                    if (envA.IsActive) // Если несущий осциллятор активен, то
                     {
                         float mod = 0;
-                        if (envB.IsActive)
+                        if (envB.IsActive) // Если модулирующий осциллятор активен, то
                             mod = oscB.Process() * envB.Process();
                         oscMix = oscA.Process() * envA.Process() * (1 + mod);
                     }
                     else
-                        goto default;
+                    {
+                        // Несущий осциллятор не активен, этот голос прекратил производить сигнал.
+                        IsActive = false;
+                        return 0;
+                    }
                     break;
 
                 case ModulationType.AmplitudeModulationB:
@@ -183,22 +191,28 @@
                         oscMix = oscB.Process() * envB.Process() * (1 + mod);
                     }
                     else
-                        goto default;
+                    {
+                        IsActive = false;
+                        return 0;
+                    }
                     break;
 
-                case ModulationType.FrequencyModulationA:
-                    if (envA.IsActive)
+                case ModulationType.PhaseModulationA:
+                    if (envA.IsActive) // Если несущий осциллятор активен
                     {
                         float mod = 0;
-                        if (envB.IsActive)
-                            mod = 10 * oscB.Process() * envB.Process();
+                        if (envB.IsActive) // Если модулирующий осциллятор активен
+                            mod = 10 * oscB.Process() * envB.Process(); // Сдвиг фазы несущего сигнала.
                         oscMix = oscA.Process(phaseModulation: mod) * envA.Process();
                     }
                     else
-                        goto default;
+                    {
+                        IsActive = false;
+                        return 0;
+                    }
                     break;
 
-                case ModulationType.FrequencyModulationB:
+                case ModulationType.PhaseModulationB:
                     if (envB.IsActive)
                     {
                         float mod = 0;
@@ -207,12 +221,11 @@
                         oscMix = oscB.Process(phaseModulation: mod) * envB.Process();
                     }
                     else
-                        goto default;
+                    {
+                        IsActive = false;
+                        return 0;
+                    }
                     break;
-
-                default:
-                    IsActive = false;
-                    return 0;
             }
 
             var filterEnvOut = envFilter.Process();

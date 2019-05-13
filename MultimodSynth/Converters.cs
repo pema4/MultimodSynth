@@ -393,9 +393,9 @@ namespace MultimodSynth
             else if (value < 0.75f)
                 return Voice.ModulationType.AmplitudeModulationB;
             else if (value < 1)
-                return Voice.ModulationType.FrequencyModulationA;
+                return Voice.ModulationType.PhaseModulationA;
             else
-                return Voice.ModulationType.FrequencyModulationB;
+                return Voice.ModulationType.PhaseModulationB;
         }
 
         /// <summary>
@@ -406,15 +406,15 @@ namespace MultimodSynth
         public static string ModulationTypeToString(double value)
         {
             if (value < 0.25f)
-                return "No modulation";
+                return "no modulation";
             else if (value < 0.5f)
-                return "AM B -> A";
+                return "amplitude modulation B -> A";
             else if (value < 0.75f)
-                return "AM A -> B";
+                return "amplitude modulation A -> B";
             else if (value < 1)
-                return "FM B -> A";
+                return "phase modulation B -> A";
             else
-                return "FM A -> B";
+                return "phase modulation A -> B";
         }
     }
 }

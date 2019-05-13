@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <SolidColorBrush x:Key="oscABackground" Color="#FFFFE7E7"/>
         <SolidColorBrush x:Key="oscAKnobColor" Color="Red"/>
-        <SolidColorBrush x:Key="oscBBackground" Color="#FFFEFEFE"/>
+        <SolidColorBrush x:Key="oscBBackground" Color="#F0F8E0"/>
         <SolidColorBrush x:Key="oscBKnobColor" Color="YellowGreen"/>
         <SolidColorBrush x:Key="filterBackground" Color="#FFE0E0FF"/>
         <SolidColorBrush x:Key="filterKnobColor" Color="Blue"/>
@@ -117,11 +117,11 @@
                                TextAlignment="Center" Text="Fine"/>
                 </StackPanel>
 
-                <!-- Tembre -->
+                <!-- Timbre -->
                 <StackPanel Grid.Row="1" Grid.Column="2">
-                    <local:Knob x:Name="ATembre" Margin="0,2,0,0"/>
+                    <local:Knob x:Name="ATimbre" Margin="0,2,0,0"/>
                     <TextBlock Margin="0,-5,0,0"
-                               TextAlignment="Center" Text="Tembre"/>
+                               TextAlignment="Center" Text="Timbre"/>
                 </StackPanel>
 
                 <!-- Envelope amp -->
@@ -220,11 +220,11 @@
                                TextAlignment="Center" Text="Fine"/>
                 </StackPanel>
 
-                <!-- Tembre -->
+                <!-- Timbre -->
                 <StackPanel Grid.Row="1" Grid.Column="2">
-                    <local:Knob x:Name="BTembre" Margin="0,2,0,0"/>
+                    <local:Knob x:Name="BTimbre" Margin="0,2,0,0"/>
                     <TextBlock Margin="0,-5,0,0"
-                               TextAlignment="Center" Text="Tembre"/>
+                               TextAlignment="Center" Text="Timbre"/>
                 </StackPanel>
 
                 <!-- Envelope amp -->

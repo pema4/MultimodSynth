@@ -3,7 +3,6 @@ using Jacobi.Vst.Core;
 using Jacobi.Vst.Framework;
 using System;
 using System.Drawing;
-using Brushes = System.Windows.Media.Brushes;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;

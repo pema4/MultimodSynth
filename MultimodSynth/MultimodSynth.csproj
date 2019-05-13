@@ -66,7 +66,7 @@
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ProjectGuid>{531F81D2-E41D-4F0E-886E-B1418853A827}</ProjectGuid>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
@@ -89,7 +89,7 @@
     <Reference Include="Jacobi.Vst.Framework">
       <HintPath>$(SolutionDir)\Lib\VST.NET.1.1\CLR4\$(PlatformName)\Release\Jacobi.Vst.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="Jacobi.Vst.Interop">
+    <Reference Include="Jacobi.Vst.Framework">
       <HintPath>$(SolutionDir)\Lib\VST.NET.1.1\CLR4\$(PlatformName)\Release\Jacobi.Vst.Interop.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -111,17 +111,17 @@
   <ItemGroup>
     <Compile Include="Components\DelayManager.cs" />
     <Compile Include="Converters.cs" />
-    <Compile Include="DSP\Effects\Delays\DelayLine.cs" />
+    <Compile Include="DSP\Effects\Delay\DelayLine.cs" />
     <Compile Include="DSP\Effects\Distortion\AbsClipper.cs" />
     <Compile Include="Components\AudioComponent.cs" />
     <Compile Include="Components\AudioComponentWithParameters.cs" />
     <Compile Include="Components\DistortionManager.cs" />
     <Compile Include="DSP\Effects\Distortion\BitCrusher.cs" />
     <Compile Include="DSP\Effects\Distortion\CubicClipper.cs" />
-    <Compile Include="DSP\Effects\Delays\IDelay.cs" />
-    <Compile Include="DSP\Effects\Delays\PingPongDelay.cs" />
-    <Compile Include="DSP\Effects\Delays\StereoOffsetDelay.cs" />
-    <Compile Include="DSP\Effects\Delays\VariousTimeDelay.cs" />
+    <Compile Include="DSP\Effects\Delay\IDelay.cs" />
+    <Compile Include="DSP\Effects\Delay\PingPongDelay.cs" />
+    <Compile Include="DSP\Effects\Delay\StereoOffsetDelay.cs" />
+    <Compile Include="DSP\Effects\Delay\VariousTimeDelay.cs" />
     <Compile Include="DSP\Effects\Distortion\IDistortion.cs" />
     <Compile Include="DSP\Filters\DCBlocker.cs" />
     <Compile Include="DSP\Generators\WaveTableOscillator.cs" />
